@@ -55,13 +55,13 @@ static int open_pi_camera_himax(struct pi_device *device)
 
     if (set_value != reg_value)
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "Failed to rotate camera image\n");
+        printf( "Failed to rotate camera image\n");
         return -1;
     }
 
     uint8_t result = 5;
     pi_camera_reg_get(device, REG_ADDR,&result);
-    cpxPrintToConsole(LOG_TO_CRTP, "Register Value: %d\n",result);
+    printf( "Register Value: %d\n",result);
 
 
 
@@ -86,13 +86,13 @@ void rx_task(void *parameters)
         switch (wifiCtrl->cmd)
         {
         case WIFI_CTRL_STATUS_WIFI_CONNECTED:
-            cpxPrintToConsole(LOG_TO_CRTP, "Wifi connected (%u.%u.%u.%u)\n",
+            printf( "Wifi connected (%u.%u.%u.%u)\n",
                             wifiCtrl->data[0], wifiCtrl->data[1],
                             wifiCtrl->data[2], wifiCtrl->data[3]);
             wifiConnected = 1;
             break;
         case WIFI_CTRL_STATUS_CLIENT_CONNECTED:
-            cpxPrintToConsole(LOG_TO_CRTP, "Wifi client connection status: %u\n", wifiCtrl->data[0]);
+            printf( "Wifi client connection status: %u\n", wifiCtrl->data[0]);
             wifiClientConnected = wifiCtrl->data[0];
             break;
         default:
@@ -163,7 +163,7 @@ void sendBufferViaCPX(CPXPacket_t * packet, uint8_t * buffer, uint32_t bufferSiz
 
 void setupWiFi(void) {
     static char ssid[] = "WiFi streaming example";
-    cpxPrintToConsole(LOG_TO_CRTP, "Setting up WiFi AP\n");
+    printf( "Setting up WiFi AP\n");
     // Set up the routing for the WiFi CTRL packets
     CPX_TX_Packet.route.destination = CPX_T_ESP32;
     CPX_RX_Packet.route.source = CPX_T_GAP8;
@@ -189,20 +189,20 @@ void tx_task(void *parameters)
     setupWiFi();
 
     // SET UP IMAGE BUFFER AND CAMERA CAPTURE SETTINGS
-    cpxPrintToConsole(LOG_TO_CRTP, "Starting camera task...\n");
+    printf( "Starting camera task...\n");
     uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
     uint32_t captureSize = resolution * sizeof(unsigned char);
     imgBuff = (unsigned char *)pmsis_l2_malloc(captureSize);
     if (imgBuff == NULL)
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "Failed to allocate Memory for Image \n");
+        printf( "Failed to allocate Memory for Image \n");
         return;
     }
 
     // TURN ON CAMERA
     if (open_pi_camera_himax(&camera))
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "Failed to open camera\n");
+        printf( "Failed to open camera\n");
         return;
     }
 
@@ -225,39 +225,30 @@ void tx_task(void *parameters)
 
     while (1)
     {
-        if (wifiClientConnected == 1)
-        {
 
-            // CAPTURE CAMERA IMAGE
-            start = xTaskGetTickCount();
-            pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-            // pi_camera_capture(&camera, imgBuff, resolution);
-            pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-            xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-            pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-            captureTime = xTaskGetTickCount() - start;
+        // CAPTURE CAMERA IMAGE
+        start = xTaskGetTickCount();
+        // pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+        pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+        pi_camera_capture(&camera, imgBuff, resolution);
+        // xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+        captureTime = xTaskGetTickCount() - start;
 
-            cpxPrintToConsole(LOG_TO_CRTP, "Camera capture\n");
+        printf( "Camera capture\n");
 
+        // for (size_t i = 0; i < 50; i++)
+        // {
+        //     printf("%u ",imgBuff[i]);
+        // }
+        // printf("Value: %u\n",(unsigned int)imgBuff[0]);
 
-
-            // TRANSFER IMAGE HEADER
-            start = xTaskGetTickCount();
-            createImageHeaderPacket(&CPX_TX_Packet, captureSize, RAW_ENCODING);
-            cpxSendPacketBlocking(&CPX_TX_Packet);
-
-
-            // TRANSFER IMAGE
-            sendBufferViaCPX(&CPX_TX_Packet, imgBuff, captureSize);
-            transferTime = xTaskGetTickCount() - start;
         
-            cpxPrintToConsole(LOG_TO_CRTP, "capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
-                                captureTime, encodingTime, captureSize, transferTime);
-        }
-        else
-        {
-            vTaskDelay(10);
-        }
+        printf( "\ncapture=%d ms, encoding=%d ms (%d bytes), transfer=%d ms\n",
+                            captureTime, encodingTime, captureSize, transferTime);
+
+        vTaskDelay(100);
+
     }
 }
 
@@ -298,7 +289,7 @@ void start_example(void)
 
     cpxInit();
     cpxEnableFunction(CPX_F_WIFI_CTRL);
-    cpxPrintToConsole(LOG_TO_CRTP, "\n\n-- WiFi image streamer example --\n\n");
+    printf( "\n\n-- WiFi image streamer example --\n\n");
 
 
     // CREATE EVENT GROUP
@@ -310,7 +301,7 @@ void start_example(void)
                         NULL, tskIDLE_PRIORITY + 1, NULL);
     if (xTask != pdPASS)
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "LED task did not start !\n");
+        printf( "LED task did not start !\n");
         pmsis_exit(-1);
     }
 
@@ -320,7 +311,7 @@ void start_example(void)
 
     if (xTask != pdPASS)
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "Camera task did not start !\n");
+        printf( "Camera task did not start !\n");
         pmsis_exit(-1);
     }
 
@@ -330,7 +321,7 @@ void start_example(void)
 
     if (xTask != pdPASS)
     {
-        cpxPrintToConsole(LOG_TO_CRTP, "RX task did not start !\n");
+        printf( "RX task did not start !\n");
         pmsis_exit(-1);
     }
 
