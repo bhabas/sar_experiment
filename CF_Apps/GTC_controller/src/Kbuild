@@ -1,0 +1,2 @@
+obj-y += GTC_controller.o
+ccflags-y += -I$(src)/../include

@@ -1,0 +1,2 @@
+obj-y += CRTP_test.o
+
