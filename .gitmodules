@@ -1,6 +1,6 @@
-[submodule "sar_experiment/crazyswarm"]
-	path = sar_experiment/crazyswarm
-	url = https://github.com/bhabas/crazyswarm.git
+[submodule "crazyswarm"]
+	path = crazyswarm
+	url = git@github.com:bhabas/crazyswarm.git
 [submodule "crazyflie-firmware"]
 	path = crazyflie-firmware
 	url = https://github.com/bhabas/crazyflie-firmware.git
