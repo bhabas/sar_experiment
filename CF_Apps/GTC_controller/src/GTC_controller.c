@@ -80,7 +80,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         // DEBUG_PRINT("Param Value: %.3f\n",(double)value_1);
         // DEBUG_PRINT("Log Value: %.3f\n",(double)value_2);
 
-        DEBUG_PRINT("Value1: %f \t Value2: %f \t Value3: %f\n\n",(double)Theta_x_cam_est,(double)Theta_y_cam_est,(double)Theta_z_cam_est);
+        DEBUG_PRINT("Value1: %f \t Value2: %f \t Value3: %f\n\n",(double)setpoint->cmd_val1,(double)setpoint->cmd_val2,(double)setpoint->cmd_val3);
 
     }
   
