@@ -12,3 +12,5 @@ math to maximize performance.
 - If you keep getting "Failed to flash: [Errno 16] Resource busy" errors, try unplugging radio and plugging it back in.
 
 - Need to send task to initial cluster core before the task can be sent to other cluster cores
+
+- If crazyswarm acts up then use 'rm ~/.ros/*.csv' to clear stuff. It might help for some reason.

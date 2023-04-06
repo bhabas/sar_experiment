@@ -37,7 +37,7 @@
 #include "task.h"
 #include "uart1.h"
 #include "log.h"
-#include "example_task.h"
+// #include "example_task.h"
 
 
 #define DEBUG_MODULE "HELLOWORLD"
@@ -54,8 +54,8 @@ void appMain() {
 
   while(1) {
     vTaskDelay(M2T(2000));
-    DEBUG_PRINT("Hello World!\n");
-    exampleTaskEnqueueInput(input);
+    consolePrintf("Hello World!\n");
+    // exampleTaskEnqueueInput(input);
     input++;
 
     // uart1Getchar(&c);
