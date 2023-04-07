@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "app.h"
+#include "app_channel.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -17,49 +18,44 @@
 
 #include "controller.h"
 #include "GTC_controller.h"
-// #include "aideck_comm_task.h"
-
-#include "uart1.h"
-
-#define ARRAY_LENGTH 3
-static uint8_t data_Array[sizeof(float) * ARRAY_LENGTH]; // Byte-String data array
-float value_Array[ARRAY_LENGTH]; // Value array to store the received float values
 
 float Theta_x_cam_est = 0.0f;
 float Theta_y_cam_est = 0.0f;
 float Theta_z_cam_est = 0.0f;
 
+struct GTC_CmdPacket{
+    uint8_t cmd_type; 
+    float cmd_val1;
+    float cmd_val2;
+    float cmd_val3;
+    float cmd_flag;
+} __attribute__((packed));
+
+struct GTC_CmdPacket GTC_Cmd;
 
 void appMain() {
     DEBUG_PRINT("Waiting for activation ...\n");
 
-    // TURN OFF BLUE LEDS (THEY'RE VERY BRIGHT)
-    ledSet(LED_BLUE_L, 0);
-    ledSet(LED_BLUE_NRF, 0);
 
-    // INITIALIZE UART1 CONNECTION
-    uart1Init(UART1_BAUDRATE); 
-
+    
 
     while(1) {
 
-        // RECIEVE BYTE-STRING OVER UART1
-        uart1GetBytesWithDefaultTimeout(sizeof(data_Array),data_Array);
+        if (appchannelReceiveDataPacket(&GTC_Cmd,sizeof(GTC_Cmd),APPCHANNEL_WAIT_FOREVER))
+        {
 
-        // CONVERT BYTE-STRING TO FLOAT ARRAY
-        for (int i = 0; i < ARRAY_LENGTH; i++) {
-        memcpy(&value_Array[i], &data_Array[i * sizeof(float)], sizeof(float));
+            // consolePrintf("App channel received x: %.3f\n",(double)GTC_Cmd.cmd_val3);
+
         }
-
-        Theta_x_cam_est = value_Array[0];
-        Theta_y_cam_est = value_Array[1];
-        Theta_z_cam_est = value_Array[2];
     }
   
 }
 
 
 void controllerOutOfTreeInit() {
+    // TURN OFF BLUE LEDS (THEY'RE VERY BRIGHT)
+    ledSet(LED_BLUE_L, 0);
+    ledSet(LED_BLUE_NRF, 0);
 
 }
 
@@ -76,11 +72,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     if (RATE_DO_EXECUTE(2, tick))
     {
-        DEBUG_PRINT("Hello Custom Controller!\n");
+        // DEBUG_PRINT("Hello Custom Controller!\n");
         // DEBUG_PRINT("Param Value: %.3f\n",(double)value_1);
         // DEBUG_PRINT("Log Value: %.3f\n",(double)value_2);
 
-        DEBUG_PRINT("Value1: %f \t Value2: %f \t Value3: %f\n\n",(double)setpoint->cmd_val1,(double)setpoint->cmd_val2,(double)setpoint->cmd_val3);
+
 
     }
   
