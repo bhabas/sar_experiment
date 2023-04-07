@@ -7,30 +7,30 @@
 
 
 struct testPacketRX{
-  float x;
-  float y;
-  float z;
-} __attribute__((packed));
-
-struct testPacketTX{
-  float sum;
+    uint8_t cmd_type; 
+    float cmd_val1;
+    float cmd_val2;
+    float cmd_val3;
+    float cmd_flag;
 } __attribute__((packed));
 
 void appMain() {
   DEBUG_PRINT("Waiting for activation... \n");
 
   struct testPacketRX rxPacket;
-  struct testPacketTX txPacket;
   
   while(1)
   {
     if (appchannelReceiveDataPacket(&rxPacket,sizeof(rxPacket),APPCHANNEL_WAIT_FOREVER))
     {
-      DEBUG_PRINT("App channel received x: %f, y: %f, z:%f\n",(double)rxPacket.x, (double)rxPacket.y, (double)rxPacket.z);
+        // uint8_t* rxPacketBytes = (uint8_t*)&rxPacket;
+        // for (size_t i = 0; i < sizeof(rxPacket); i++) {
+        //         consolePrintf("%02X", rxPacketBytes[i]); // Print each byte in hexadecimal format
+        //     }
+        // consolePrintf("\n");
 
-      txPacket.sum = rxPacket.x + rxPacket.y + rxPacket.z;
+        consolePrintf("App channel received x: %.3f\n",(double)rxPacket.cmd_val3);
 
-      appchannelSendDataPacketBlock(&txPacket, sizeof(txPacket));
     }
     
   }
