@@ -73,6 +73,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     if (RATE_DO_EXECUTE(2, tick))
     {
         // DEBUG_PRINT("Hello Custom Controller!\n");
+        consolePrintf("State received z: %.3f\n",(double)state->position.z);
+
         // DEBUG_PRINT("Param Value: %.3f\n",(double)value_1);
         // DEBUG_PRINT("Log Value: %.3f\n",(double)value_2);
 
