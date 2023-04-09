@@ -75,16 +75,12 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     {
         // DEBUG_PRINT("Hello Custom Controller!\n");
 
-        struct quat quat = mkquat(state->attitudeQuaternion.x, state->attitudeQuaternion.y, state->attitudeQuaternion.z, state->attitudeQuaternion.w);
-        struct vec rpy = quat2rpy(quat);
-        consolePrintf("Pos received (%.3f, %.3f, %.3f)\n",(double)state->position.x,(double)state->position.y,(double)state->position.z);
-        consolePrintf("RPY received (%.3f, %.3f, %.3f)\n",(double)rpy.x,(double)rpy.y,(double)rpy.z);
-    
-        consolePrintf("\n");
 
 
-        // DEBUG_PRINT("Param Value: %.3f\n",(double)value_1);
-        // DEBUG_PRINT("Log Value: %.3f\n",(double)value_2);
+        #ifdef EXP_FLAG
+        DEBUG_PRINT("Param Value: %.3f\n",(double)value_1);
+        DEBUG_PRINT("Log Value: %.3f\n",(double)value_2);
+        #endif
 
 
 
