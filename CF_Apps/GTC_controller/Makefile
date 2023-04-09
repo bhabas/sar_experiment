@@ -20,6 +20,16 @@ CRAZYFLIE_BASE := ../../crazyflie-firmware
 #
 OOT_CONFIG := $(PWD)/app-config
 
+
+#
+# To include header files from other directories
+#
+EXTRA_CFLAGS += -I$(PWD)/include/
+
+
+#
+# Custom C definitions
+#
 EXTRA_CFLAGS += -DEXP_FLAG
 
 include $(CRAZYFLIE_BASE)/tools/make/oot.mk
