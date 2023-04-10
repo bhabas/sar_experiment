@@ -12,7 +12,7 @@ void appMain() {
         if (appchannelReceiveDataPacket(&GTC_Cmd,sizeof(GTC_Cmd),APPCHANNEL_WAIT_FOREVER))
         {
             // if (GTC_Cmd.cmd_rx == true) GTC_Command(&GTC_Cmd);
-            consolePrintf("GTC RX value1: %.3f\n",(double)GTC_Cmd.cmd_val1);
+            consolePrintf("GTC RX value1: %u\n",(uint8_t)GTC_Cmd.cmd_rx);
         }
         #endif
     }

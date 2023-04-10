@@ -17,6 +17,7 @@ struct GTC_CmdPacket{
     float cmd_val2;
     float cmd_val3;
     float cmd_flag;
+    bool  cmd_rx;
 } __attribute__((packed));
 
 extern struct GTC_CmdPacket GTC_Cmd;
