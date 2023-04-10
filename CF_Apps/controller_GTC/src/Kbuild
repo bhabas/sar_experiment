@@ -1,1 +1,2 @@
 obj-y += controller_GTC.o
+obj-y += shared_lib.o
