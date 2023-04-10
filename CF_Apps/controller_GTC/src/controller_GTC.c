@@ -7,13 +7,25 @@ void appMain() {
     while (1)
     {
         #ifdef CONFIG_SAR_SIM
-        // consolePrintf("Hello app\n");
+
+            if (GTC_Cmd.cmd_rx == true)
+            {
+                GTC_Command(&GTC_Cmd);
+                GTC_Cmd.cmd_rx = false;
+            }
+
+
         #elif CONFIG_SAR_EXP
-        if (appchannelReceiveDataPacket(&GTC_Cmd,sizeof(GTC_Cmd),APPCHANNEL_WAIT_FOREVER))
-        {
-            // if (GTC_Cmd.cmd_rx == true) GTC_Command(&GTC_Cmd);
-            consolePrintf("GTC RX value1: %u\n",(uint8_t)GTC_Cmd.cmd_rx);
-        }
+
+            if (appchannelReceiveDataPacket(&GTC_Cmd,sizeof(GTC_Cmd),APPCHANNEL_WAIT_FOREVER))
+            {
+                if (GTC_Cmd.cmd_rx == true)
+                {
+                    GTC_Command(&GTC_Cmd);
+                    GTC_Cmd.cmd_rx = false;
+                }
+            }
+
         #endif
     }
     
@@ -43,7 +55,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     if (RATE_DO_EXECUTE(2, tick))
     {
-        consolePrintf("GTC loop value1: %.3f\n",(double)GTC_Cmd.cmd_val1);
+        // consolePrintf("GTC loop value1: %.3f\n",(double)GTC_Cmd.cmd_val1);
     }
 
     // UPDATE OPTICAL FLOW VALUES AT 100 HZ
