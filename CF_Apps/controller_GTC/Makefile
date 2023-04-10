@@ -30,6 +30,6 @@ EXTRA_CFLAGS += -I$(PWD)/include/
 #
 # Custom C definitions
 #
-EXTRA_CFLAGS += -DEXP_FLAG
+EXTRA_CFLAGS += -DCONFIG_SAR_EXP
 
 include $(CRAZYFLIE_BASE)/tools/make/oot.mk
