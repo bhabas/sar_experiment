@@ -28,18 +28,17 @@
 #include "motors.h"
 #include "pm.h"
 #include "led.h"
-
-
 #include "app.h"
 #include "app_channel.h"
+
 #include "controller.h"
 
+// CUSTOM LIBRARIES
+#include "shared_lib.h"
 
 #define DEBUG_MODULE "GTC_CONTROLLER"
 
 
-float value_1 = 5.4f;
-float value_2 = 3.14f;
 
 
 

@@ -1,16 +1,5 @@
-#include "GTC_controller.h"
+#include "controller_GTC.h"
 
-
-struct GTC_CmdPacket{
-    uint8_t cmd_type; 
-    float cmd_val1;
-    float cmd_val2;
-    float cmd_val3;
-    float cmd_flag;
-    bool  cmd_rx;
-} __attribute__((packed));
-
-extern struct GTC_CmdPacket GTC_Cmd;
 
 void appMain() {
 
@@ -54,7 +43,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     if (RATE_DO_EXECUTE(2, tick))
     {
-        DEBUG_PRINT("Hello Custom Controller!\n");
+        DEBUG_PRINT("Hello Custom Controller! %.3f\n",(double)value_1);
+
+
 
 
     }
@@ -63,11 +54,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 }
 
 #ifndef GAZEBO_SIM
-// PARAM_GROUP_START(my_PARAM)
-//     PARAM_ADD(PARAM_FLOAT | PARAM_PERSISTENT, value_1, &value_1)
-// PARAM_GROUP_STOP(my_PARAM)
+PARAM_GROUP_START(my_PARAM)
+    PARAM_ADD(PARAM_FLOAT | PARAM_PERSISTENT, value_1, &value_1)
+PARAM_GROUP_STOP(my_PARAM)
 
-// LOG_GROUP_START(my_LOG)
-//     LOG_ADD(LOG_FLOAT, value_2, &value_2)
-// LOG_GROUP_STOP(my_LOG)
+LOG_GROUP_START(my_LOG)
+    LOG_ADD(LOG_FLOAT, value_2, &value_2)
+LOG_GROUP_STOP(my_LOG)
 #endif

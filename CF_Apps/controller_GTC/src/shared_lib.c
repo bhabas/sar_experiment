@@ -1,0 +1,8 @@
+#include "shared_lib.h"
+
+
+
+struct GTC_CmdPacket GTC_Cmd;
+
+float value_1 = 5.4f;
+float value_2 = 3.14f;
