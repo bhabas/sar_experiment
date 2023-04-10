@@ -4,17 +4,27 @@
 
 void appMain() {
 
-    while (1)
-    {
-        #ifdef CONFIG_SAR_SIM
-        // consolePrintf("Hello app\n");
-        #elif CONFIG_SAR_EXP
-        consolePrintf("Hello app\n");
-        vTaskDelay(M2T(2000));
+    while(1) {
+
+        #ifdef GAZEBO_SIM
+        // EXECUTE GTC COMMAND WHEN RECEIVED
+        if (GTC_Cmd.cmd_rx == true)
+        {
+            // GTC_Command(&GTC_Cmd);
+        }
+        #else
+        // WAIT UNTIL GTC COMMAND IS RECEIVED
+        if (appchannelReceiveDataPacket(&GTC_Cmd,sizeof(GTC_Cmd),APPCHANNEL_WAIT_FOREVER))
+        {
+            // if (GTC_Cmd.cmd_rx == true) GTC_Command(&GTC_Cmd);
+            consolePrintf("GTC RX value1: %.3f\n",(double)GTC_Cmd.cmd_val1);
+        }
         #endif
     }
     
 }
+
+    
 
 
 void controllerOutOfTreeInit() {
@@ -38,7 +48,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     if (RATE_DO_EXECUTE(2, tick))
     {
-        // consolePrintf("GTC loop value1: %.3f\n",(double)value_1);
+        consolePrintf("GTC loop value1: %.3f\n",(double)GTC_Cmd.cmd_val1);
     }
 
     // UPDATE OPTICAL FLOW VALUES AT 100 HZ
@@ -48,7 +58,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     
 
     if (RATE_DO_EXECUTE(2, tick)) {
-
 
         controlOutput(state,sensors);
 
