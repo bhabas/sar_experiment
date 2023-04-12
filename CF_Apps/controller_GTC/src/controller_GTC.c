@@ -174,6 +174,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         compressStates();
         compressSetpoints();
+        compressFlipStates();
 
 
     }
