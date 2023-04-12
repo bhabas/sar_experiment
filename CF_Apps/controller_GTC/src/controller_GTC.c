@@ -50,6 +50,7 @@ bool controllerOutOfTreeTest() {
 void controllerOutOfTreeReset() {
 
     consolePrintf("GTC Reset\n");
+    consolePrintf("Policy_Type: %d\n",Policy);
 
     // RESET INTEGRATION ERRORS
     e_PI = vzero();
@@ -112,9 +113,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         // =========== CONVERT THRUSTS [N] AND MOMENTS [N*m] TO PWM =========== // 
         f_thrust_g = clamp(F_thrust/4.0f*Newton2g, 0.0f, f_max*0.9f); // Clamp thrust to prevent control saturation
-        f_roll_g = M.x/(4.0f*dp)*Newton2g;
-        f_pitch_g = M.y/(4.0f*dp)*Newton2g;
-        f_yaw_g = M.z/(4.0f*c_tf)*Newton2g;
+        f_roll_g = M.x/(4.0f*Prop_Dist)*Newton2g;
+        f_pitch_g = M.y/(4.0f*Prop_Dist)*Newton2g;
+        f_yaw_g = M.z/(4.0f*C_tf)*Newton2g;
 
         // THESE CONNECT TO POWER_DISTRIBUTION_STOCK.C
         control->thrust = f_thrust_g;                   // This gets passed to firmware EKF
@@ -171,7 +172,41 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             M4_pwm = (int32_t)thrust2PWM(M4_thrust);
         }
 
+        compressStates();
+
     }
  
 
 }
+
+
+#ifdef CONFIG_SAR_EXP
+LOG_GROUP_START(LogStates_GTC)
+LOG_ADD(LOG_UINT32, Z_xy,   &StatesZ_GTC.xy)
+LOG_ADD(LOG_INT16,  Z_z,    &StatesZ_GTC.z)
+
+LOG_ADD(LOG_UINT32, Z_vxy,  &StatesZ_GTC.vxy)
+LOG_ADD(LOG_INT16,  Z_vz,   &StatesZ_GTC.vz)
+
+LOG_ADD(LOG_UINT32, Z_quat, &StatesZ_GTC.quat)
+
+LOG_ADD(LOG_UINT32, Z_wxy,  &StatesZ_GTC.wxy)
+LOG_ADD(LOG_INT16,  Z_wz,   &StatesZ_GTC.wz)
+
+LOG_ADD(LOG_UINT32, Z_Thetaxy, &StatesZ_GTC.Theta_xy)
+LOG_ADD(LOG_INT16,  Z_Tau,  &StatesZ_GTC.Tau)
+LOG_ADD(LOG_INT16,  Z_D_perp, &StatesZ_GTC.D_perp)
+
+LOG_ADD(LOG_UINT32, Z_FMz, &StatesZ_GTC.FMz)
+LOG_ADD(LOG_UINT32, Z_Mxy, &StatesZ_GTC.Mxy)
+
+LOG_ADD(LOG_UINT32, Z_f_12, &StatesZ_GTC.M_thrust12)
+LOG_ADD(LOG_UINT32, Z_f_34, &StatesZ_GTC.M_thrust34)
+
+LOG_ADD(LOG_UINT32, Z_PWM12, &StatesZ_GTC.MS_PWM12)
+LOG_ADD(LOG_UINT32, Z_PWM34, &StatesZ_GTC.MS_PWM34)
+
+LOG_ADD(LOG_UINT32, Z_NN_FP, &StatesZ_GTC.NN_FP)
+LOG_GROUP_STOP(LogStateData_GTC)
+
+#endif

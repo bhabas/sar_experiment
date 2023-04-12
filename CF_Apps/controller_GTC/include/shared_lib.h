@@ -8,8 +8,10 @@ extern "C" {
 #include "console.h"
 #include "math3d.h"
 #include "pm.h"
+#include "quatcompress.h"
 
 #include "controller_GTC.h"
+#include "CompressStates.h"
 
 
 #define PWM_MAX 60000
@@ -22,8 +24,8 @@ extern float m;     // [kg]
 extern float Ixx;   // [kg*m^2]
 extern float Iyy;   // [kg*m^2]
 extern float Izz;   // [kg*m^2]
-extern float dp;    // COM to Prop along x-axis [m]
-extern float c_tf;  // Moment Coeff [Nm/N]
+extern float Prop_Dist;    // COM to Prop along x-axis [m]
+extern float C_tf;  // Moment Coeff [Nm/N]
 extern float f_max; // Max thrust per motor [g]
 
 extern float dt;    // Controller cycle time
@@ -143,6 +145,29 @@ extern float thrust_override[4];    // Motor thrusts [g]
 
 
 // =================================
+//          SENSORY VALUES
+// =================================
+
+// OPTICAL FLOW STATES
+extern float Tau;           // [s]
+extern float Theta_x;       // [rad/s] 
+extern float Theta_y;       // [rad/s]
+extern float D_perp;        // [m]
+
+// ANALYTICAL OPTICAL FLOW STATES
+extern float Tau_calc;      // [s]
+extern float Theta_x_calc;  // [rad/s] 
+extern float Theta_y_calc;  // [rad/s]
+extern float D_perp_calc;   // [m]
+
+// ESTIMATED OPTICAL FLOW STATES
+extern float Tau_est;      // [s]
+extern float Theta_x_est;  // [rad/s]
+extern float Theta_y_est;  // [rad/s]
+extern float D_perp_est;   // [m]
+
+
+// =================================
 //  FLAGS AND SYSTEM INITIALIZATION
 // =================================
 
@@ -164,11 +189,7 @@ extern bool onceFlag;
 // SENSOR FLAGS
 extern bool camera_sensor_active;
 
-
-
-
-
-
+// GTC COMMAND PACKETS
 struct GTC_CmdPacket{
     uint8_t cmd_type; 
     float cmd_val1;
@@ -177,8 +198,16 @@ struct GTC_CmdPacket{
     float cmd_flag;
     bool  cmd_rx;
 } __attribute__((packed));
-
 extern struct GTC_CmdPacket GTC_Cmd;
+
+// POLICY SETTING
+typedef enum {
+    PARAM_OPTIM = 0,
+    SVL_POLICY = 1,
+    DEEP_RL = 2,
+    DEEP_RL_SB3 = 3
+}PolicyType;
+extern PolicyType Policy;
 
 
 
