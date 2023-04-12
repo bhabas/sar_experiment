@@ -1,3 +1,4 @@
 obj-y += controller_GTC.o
 obj-y += shared_lib.o
 obj-y += CompressStates.o
+obj-y += traj_funcs.o
