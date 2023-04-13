@@ -1,6 +1,5 @@
 DATA_TYPE: "EXP"
 
-# ENV_SETTINGS:
 
 PLANE_SETTINGS:
   Plane_Model: "Standard_Plane"
@@ -8,7 +7,7 @@ PLANE_SETTINGS:
 
 QUAD_SETTINGS:
   CF_Type: "Standard"
-  CF_Config: "A20_L75_K32"
+  CF_Config: "Narrow_Long"
   Cam_Sensor: False
 
   Policy_Type: "PARAM_OPTIM"
@@ -18,7 +17,6 @@ QUAD_SETTINGS:
 
 
 CF_DC_SETTINGS:
-  Console_Rate: 50 # [Hz]
   Logging_Rate: 10 # [Hz]
 
 

@@ -246,6 +246,45 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 
 #ifdef CONFIG_SAR_EXP
+
+PARAM_GROUP_START(GTC_Params)
+// NOTE: PARAM NAMES CANNOT EXCEED 14 CHARACTERS (WHY? IDK.)
+// NOTE: CANNOT HAVE A LOG AND A PARAM ACCESS THE SAME VALUE
+PARAM_ADD(PARAM_FLOAT, P_kp_xy_p, &P_kp_xy)
+PARAM_ADD(PARAM_FLOAT, P_kd_xy_p, &P_kd_xy) 
+PARAM_ADD(PARAM_FLOAT, P_ki_xy_p, &P_ki_xy)
+PARAM_ADD(PARAM_FLOAT, i_range_xy_p, &i_range_xy)
+
+PARAM_ADD(PARAM_FLOAT, P_kp_z_p,  &P_kp_z)
+PARAM_ADD(PARAM_FLOAT, P_kd_z_p,  &P_kd_z)
+PARAM_ADD(PARAM_FLOAT, P_ki_z_p,  &P_ki_z)
+PARAM_ADD(PARAM_FLOAT, i_range_z_p, &i_range_z)
+
+PARAM_ADD(PARAM_FLOAT, R_kp_xy_p, &R_kp_xy)
+PARAM_ADD(PARAM_FLOAT, R_kd_xy_p, &R_kd_xy) 
+PARAM_ADD(PARAM_FLOAT, R_ki_xy_p, &R_ki_xy)
+PARAM_ADD(PARAM_FLOAT, i_range_R_xy_p, &i_range_R_xy)
+
+PARAM_ADD(PARAM_FLOAT, R_kp_z_p,  &R_kp_z)
+PARAM_ADD(PARAM_FLOAT, R_kd_z_p,  &R_kd_z)
+PARAM_ADD(PARAM_FLOAT, R_ki_z_p,  &R_ki_z)
+PARAM_ADD(PARAM_FLOAT, i_range_R_z_p, &i_range_R_z)
+
+PARAM_ADD(PARAM_FLOAT, b1_d_x_p, &b1_d.x)
+PARAM_ADD(PARAM_FLOAT, b1_d_y_p, &b1_d.y)
+PARAM_ADD(PARAM_FLOAT, b1_d_z_p, &b1_d.z)
+
+PARAM_ADD(PARAM_FLOAT, CF_mass_p, &m)
+PARAM_ADD(PARAM_FLOAT, Ixx_p, &Ixx)
+PARAM_ADD(PARAM_FLOAT, Iyy_p, &Iyy)
+PARAM_ADD(PARAM_FLOAT, Izz_p, &Izz)
+
+PARAM_ADD(PARAM_UINT8, SafeModeFlag_p, &safeModeEnable)
+PARAM_ADD(PARAM_UINT8, PolicyType_p, &Policy)
+
+PARAM_GROUP_STOP(GTC_Params)
+
+
 LOG_GROUP_START(LogStates_GTC)
 LOG_ADD(LOG_UINT32, Z_xy,   &StatesZ_GTC.xy)
 LOG_ADD(LOG_INT16,  Z_z,    &StatesZ_GTC.z)
