@@ -279,6 +279,10 @@ PARAM_ADD(PARAM_FLOAT, Ixx_p, &Ixx)
 PARAM_ADD(PARAM_FLOAT, Iyy_p, &Iyy)
 PARAM_ADD(PARAM_FLOAT, Izz_p, &Izz)
 
+PARAM_ADD(PARAM_FLOAT, Prop_Dist_p, &Prop_Dist)
+PARAM_ADD(PARAM_FLOAT, C_tf_p, &C_tf)
+PARAM_ADD(PARAM_FLOAT, f_max_p, &f_max)
+
 PARAM_ADD(PARAM_UINT8, SafeModeFlag_p, &safeModeEnable)
 PARAM_ADD(PARAM_UINT8, PolicyType_p, &Policy)
 

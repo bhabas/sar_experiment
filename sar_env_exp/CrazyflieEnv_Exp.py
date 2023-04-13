@@ -73,40 +73,57 @@ class CrazyflieEnv_Exp(CrazyflieEnv_Base):
         ## SET CONTROLLER GAIN VALUES
         temp_str = f"/CF_Type/{self.CF_Type}/CtrlGains"
         GainsDict = {
-                    "GTC_Params/P_kp_xy_p":     rospy.get_param(f"{temp_str}/P_kp_xy"),
-                    "GTC_Params/P_kd_xy_p":     rospy.get_param(f"{temp_str}/P_kd_xy"), 
-                    "GTC_Params/P_ki_xy_p":     rospy.get_param(f"{temp_str}/P_ki_xy"),
-                    "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_xy"),
+            "GTC_Params/P_kp_xy_p":     rospy.get_param(f"{temp_str}/P_kp_xy"),
+            "GTC_Params/P_kd_xy_p":     rospy.get_param(f"{temp_str}/P_kd_xy"), 
+            "GTC_Params/P_ki_xy_p":     rospy.get_param(f"{temp_str}/P_ki_xy"),
+            "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_xy"),
 
-                    "GTC_Params/P_kp_z_p":      rospy.get_param(f"{temp_str}/P_kp_z"),        
-                    "GTC_Params/P_kd_z_p":      rospy.get_param(f"{temp_str}/P_kd_z"),
-                    "GTC_Params/P_ki_z_p":      rospy.get_param(f"{temp_str}/P_ki_z"),
-                    "GTC_Params/i_range_z_p":   rospy.get_param(f"{temp_str}/i_range_z"),
+            "GTC_Params/P_kp_z_p":      rospy.get_param(f"{temp_str}/P_kp_z"),        
+            "GTC_Params/P_kd_z_p":      rospy.get_param(f"{temp_str}/P_kd_z"),
+            "GTC_Params/P_ki_z_p":      rospy.get_param(f"{temp_str}/P_ki_z"),
+            "GTC_Params/i_range_z_p":   rospy.get_param(f"{temp_str}/i_range_z"),
 
-                    "GTC_Params/R_kp_xy_p":     rospy.get_param(f"{temp_str}/R_kp_xy"),
-                    "GTC_Params/R_kd_xy_p":     rospy.get_param(f"{temp_str}/R_kd_xy"),
-                    "GTC_Params/R_ki_xy_p":     rospy.get_param(f"{temp_str}/R_ki_xy"),
-                    "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_R_xy"),
+            "GTC_Params/R_kp_xy_p":     rospy.get_param(f"{temp_str}/R_kp_xy"),
+            "GTC_Params/R_kd_xy_p":     rospy.get_param(f"{temp_str}/R_kd_xy"),
+            "GTC_Params/R_ki_xy_p":     rospy.get_param(f"{temp_str}/R_ki_xy"),
+            "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_R_xy"),
 
 
-                    "GTC_Params/R_kp_z_p":      rospy.get_param(f"{temp_str}/R_kp_z"),
-                    "GTC_Params/R_kd_z_p":      rospy.get_param(f"{temp_str}/R_kd_z"),
-                    "GTC_Params/R_ki_z_p":      rospy.get_param(f"{temp_str}/R_ki_z"),
-                    "GTC_Params/i_range_R_z_p": rospy.get_param(f"{temp_str}/i_range_R_z"),
+            "GTC_Params/R_kp_z_p":      rospy.get_param(f"{temp_str}/R_kp_z"),
+            "GTC_Params/R_kd_z_p":      rospy.get_param(f"{temp_str}/R_kd_z"),
+            "GTC_Params/R_ki_z_p":      rospy.get_param(f"{temp_str}/R_ki_z"),
+            "GTC_Params/i_range_R_z_p": rospy.get_param(f"{temp_str}/i_range_R_z"),
         }
         self.cf.setParams(GainsDict)
         
+        ## SET SYSTEM GEOMETRY PARAMETERS INERTIA VALUES
+        temp_str = f"/CF_Type/{self.CF_Type}/System_Params"
+        SystemParamDict = {
+            "GTC_Params/Prop_Dist_p":     rospy.get_param(f"{temp_str}/Prop_Dist"), 
+            "GTC_Params/C_tf_p":     rospy.get_param(f"{temp_str}/C_tf"),
+            "GTC_Params/f_max_p":     rospy.get_param(f"{temp_str}/f_max"),
+        }
+        self.cf.setParams(SystemParamDict)
+
+
         ## SET CONTROLLER INERTIA VALUES
         temp_str = f"/CF_Type/{self.CF_Type}/Config/{self.CF_Config}"
-        ModelParamDict = {
-                    "GTC_Params/CF_mass_p": rospy.get_param(f"{temp_str}/Mass"),
-                    "GTC_Params/Ixx_p":     rospy.get_param(f"{temp_str}/Ixx"), 
-                    "GTC_Params/Iyy_p":     rospy.get_param(f"{temp_str}/Iyy"),
-                    "GTC_Params/Izz_p":     rospy.get_param(f"{temp_str}/Izz"),
+        InertiaParamDict = {
+            "GTC_Params/CF_mass_p": rospy.get_param(f"{temp_str}/Mass"),
+            "GTC_Params/Ixx_p":     rospy.get_param(f"{temp_str}/Ixx"), 
+            "GTC_Params/Iyy_p":     rospy.get_param(f"{temp_str}/Iyy"),
+            "GTC_Params/Izz_p":     rospy.get_param(f"{temp_str}/Izz"),
         }
-        self.cf.setParams(ModelParamDict)
+        self.cf.setParams(InertiaParamDict)
 
         self.SendCmd("Load_Params")
+
+    def safeMode(self,status):
+        
+        if status == True:
+            self.cf.setParam("GTC_Params/SafeModeFlag_p",1)
+        elif status == False:
+            self.cf.setParam("GTC_Params/SafeModeFlag_p",0)
 
 
 if __name__ == "__main__":
