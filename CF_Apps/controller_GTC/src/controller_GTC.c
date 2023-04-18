@@ -103,6 +103,23 @@ void controllerOutOfTreeReset() {
     Policy_Flip_tr = 0.0f;
     Policy_Action_tr = 0.0f;
 
+
+
+    // UPDATE LANDING SURFACE PARAMETERS
+    n_hat.x = sinf(Surface_Angle);
+    n_hat.y = 0;
+    n_hat.z = -cosf(Surface_Angle);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_x.x = -cosf(Surface_Angle);
+    t_x.y = 0;
+    t_x.z = -sinf(Surface_Angle);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_y.x = 0;
+    t_y.y = 1;
+    t_y.z = 0;
+
 }
 
 
@@ -115,7 +132,31 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     // UPDATE OPTICAL FLOW VALUES AT 100 HZ
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
-        Tau = 5.0f;
+        // UPDATE POS AND VEL
+            r_BO = mkvec(state->position.x, state->position.y, state->position.z);
+            V_BO = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);
+
+            // // CALC DISPLACEMENT FROM PLANE CENTER
+            r_PB = vsub(r_PO,r_BO); 
+
+            // // CALC RELATIVE DISTANCE AND VEL
+            D_perp = vdot(r_PB,n_hat) + 1e-6f;
+
+            V_perp = vdot(V_BO,n_hat);
+            V_tx = vdot(V_BO,t_x);
+            V_ty = vdot(V_BO,t_y);
+
+            if (fabsf(D_perp) < 0.02f)
+            {
+                D_perp = 0.0f;
+            }
+
+            // CALC OPTICAL FLOW VALUES
+            Theta_x = clamp(V_tx/D_perp,-20.0f,20.0f);
+            Theta_y = clamp(V_ty/D_perp,-20.0f,20.0f);
+            Theta_z = clamp(V_perp/D_perp,-20.0f,20.0f);
+            Tau = clamp(1/Theta_z,0.0f,5.0f);
+
     }
 
     // EXECUTE COMMANDED TRAJECTORY
@@ -246,49 +287,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 
 #ifdef CONFIG_SAR_EXP
-
-PARAM_GROUP_START(GTC_Params)
-// NOTE: PARAM NAMES CANNOT EXCEED 14 CHARACTERS (WHY? IDK.)
-// NOTE: CANNOT HAVE A LOG AND A PARAM ACCESS THE SAME VALUE
-PARAM_ADD(PARAM_FLOAT, P_kp_xy_p, &P_kp_xy)
-PARAM_ADD(PARAM_FLOAT, P_kd_xy_p, &P_kd_xy) 
-PARAM_ADD(PARAM_FLOAT, P_ki_xy_p, &P_ki_xy)
-PARAM_ADD(PARAM_FLOAT, i_range_xy_p, &i_range_xy)
-
-PARAM_ADD(PARAM_FLOAT, P_kp_z_p,  &P_kp_z)
-PARAM_ADD(PARAM_FLOAT, P_kd_z_p,  &P_kd_z)
-PARAM_ADD(PARAM_FLOAT, P_ki_z_p,  &P_ki_z)
-PARAM_ADD(PARAM_FLOAT, i_range_z_p, &i_range_z)
-
-PARAM_ADD(PARAM_FLOAT, R_kp_xy_p, &R_kp_xy)
-PARAM_ADD(PARAM_FLOAT, R_kd_xy_p, &R_kd_xy) 
-PARAM_ADD(PARAM_FLOAT, R_ki_xy_p, &R_ki_xy)
-PARAM_ADD(PARAM_FLOAT, i_range_R_xy_p, &i_range_R_xy)
-
-PARAM_ADD(PARAM_FLOAT, R_kp_z_p,  &R_kp_z)
-PARAM_ADD(PARAM_FLOAT, R_kd_z_p,  &R_kd_z)
-PARAM_ADD(PARAM_FLOAT, R_ki_z_p,  &R_ki_z)
-PARAM_ADD(PARAM_FLOAT, i_range_R_z_p, &i_range_R_z)
-
-PARAM_ADD(PARAM_FLOAT, b1_d_x_p, &b1_d.x)
-PARAM_ADD(PARAM_FLOAT, b1_d_y_p, &b1_d.y)
-PARAM_ADD(PARAM_FLOAT, b1_d_z_p, &b1_d.z)
-
-PARAM_ADD(PARAM_FLOAT, CF_mass_p, &m)
-PARAM_ADD(PARAM_FLOAT, Ixx_p, &Ixx)
-PARAM_ADD(PARAM_FLOAT, Iyy_p, &Iyy)
-PARAM_ADD(PARAM_FLOAT, Izz_p, &Izz)
-
-PARAM_ADD(PARAM_FLOAT, Prop_Dist_p, &Prop_Dist)
-PARAM_ADD(PARAM_FLOAT, C_tf_p, &C_tf)
-PARAM_ADD(PARAM_FLOAT, f_max_p, &f_max)
-
-PARAM_ADD(PARAM_UINT8, SafeModeFlag_p, &safeModeEnable)
-PARAM_ADD(PARAM_UINT8, PolicyType_p, &Policy)
-
-PARAM_GROUP_STOP(GTC_Params)
-
-
 LOG_GROUP_START(LogStates_GTC)
 LOG_ADD(LOG_UINT32, Z_xy,   &StatesZ_GTC.xy)
 LOG_ADD(LOG_INT16,  Z_z,    &StatesZ_GTC.z)
