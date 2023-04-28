@@ -18,8 +18,8 @@ extern "C" {
 #define PWM_MAX 60000
 #define g2Newton (9.81f/1000.0f)
 #define Newton2g (1000.0f/9.81f)
-#define Deg2Rad M_PI/180.0f
-#define Rad2Deg 180.0f/M_PI
+#define Deg2Rad (float)M_PI/180.0f
+#define Rad2Deg 180.0f/(float)M_PI
 
 
 
@@ -251,7 +251,7 @@ extern float Policy_Action_tr;
 // =================================
 
 // LANDING SURFACE PARAMETERS
-extern float Surface_Angle;
+extern float Plane_Angle;
 extern struct vec t_x;          // Plane Unit Tangent Vector
 extern struct vec t_y;          // Plane Unit Tangent Vector
 extern struct vec n_hat;        // Plane Unit Normal Vector
@@ -285,6 +285,7 @@ extern struct GTC_CmdPacket GTC_Cmd;
 void GTC_Command(struct GTC_CmdPacket *GTC_Cmd);
 void controlOutput(const state_t *state, const sensorData_t *sensors);
 uint16_t thrust2PWM(float f);
+void calcPlaneNormal(float Plane_Angle);
 
 
 
