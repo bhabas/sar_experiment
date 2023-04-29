@@ -16,3 +16,5 @@ math to maximize performance.
 - If crazyswarm acts up then use 'rm ~/.ros/*.csv' to clear stuff. It might help for some reason.
 
 - The WiFi module and the gap8 are a bit sensitive to voltage drops, so if your drone is very close to max weight and/or the battery is not the best anymore I would expect problems
+
+- Log variables are limited to a length up to 26 as total log variable length (group + name +1) 

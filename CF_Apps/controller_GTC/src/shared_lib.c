@@ -2,20 +2,24 @@
 
 
 
-// INITIAL SYSTEM PARAMETERS
+// =================================
+//    INITIAL SYSTEM PARAMETERS
+// =================================
 float m = 34.3e-3f;         // [kg]
 float Ixx = 15.83e-6f;      // [kg*m^2]
 float Iyy = 17.00e-6f;      // [kg*m^2]
 float Izz = 31.19e-6f;      // [kg*m^2]
-static struct mat33 J;      // Rotational Inertia Matrix [kg*m^2]
-float dp = 0.0325;          // COM to Prop along x-axis [m]
-float c_tf = 0.00618f;      // Moment Coeff [Nm/N]
+struct mat33 J;             // Rotational Inertia Matrix [kg*m^2]
+
+float Prop_Dist = 0.0325f;          // COM to Prop along x-axis [m]
+float C_tf = 0.00618f;      // Moment Coeff [Nm/N]
 float f_max = 15.0f;        // Max thrust per motor [g]
 
 const float g = 9.81f;                        // Gravity [m/s^2]
 const struct vec e_3 = {0.0f, 0.0f, 1.0f};    // Global z-axis
 
 float dt = (float)(1.0f/RATE_100_HZ);
+struct GTC_CmdPacket GTC_Cmd;
 
 // =================================
 //    CONTROL GAIN INITIALIZATION
@@ -147,6 +151,31 @@ float thrust_override[4] = {0.0f,0.0f,0.0f,0.0f};   // Motor thrusts [g]
 
 
 // =================================
+//          SENSORY VALUES
+// =================================
+
+// OPTICAL FLOW STATES
+float Tau = 0.0f;       // [s]
+float Theta_x = 0.0f;   // [rad/s] 
+float Theta_y = 0.0f;   // [rad/s]
+float Theta_z = 0.0f;   // [rad/s]
+float D_perp = 0.0f;    // [m]
+
+// ANALYTICAL OPTICAL FLOW STATES
+float Tau_calc = 0.0f;       // [s]
+float Theta_x_calc = 0.0f;   // [rad/s] 
+float Theta_y_calc = 0.0f;   // [rad/s]
+float D_perp_calc = 0.0f;    // [m]
+
+// ESTIMATED OPTICAL FLOW STATES
+float Tau_est = 0.0f;       // [s]
+float Theta_x_est = 0.0f;   // [rad/s]
+float Theta_y_est = 0.0f;   // [rad/s]
+float D_perp_est = 0.0f;    // [m]
+
+
+
+// =================================
 //  FLAGS AND SYSTEM INITIALIZATION
 // =================================
 
@@ -160,35 +189,92 @@ bool safeModeEnable = true;
 bool customThrust_flag = false;
 bool customPWM_flag = false;
 
+
+// SENSOR FLAGS
+bool camera_sensor_active = false;
+
+
+// =================================
+//       POLICY INITIALIZATION
+// =================================
+
+// DEFINE POLICY TYPE ACTIVATED
+PolicyType Policy = PARAM_OPTIM;
+
 // POLICY FLAGS
 bool policy_armed_flag = false;
 bool flip_flag = false;
 bool onceFlag = false;
 
-// SENSOR FLAGS
-bool camera_sensor_active = false;
+// POLICY TRIGGER/ACTION VALUES
+float Policy_Flip = 0.0f;  
+float Policy_Action = 0.0f;
 
-struct GTC_CmdPacket GTC_Cmd;
+
+
+// ======================================
+//  RECORD SYSTEM STATES AT FLIP TRIGGER
+// ======================================
+
+// CARTESIAN STATES
+struct vec statePos_tr = {0.0f,0.0f,0.0f};         // Pos [m]
+struct vec stateVel_tr = {0.0f,0.0f,0.0f};         // Vel [m/s]
+struct quat stateQuat_tr = {0.0f,0.0f,0.0f,1.0f};  // Orientation
+struct vec stateOmega_tr = {0.0f,0.0f,0.0f};       // Angular Rate [rad/s]
+
+// OPTICAL FLOW STATES
+float Tau_tr = 0.0f;        // [rad/s]
+float Theta_x_tr = 0.0f;    // [rad/s]
+float Theta_y_tr = 0.0f;    // [rad/s]
+float D_perp_tr = 0.0f;     // [m/s]
+
+// CONTROLLER STATES
+float F_thrust_flip = 0.0f; // [N]
+float M_x_flip = 0.0f;      // [N*m]
+float M_y_flip = 0.0f;      // [N*m]
+float M_z_flip = 0.0f;      // [N*m]
+
+// POLICY TRIGGER/ACTION VALUES
+float Policy_Flip_tr = 0.0f;    
+float Policy_Action_tr = 0.0f;
+
+// =================================
+//    LANDING SURFACE PARAMETERS
+// =================================
+
+// LANDING SURFACE PARAMETERS
+float Plane_Angle = 180.0f;
+struct vec t_x = {1.0f,0.0f,0.0f};      // Plane Unit Tangent Vector
+struct vec t_y = {0.0f,1.0f,0.0f};      // Plane Unit Tangent Vector
+struct vec n_hat = {0.0f,0.0f,1.0f};    // Plane Unit Normal Vector
+
+struct vec r_PO = {0.0f,0.0f,2.0f};     // Plane Position Vector        [m]
+struct vec r_BO = {0.0f,0.0f,0.0f};     // Quad Position Vector         [m]
+struct vec r_PB = {0.0f,0.0f,0.0f};     // Quad-Plane Distance Vector   [m]
+struct vec V_BO = {0.0f,0.0f,0.0f};     // Quad Velocity Vector         [m/s]
+
+
+float V_perp = 0.0;                     // Velocity perp to plane [m/s]
+float V_tx = 0.0;                       // Tangent_x velocity [m/s]
+float V_ty = 0.0;                       // Tangent_y velocity [m/s]
+
+
+
 
 
 void GTC_Command(struct GTC_CmdPacket *GTC_Cmd)
 {
-    consolePrintf("Command Recieved:\n");
-
     switch(GTC_Cmd->cmd_type){
         case 0: // Reset
-            consolePrintf("Cmd Reset: %.3f\n",(double)GTC_Cmd->cmd_val1);
             controllerOutOfTreeReset();
             break;
 
 
         case 1: // Position
-
-            consolePrintf("Pos Val: %.3f\n",(double)GTC_Cmd->cmd_val1);
             x_d.x = GTC_Cmd->cmd_val1;
             x_d.y = GTC_Cmd->cmd_val2;
             x_d.z = GTC_Cmd->cmd_val3;
-            kp_xf = 1.0f;
+            kp_xf = GTC_Cmd->cmd_flag;
             break;
         
         case 2: // Velocity
@@ -213,7 +299,180 @@ void GTC_Command(struct GTC_CmdPacket *GTC_Cmd)
             motorstop_flag = true;
             break;
 
-   
+        case 7: // Execute Moment-Based Flip
+
+            M_d.x = GTC_Cmd->cmd_val1*1e-3f;
+            M_d.y = GTC_Cmd->cmd_val2*1e-3f;
+            M_d.z = GTC_Cmd->cmd_val3*1e-3f;
+
+            moment_flag = (bool)GTC_Cmd->cmd_flag;
+            break;
+
+        case 8: // Arm Policy Maneuver
+            Policy_Flip = GTC_Cmd->cmd_val1;
+            Policy_Action = GTC_Cmd->cmd_val2;
+
+            policy_armed_flag = (bool)GTC_Cmd->cmd_flag;
+            break;
+
+        case 10: // Point-to-Point Trajectory
+
+            Traj_Type = P2P;
+            axis = (axis_direction)GTC_Cmd->cmd_flag;
+
+            switch(axis){
+
+                case x_axis:
+
+                    Traj_Active[0] = true;
+                    s_0_t[0] = GTC_Cmd->cmd_val1;  // Starting position [m]
+                    s_f_t[0] = GTC_Cmd->cmd_val2;  // Ending position [m]
+                    a_t[0] = GTC_Cmd->cmd_val3;    // Peak acceleration [m/s^2]
+
+                    T[0] = sqrtf(6.0f/a_t[0]*fabsf(s_f_t[0] - s_0_t[0])); // Calc trajectory manuever time [s]
+                    t_traj[0] = 0.0f; // Reset timer
+                    break;
+
+                case y_axis:
+
+                    Traj_Active[1] = true;
+                    s_0_t[1] = GTC_Cmd->cmd_val1;  // Starting position [m]
+                    s_f_t[1] = GTC_Cmd->cmd_val2;  // Ending position [m]
+                    a_t[1] = GTC_Cmd->cmd_val3;    // Peak acceleration [m/s^2]
+
+                    T[1] = sqrtf(6.0f/a_t[1]*fabsf(s_f_t[1] - s_0_t[1])); // Calc trajectory manuever time [s]
+                    t_traj[1] = 0.0f; // Reset timer
+                    break;
+
+                case z_axis:
+
+                    Traj_Active[2] = true;
+                    s_0_t[2] = GTC_Cmd->cmd_val1;  // Starting position [m]
+                    s_f_t[2] = GTC_Cmd->cmd_val2;  // Ending position [m]
+                    a_t[2] = GTC_Cmd->cmd_val3;    // Peak acceleration [m/s^2]
+
+                    T[2] = sqrtf(6.0f/a_t[2]*fabsf(s_f_t[2] - s_0_t[2])); // Calc trajectory manuever time [s]
+                    t_traj[2] = 0.0f; // Reset timer
+                    break;
+                    
+            }
+
+            break;
+
+
+        case 91: // Gazebo Velocity Trajectory (Instantaneous Acceleration)
+
+            Traj_Type = CONST_VEL_GZ;
+            axis = (axis_direction)GTC_Cmd->cmd_flag;
+
+            switch(axis){
+
+                case x_axis:
+
+                    s_0_t[0] = GTC_Cmd->cmd_val1;   // Starting position [m]
+                    v_t[0] = GTC_Cmd->cmd_val2;     // Desired velocity [m/s]
+                    a_t[0] = 0.0f;                  // Acceleration [m/s^2]
+
+                    t_traj[0] = 0.0f; // Reset timer
+                    break;
+
+                case y_axis:
+
+                    s_0_t[1] = GTC_Cmd->cmd_val1;
+                    v_t[1] = GTC_Cmd->cmd_val2;
+                    a_t[1] = 0.0f;
+
+                    t_traj[1] = 0.0f;
+                    break;
+
+                case z_axis:
+
+                    s_0_t[2] = GTC_Cmd->cmd_val1;
+                    v_t[2] = GTC_Cmd->cmd_val2;
+                    a_t[2] = 0.0f;
+
+                    t_traj[2] = 0.0f;
+                    break;
+                    
+            }
+
+            break;
+
+        case 11: // Constant Velocity Trajectory
+
+            Traj_Type = CONST_VEL;
+            axis = (axis_direction)GTC_Cmd->cmd_flag;
+
+            switch(axis){
+
+                case x_axis:
+
+                    s_0_t[0] = GTC_Cmd->cmd_val1;               // Starting position [m]
+                    v_t[0] = GTC_Cmd->cmd_val2;                 // Desired velocity [m/s]
+                    a_t[0] = GTC_Cmd->cmd_val3;                 // Acceleration [m/s^2]
+
+                    t_traj[0] = 0.0f; // Reset timer
+                    break;
+
+                case y_axis:
+
+                    s_0_t[1] = GTC_Cmd->cmd_val1;
+                    v_t[1] = GTC_Cmd->cmd_val2;
+                    a_t[1] = GTC_Cmd->cmd_val3;
+
+                    t_traj[1] = 0.0f;
+                    break;
+
+                case z_axis:
+
+                    s_0_t[2] = GTC_Cmd->cmd_val1;
+                    v_t[2] = GTC_Cmd->cmd_val2;
+                    a_t[2] = GTC_Cmd->cmd_val3;
+
+                    t_traj[2] = 0.0f;
+                    break;
+                    
+            }
+
+            break;
+
+
+        case 20: // Tumble-Detection
+            tumble_detection = GTC_Cmd->cmd_flag;
+            break;
+
+        case 30: // Custom Thrust Values
+
+            customThrust_flag = true;
+            thrust_override[0] = GTC_Cmd->cmd_val1;
+            thrust_override[1] = GTC_Cmd->cmd_val2;
+            thrust_override[2] = GTC_Cmd->cmd_val3;
+            thrust_override[3] = GTC_Cmd->cmd_flag;
+
+            break;
+
+        case 31: // Custom PWM Values
+
+            customPWM_flag = true;
+            PWM_override[0] = GTC_Cmd->cmd_val1;
+            PWM_override[1] = GTC_Cmd->cmd_val2;
+            PWM_override[2] = GTC_Cmd->cmd_val3;
+            PWM_override[3] = GTC_Cmd->cmd_flag;
+
+            break;
+
+        
+
+        case 93: // UPDATE PLANE POSITION
+
+            r_PO.x = GTC_Cmd->cmd_val1;
+            r_PO.y = GTC_Cmd->cmd_val2;
+            r_PO.z = GTC_Cmd->cmd_val3;
+            Plane_Angle = GTC_Cmd->cmd_flag;
+
+            calcPlaneNormal(Plane_Angle);
+            
+            break;
     }
 
 }
@@ -375,3 +634,26 @@ uint16_t thrust2PWM(float f)
 
     return PWM;
 }
+
+void calcPlaneNormal(float Plane_Angle)
+{
+    // UPDATE LANDING SURFACE PARAMETERS
+    n_hat.x = sinf(Plane_Angle*Deg2Rad);
+    n_hat.y = 0;
+    n_hat.z = -cosf(Plane_Angle*Deg2Rad);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_x.x = -cosf(Plane_Angle*Deg2Rad);
+    t_x.y = 0;
+    t_x.z = -sinf(Plane_Angle*Deg2Rad);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_y.x = 0;
+    t_y.y = 1;
+    t_y.z = 0;
+}
+
+
+
+
+

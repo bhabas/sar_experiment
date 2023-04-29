@@ -8,22 +8,30 @@ extern "C" {
 #include "console.h"
 #include "math3d.h"
 #include "pm.h"
+#include "quatcompress.h"
 
 #include "controller_GTC.h"
+#include "traj_funcs.h"
+#include "CompressStates.h"
 
 
 #define PWM_MAX 60000
 #define g2Newton (9.81f/1000.0f)
 #define Newton2g (1000.0f/9.81f)
+#define Deg2Rad (float)M_PI/180.0f
+#define Rad2Deg 180.0f/(float)M_PI
+
 
 
 // DECLARE SYSTEM PARAMETERS
-extern float m;     // [kg]
-extern float Ixx;   // [kg*m^2]
-extern float Iyy;   // [kg*m^2]
-extern float Izz;   // [kg*m^2]
-extern float dp;    // COM to Prop along x-axis [m]
-extern float c_tf;  // Moment Coeff [Nm/N]
+extern float m;         // [kg]
+extern float Ixx;       // [kg*m^2]
+extern float Iyy;       // [kg*m^2]
+extern float Izz;       // [kg*m^2]
+extern struct mat33 J;  // Rotational Inertia Matrix [kg*m^2]
+
+extern float Prop_Dist;    // COM to Prop along x-axis [m]
+extern float C_tf;  // Moment Coeff [Nm/N]
 extern float f_max; // Max thrust per motor [g]
 
 extern float dt;    // Controller cycle time
@@ -143,6 +151,30 @@ extern float thrust_override[4];    // Motor thrusts [g]
 
 
 // =================================
+//          SENSORY VALUES
+// =================================
+
+// OPTICAL FLOW STATES
+extern float Tau;           // [s]
+extern float Theta_x;       // [rad/s] 
+extern float Theta_y;       // [rad/s]
+extern float Theta_z;       // [rad/s]
+extern float D_perp;        // [m]
+
+// ANALYTICAL OPTICAL FLOW STATES
+extern float Tau_calc;      // [s]
+extern float Theta_x_calc;  // [rad/s] 
+extern float Theta_y_calc;  // [rad/s]
+extern float D_perp_calc;   // [m]
+
+// ESTIMATED OPTICAL FLOW STATES
+extern float Tau_est;      // [s]
+extern float Theta_x_est;  // [rad/s]
+extern float Theta_y_est;  // [rad/s]
+extern float D_perp_est;   // [m]
+
+
+// =================================
 //  FLAGS AND SYSTEM INITIALIZATION
 // =================================
 
@@ -164,11 +196,78 @@ extern bool onceFlag;
 // SENSOR FLAGS
 extern bool camera_sensor_active;
 
+// =================================
+//       POLICY INITIALIZATION
+// =================================
+
+// POLICY SETTING
+typedef enum {
+    PARAM_OPTIM = 0,
+    SVL_POLICY = 1,
+    DEEP_RL = 2,
+    DEEP_RL_SB3 = 3
+}PolicyType;
+extern PolicyType Policy;
+
+// POLICY FLAGS
+extern bool policy_armed_flag;
+extern bool flip_flag;
+extern bool onceFlag;
+
+// POLICY TRIGGER/ACTION VALUES
+extern float Policy_Flip;  
+extern float Policy_Action;
 
 
 
+// ======================================
+//  RECORD SYSTEM STATES AT FLIP TRIGGER
+// ======================================
+
+// CARTESIAN STATES
+extern struct vec statePos_tr;      // Pos [m]
+extern struct vec stateVel_tr;      // Vel [m/s]
+extern struct quat stateQuat_tr;    // Orientation
+extern struct vec stateOmega_tr;    // Angular Rate [rad/s]
+
+// OPTICAL FLOW STATES
+extern float Tau_tr;                // [rad/s]
+extern float Theta_x_tr;            // [rad/s]
+extern float Theta_y_tr;            // [rad/s]
+extern float D_perp_tr;             // [m/s]
+
+// CONTROLLER STATES
+extern float F_thrust_flip;         // [N]
+extern float M_x_flip;              // [N*m]
+extern float M_y_flip;              // [N*m]
+extern float M_z_flip;              // [N*m]
+
+// POLICY TRIGGER/ACTION VALUES
+extern float Policy_Flip_tr;    
+extern float Policy_Action_tr;
+
+// =================================
+//    LANDING SURFACE PARAMETERS
+// =================================
+
+// LANDING SURFACE PARAMETERS
+extern float Plane_Angle;
+extern struct vec t_x;          // Plane Unit Tangent Vector
+extern struct vec t_y;          // Plane Unit Tangent Vector
+extern struct vec n_hat;        // Plane Unit Normal Vector
+
+extern struct vec r_PO;         // Plane Position Vector        [m]
+extern struct vec r_BO;         // Quad Position Vector         [m]
+extern struct vec r_PB;         // Quad-Plane Distance Vector   [m]
+extern struct vec V_BO;         // Quad Velocity Vector         [m/s]
+
+extern float V_perp;            // Velocity perp to plane [m/s]
+extern float V_tx;              // Tangent_x velocity [m/s]
+extern float V_ty;              // Tangent_y velocity [m/s]
 
 
+
+// GTC COMMAND PACKETS
 struct GTC_CmdPacket{
     uint8_t cmd_type; 
     float cmd_val1;
@@ -177,14 +276,16 @@ struct GTC_CmdPacket{
     float cmd_flag;
     bool  cmd_rx;
 } __attribute__((packed));
-
 extern struct GTC_CmdPacket GTC_Cmd;
+
+
 
 
 
 void GTC_Command(struct GTC_CmdPacket *GTC_Cmd);
 void controlOutput(const state_t *state, const sensorData_t *sensors);
 uint16_t thrust2PWM(float f);
+void calcPlaneNormal(float Plane_Angle);
 
 
 

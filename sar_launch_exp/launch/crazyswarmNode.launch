@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find crazyflie_launch)/launch/params.launch"/>
+  <include file="$(find sar_launch_exp)/launch/params.launch"/>
+
+
+  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflieTypes.yaml" />
+  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflies.yaml" />
+
+  <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
+    <rosparam>
+      # Logging configuration (Use enable_logging to actually enable logging)
+      genericLogTopics: ["log1","log2","log3","log4","log5","log6"]
+      genericLogTopicFrequencies: [20,20,20,50,50,200]
+
+      <!-- THIS IS MAXED OUT (26/26) BYTES -->
+      genericLogTopic_log1_Variables: [
+      "LogStates_GTC.Z_xy",    "LogStates_GTC.Z_z",
+      "LogStates_GTC.Z_vxy",   "LogStates_GTC.Z_vz",
+      "LogStates_GTC.Z_quat",
+      "LogStates_GTC.Z_wxy",
+      "LogStates_GTC.Z_Thetaxy",  "LogStates_GTC.Z_Tau",
+      ]
+
+      <!-- THIS IS MAXED OUT (26/26) BYTES -->
+      genericLogTopic_log2_Variables: [
+      "LogStates_GTC.Z_wz",
+      "LogStates_GTC.Z_D_perp",
+      "LogStates_GTC.Z_FMz",   "LogStates_GTC.Z_Mxy",
+      "LogStates_GTC.Z_PWM12", "LogStates_GTC.Z_PWM34",
+      "LogStates_GTC.Z_NN_FP",
+      "LogFlipData_GTC.Flip_Flag",
+      "LogStates_GTC.Z_vbat"
+      ]
+
+      <!-- SIZE: (26/26) BYTES -->
+      genericLogTopic_log3_Variables: [
+      "LogSetPoints_GTC.Z_xy",   "LogSetPoints_GTC.Z_z",
+      "LogSetPoints_GTC.Z_vxy",  "LogSetPoints_GTC.Z_vz",
+      "LogSetPoints_GTC.Z_axy",  "LogSetPoints_GTC.Z_az",
+      "LogStates_GTC.Z_f_12",    "LogStates_GTC.Z_f_34",
+      ]
+
+      <!-- SIZE: (24/26) BYTES -->
+      genericLogTopic_log4_Variables: [
+      "LogFlipData_GTC.Z_z",    "LogFlipData_GTC.Z_D_perp",
+      "LogFlipData_GTC.Zf_vxy",  "LogFlipData_GTC.Z_vz",
+      "LogFlipData_GTC.Z_quat",
+      "LogFlipData_GTC.Z_wxy",
+      "LogFlipData_GTC.Z_Thetaxy", "LogFlipData_GTC.Z_Tau",
+      ]
+
+      <!-- SIZE: (0/26) BYTES -->
+      genericLogTopic_log5_Variables: [
+      "valsLog.Motorstop_Flag", "valsLog.Pos_Ctrl_Flag",
+      "valsLog.Vel_Ctrl_Flag",  "valsLog.Pos_Ctrl_Flag",
+      "valsLog.Tumbled_Flag",
+      "valsLog.Moment_Flag",
+      "valsLog.Policy_Armed_Flag",
+      ]
+
+      <!-- SIZE: (0/26) BYTES -->
+      genericLogTopic_log6_Variables: [
+      "pm.vbat"
+      ]
+
+      
+      # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
+      # allCrazyflies.yaml to set per drone)
+      firmwareParams:
+        commander:
+          enHighLevel: 1
+        stabilizer:
+          estimator: 2 # 1: complementary, 2: kalman 3: UKF
+          controller: 5 # 1: PID, 2: mellinger 5: OOT controller
+        kalman:
+          resetEstimation: 0
+
+
+      motion_capture_type: "none" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
+      motion_capture_host_name: "192.168.1.100:801"
+      object_tracking_type: "motionCapture" # one of motionCapture,libobjecttracker
+      send_position_only: True # True: position only; False: position+orientation 
+      
+
+      # motion_capture_interface_ip: "" # optional for optitrack with multiple interfaces
+      save_point_clouds: "/dev/null" # set to a valid path to log mocap point cloud binary file.
+      print_latency: False
+      write_csvs: False
+      force_no_cache: False
+      enable_parameters: True
+      enable_logging: True
+      enable_logging_pose: False
+
+
+    </rosparam>
+  </node>
+
+</launch>
