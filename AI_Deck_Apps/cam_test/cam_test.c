@@ -27,7 +27,7 @@ static int open_camera(struct pi_device *device)
     {
         return -1;
     }
-    pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT,0);
+    // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT,0);
 
     return 0;
 }
@@ -65,7 +65,15 @@ void test_camera(void)
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
     pi_camera_close(&camera);
 
-    printf("Val: %d\n",buff[0]);
+    printf("Print Image:\n\n");
+
+    for (size_t i = 0; i < WIDTH*50; i++)
+    {
+        printf("%d ",buff[i]);
+    }
+    printf("\n\nPrint Image:\n");
+
+    
 
 
     printf("Test success !\n");
