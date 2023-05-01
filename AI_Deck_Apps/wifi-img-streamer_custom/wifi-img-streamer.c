@@ -62,7 +62,7 @@ static int open_pi_camera_himax(struct pi_device *device)
 
     pi_himax_conf_init(&cam_conf);
 
-    cam_conf.format = PI_CAMERA_QVGA;
+    cam_conf.format = PI_CAMERA_QQVGA;
 
     pi_open_from_conf(device, &cam_conf);
     if (pi_camera_open(device))
@@ -229,53 +229,75 @@ void camera_task(void *parameters)
 
     uint32_t imgSize = 0;
 
+    for (uint32_t i = 0; i < resolution; i++)
+    {
+        imgBuff[i] = 0;
+    }
+
+    printf("Image: \n");
+    for (uint32_t i = 76500; i < 76600; i++)
+    {
+        printf("%d ",imgBuff[i]);
+    }
+
+    // while (1)
+    // {
+    //     pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+    //     printf("1\n");
+
+    //     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+    //     printf("2\n");
+
+    //     xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+    //     printf("3\n");
+
+    //     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+    //     printf("4\n");
+
+    //     printf("Image: \n");
+    //     for (uint32_t i = 76500; i < 76600; i++)
+    //     {
+    //         printf("%d ",imgBuff[i]);
+    //     }
+    //     printf("\n\n");
+    // }
+    
+    
+
     while (1)
     {
-        start = xTaskGetTickCount();
-        pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-        pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-        xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-        pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-        captureTime = xTaskGetTickCount() - start;
 
-        printf("Image: %d\n",imgBuff[38400]);
+        if (wifiClientConnected == 1)
+        {
+            start = xTaskGetTickCount();
+            pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+            pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+            xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+            pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+            captureTime = xTaskGetTickCount() - start;
 
+            imgSize = captureSize;
+            start = xTaskGetTickCount();
 
-        // if (wifiClientConnected == 1)
-        // {
-        //     start = xTaskGetTickCount();
-        //     pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-        //     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-        //     xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-        //     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-        //     captureTime = xTaskGetTickCount() - start;
+            // First send information about the image
+            createImageHeaderPacket(&txp, imgSize);
+            cpxSendPacketBlocking(&txp);
 
-        //     printf("Image: %d\n",imgBuff[38400]);
+            start = xTaskGetTickCount();
+            // Send image
+            sendBufferViaCPX(&txp, imgBuff, imgSize);
 
-
-
-        //     // imgSize = captureSize;
-        //     // start = xTaskGetTickCount();
-
-        //     // // First send information about the image
-        //     // createImageHeaderPacket(&txp, imgSize);
-        //     // cpxSendPacketBlocking(&txp);
-
-        //     // start = xTaskGetTickCount();
-        //     // // Send image
-        //     // sendBufferViaCPX(&txp, imgBuff, imgSize);
-
-        //     // transferTime = xTaskGetTickCount() - start;
+            transferTime = xTaskGetTickCount() - start;
 
 
-        //     // printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
-        //     //                     captureTime, encodingTime, imgSize, transferTime);
+            printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
+                                captureTime, encodingTime, imgSize, transferTime);
 
-        // }
-        // else
-        // {
-        //     vTaskDelay(10);
-        // }
+        }
+        else
+        {
+            vTaskDelay(10);
+        }
     }
 }
 
