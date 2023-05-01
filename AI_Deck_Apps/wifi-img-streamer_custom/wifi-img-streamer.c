@@ -38,20 +38,20 @@
 #define CAM_WIDTH 324
 #define CAM_HEIGHT 244
 
-// static pi_task_t task1;
-// static unsigned char *imgBuff;
-// static struct pi_device camera;
-// static pi_buffer_t buffer;
+static pi_task_t task1;
+static unsigned char *imgBuff;
+static struct pi_device camera;
+static pi_buffer_t buffer;
 
-// static EventGroupHandle_t evGroup;
-// #define CAPTURE_DONE_BIT (1 << 0)
+static EventGroupHandle_t evGroup;
+#define CAPTURE_DONE_BIT (1 << 0)
 
-// // Performance menasuring variables
-// static uint32_t start = 0;
-// static uint32_t captureTime = 0;
-// static uint32_t transferTime = 0;
-// static uint32_t encodingTime = 0;
-// // #define OUTPUT_PROFILING_DATA
+// Performance menasuring variables
+static uint32_t start = 0;
+static uint32_t captureTime = 0;
+static uint32_t transferTime = 0;
+static uint32_t encodingTime = 0;
+
 
 // static int open_pi_camera_himax(struct pi_device *device)
 // {
@@ -326,84 +326,85 @@
 //   }
 // }
 
-// #define LED_PIN 2
-// static pi_device_t led_gpio_dev;
-// void hb_task(void *parameters)
-// {
-//   (void)parameters;
-//   char *taskname = pcTaskGetName(NULL);
+#define LED_PIN 2
+static pi_device_t led_gpio_dev;
+void hb_task(void *parameters)
+{
+    (void)parameters;
+    char *taskname = pcTaskGetName(NULL);
 
-//   // Initialize the LED pin
-//   pi_gpio_pin_configure(&led_gpio_dev, LED_PIN, PI_GPIO_OUTPUT);
+    // Initialize the LED pin
+    pi_gpio_pin_configure(&led_gpio_dev, LED_PIN, PI_GPIO_OUTPUT);
 
-//   const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
+    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
 
-//   while (1)
-//   {
-//     pi_gpio_pin_write(&led_gpio_dev, LED_PIN, 1);
-//     vTaskDelay(xDelay);
-//     pi_gpio_pin_write(&led_gpio_dev, LED_PIN, 0);
-//     vTaskDelay(xDelay);
-//   }
-// }
+    while (1)
+    {
+        pi_gpio_pin_write(&led_gpio_dev, LED_PIN, 1);
+        vTaskDelay(xDelay);
+        pi_gpio_pin_write(&led_gpio_dev, LED_PIN, 0);
+        vTaskDelay(xDelay);
+        printf("Printing LED\n");
+    }
+}
 
 void start_example(void)
 {
     printf("Testing2\n");
-//   struct pi_uart_conf conf;
-//   struct pi_device device;
-//   pi_uart_conf_init(&conf);
-//   conf.baudrate_bps = 115200;
+    struct pi_uart_conf conf;
+    struct pi_device device;
+    pi_uart_conf_init(&conf);
+    conf.baudrate_bps = 115200;
 
-//     printf("-- LED_  --\n");
+    printf("-- LED_  --\n");
 
 
-//   pi_open_from_conf(&device, &conf);
-//   if (pi_uart_open(&device))
+    pi_open_from_conf(&device, &conf);
+    if (pi_uart_open(&device))
+    {
+        printf("[UART] open failed !\n");
+        pmsis_exit(-1);
+    }
+
+    cpxInit();
+    cpxEnableFunction(CPX_F_WIFI_CTRL);
+
+    printf("-- WiFi image streamer example --\n");
+
+    evGroup = xEventGroupCreate();
+
+    BaseType_t xTask;
+
+    xTask = xTaskCreate(hb_task, "hb_task", configMINIMAL_STACK_SIZE * 2,
+                        NULL, tskIDLE_PRIORITY + 1, NULL);
+    if (xTask != pdPASS)
+    {
+        printf("HB task did not start !\n");
+        pmsis_exit(-1);
+    }
+
+//   xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
+//                       NULL, tskIDLE_PRIORITY + 1, NULL);
+
+//   if (xTask != pdPASS)
 //   {
-//     printf("[UART] open failed !\n");
+//     printf("Camera task did not start !\n");
 //     pmsis_exit(-1);
 //   }
 
-// //   cpxInit();
-// //   cpxEnableFunction(CPX_F_WIFI_CTRL);
+//   xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
+//                       NULL, tskIDLE_PRIORITY + 1, NULL);
 
-// //   printf("-- WiFi image streamer example --\n");
+//   if (xTask != pdPASS)
+//   {
+//     printf("RX task did not start !\n");
+//     pmsis_exit(-1);
+//   }
 
-// //   evGroup = xEventGroupCreate();
-
-// //   BaseType_t xTask;
-
-// //   xTask = xTaskCreate(hb_task, "hb_task", configMINIMAL_STACK_SIZE * 2,
-// //                       NULL, tskIDLE_PRIORITY + 1, NULL);
-// //   if (xTask != pdPASS)
-// //   {
-// //     printf("HB task did not start !\n");
-// //     pmsis_exit(-1);
-// //   }
-
-// //   xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
-// //                       NULL, tskIDLE_PRIORITY + 1, NULL);
-
-// //   if (xTask != pdPASS)
-// //   {
-// //     printf("Camera task did not start !\n");
-// //     pmsis_exit(-1);
-// //   }
-
-// //   xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
-// //                       NULL, tskIDLE_PRIORITY + 1, NULL);
-
-// //   if (xTask != pdPASS)
-// //   {
-// //     printf("RX task did not start !\n");
-// //     pmsis_exit(-1);
-// //   }
-
-// //   while (1)
-// //   {
-// //     pi_yield();
-// //   }
+    while (1)
+    {
+        pi_yield();
+    }
     pmsis_exit(0);
 
 }
