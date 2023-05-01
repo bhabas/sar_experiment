@@ -52,6 +52,9 @@ static uint32_t captureTime = 0;
 static uint32_t transferTime = 0;
 static uint32_t encodingTime = 0;
 
+static CPXPacket_t txp; // Transfer packet
+static CPXPacket_t rxp; // Receive packet
+
 
 // static int open_pi_camera_himax(struct pi_device *device)
 // {
@@ -86,31 +89,31 @@ static uint32_t encodingTime = 0;
 static int wifiConnected = 0;
 static int wifiClientConnected = 0;
 
-// void rx_task(void *parameters)
-// {
-//   while (1)
-//   {
-//     cpxReceivePacketBlocking(CPX_F_WIFI_CTRL, &rxp);
+void rx_task(void *parameters)
+{
+  while (1)
+  {
+    cpxReceivePacketBlocking(CPX_F_WIFI_CTRL, &rxp);
 
-//     WiFiCTRLPacket_t * wifiCtrl = (WiFiCTRLPacket_t*) rxp.data;
+    WiFiCTRLPacket_t * wifiCtrl = (WiFiCTRLPacket_t*) rxp.data;
 
-//     switch (wifiCtrl->cmd)
-//     {
-//       case WIFI_CTRL_STATUS_WIFI_CONNECTED:
-//         printf("Wifi connected (%u.%u.%u.%u)\n",
-//                           wifiCtrl->data[0], wifiCtrl->data[1],
-//                           wifiCtrl->data[2], wifiCtrl->data[3]);
-//         wifiConnected = 1;
-//         break;
-//       case WIFI_CTRL_STATUS_CLIENT_CONNECTED:
-//         printf("Wifi client connection status: %u\n", wifiCtrl->data[0]);
-//         wifiClientConnected = wifiCtrl->data[0];
-//         break;
-//       default:
-//         break;
-//     }
-//   }
-// }
+    switch (wifiCtrl->cmd)
+    {
+      case WIFI_CTRL_STATUS_WIFI_CONNECTED:
+        printf("Wifi connected (%u.%u.%u.%u)\n",
+                          wifiCtrl->data[0], wifiCtrl->data[1],
+                          wifiCtrl->data[2], wifiCtrl->data[3]);
+        wifiConnected = 1;
+        break;
+      case WIFI_CTRL_STATUS_CLIENT_CONNECTED:
+        printf("Wifi client connection status: %u\n", wifiCtrl->data[0]);
+        wifiClientConnected = wifiCtrl->data[0];
+        break;
+      default:
+        break;
+    }
+  }
+}
 
 // static void capture_done_cb(void *arg)
 // {
@@ -144,8 +147,7 @@ static int wifiClientConnected = 0;
 
 // static StreamerMode_t streamerMode = RAW_ENCODING;
 
-static CPXPacket_t txp; // Transfer packet
-static CPXPacket_t rxp; // Receive packet
+
 
 
 // void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize, StreamerMode_t imgType) {
@@ -399,14 +401,14 @@ void start_example(void)
         pmsis_exit(-1);
   }
 
-//   xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
-//                       NULL, tskIDLE_PRIORITY + 1, NULL);
+  xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
+                      NULL, tskIDLE_PRIORITY + 1, NULL);
 
-//   if (xTask != pdPASS)
-//   {
-//     printf("RX task did not start !\n");
-//     pmsis_exit(-1);
-//   }
+  if (xTask != pdPASS)
+  {
+    printf("RX task did not start !\n");
+    pmsis_exit(-1);
+  }
 
     while (1)
     {
