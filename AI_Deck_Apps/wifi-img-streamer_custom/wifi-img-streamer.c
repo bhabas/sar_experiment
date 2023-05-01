@@ -83,10 +83,9 @@ static uint32_t encodingTime = 0;
 //   return 0;
 // }
 
-// static int wifiConnected = 0;
-// static int wifiClientConnected = 0;
+static int wifiConnected = 0;
+static int wifiClientConnected = 0;
 
-// static CPXPacket_t rxp;
 // void rx_task(void *parameters)
 // {
 //   while (1)
@@ -145,7 +144,9 @@ static uint32_t encodingTime = 0;
 
 // static StreamerMode_t streamerMode = RAW_ENCODING;
 
-// static CPXPacket_t txp;
+static CPXPacket_t txp; // Transfer packet
+static CPXPacket_t rxp; // Receive packet
+
 
 // void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize, StreamerMode_t imgType) {
 //   img_header_t *imgHeader = (img_header_t *) packet->data;
@@ -174,31 +175,37 @@ static uint32_t encodingTime = 0;
 //   } while (size == sizeof(packet->data));
 // }
 
-// void setupWiFi(void) {
-//   static char ssid[] = "WiFi streaming example";
-//   printf("Setting up WiFi AP\n");
-//   // Set up the routing for the WiFi CTRL packets
-//   txp.route.destination = CPX_T_ESP32;
-//   rxp.route.source = CPX_T_GAP8;
-//   txp.route.function = CPX_F_WIFI_CTRL;
-//   WiFiCTRLPacket_t * wifiCtrl = (WiFiCTRLPacket_t*) txp.data;
-  
-//   wifiCtrl->cmd = WIFI_CTRL_SET_SSID;
-//   memcpy(wifiCtrl->data, ssid, sizeof(ssid));
-//   txp.dataLength = sizeof(ssid);
-//   cpxSendPacketBlocking(&txp);
-  
-//   wifiCtrl->cmd = WIFI_CTRL_WIFI_CONNECT;
-//   wifiCtrl->data[0] = 0x01;
-//   txp.dataLength = 2;
-//   cpxSendPacketBlocking(&txp);
-// }
+void setupWiFi(void) {
+    static char ssid[] = "WiFi streaming example";
+    printf("Setting up WiFi AP\n");
+    // Set up the routing for the WiFi CTRL packets
+    txp.route.destination = CPX_T_ESP32;
+    rxp.route.source = CPX_T_GAP8;
+    txp.route.function = CPX_F_WIFI_CTRL;
+    WiFiCTRLPacket_t * wifiCtrl = (WiFiCTRLPacket_t*) txp.data;
+    
+    wifiCtrl->cmd = WIFI_CTRL_SET_SSID;
+    memcpy(wifiCtrl->data, ssid, sizeof(ssid));
+    txp.dataLength = sizeof(ssid);
+    cpxSendPacketBlocking(&txp);
+    
+    wifiCtrl->cmd = WIFI_CTRL_WIFI_CONNECT;
+    wifiCtrl->data[0] = 0x01;
+    txp.dataLength = 2;
+    cpxSendPacketBlocking(&txp);
+}
 
-// void camera_task(void *parameters)
-// {
-//   vTaskDelay(2000);
+void camera_task(void *parameters)
+{
+    vTaskDelay(2000);
 
-//   setupWiFi();
+    setupWiFi();
+
+    while (1)
+    {
+        pi_yield();
+    }
+    
 
 
 //   printf("Starting camera task...\n");
@@ -324,7 +331,7 @@ static uint32_t encodingTime = 0;
 //       vTaskDelay(10);
 //     }
 //   }
-// }
+}
 
 #define LED_PIN 2
 static pi_device_t led_gpio_dev;
@@ -383,14 +390,14 @@ void start_example(void)
         pmsis_exit(-1);
     }
 
-//   xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
-//                       NULL, tskIDLE_PRIORITY + 1, NULL);
+  xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
+                      NULL, tskIDLE_PRIORITY + 1, NULL);
 
-//   if (xTask != pdPASS)
-//   {
-//     printf("Camera task did not start !\n");
-//     pmsis_exit(-1);
-//   }
+  if (xTask != pdPASS)
+  {
+        printf("Camera task did not start !\n");
+        pmsis_exit(-1);
+  }
 
 //   xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
 //                       NULL, tskIDLE_PRIORITY + 1, NULL);
