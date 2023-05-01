@@ -231,39 +231,51 @@ void camera_task(void *parameters)
 
     while (1)
     {
-        if (wifiClientConnected == 1)
-        {
-            start = xTaskGetTickCount();
-            pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-            pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-            xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-            pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-            captureTime = xTaskGetTickCount() - start;
+        start = xTaskGetTickCount();
+        pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+        pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+        xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+        captureTime = xTaskGetTickCount() - start;
+
+        printf("Image: %d\n",imgBuff[38400]);
+
+
+        // if (wifiClientConnected == 1)
+        // {
+        //     start = xTaskGetTickCount();
+        //     pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+        //     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+        //     xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        //     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+        //     captureTime = xTaskGetTickCount() - start;
+
+        //     printf("Image: %d\n",imgBuff[38400]);
 
 
 
-            imgSize = captureSize;
-            start = xTaskGetTickCount();
+        //     // imgSize = captureSize;
+        //     // start = xTaskGetTickCount();
 
-            // First send information about the image
-            createImageHeaderPacket(&txp, imgSize);
-            cpxSendPacketBlocking(&txp);
+        //     // // First send information about the image
+        //     // createImageHeaderPacket(&txp, imgSize);
+        //     // cpxSendPacketBlocking(&txp);
 
-            start = xTaskGetTickCount();
-            // Send image
-            sendBufferViaCPX(&txp, imgBuff, imgSize);
+        //     // start = xTaskGetTickCount();
+        //     // // Send image
+        //     // sendBufferViaCPX(&txp, imgBuff, imgSize);
 
-            transferTime = xTaskGetTickCount() - start;
+        //     // transferTime = xTaskGetTickCount() - start;
 
 
-            printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
-                                captureTime, encodingTime, imgSize, transferTime);
+        //     // printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
+        //     //                     captureTime, encodingTime, imgSize, transferTime);
 
-        }
-        else
-        {
-            vTaskDelay(10);
-        }
+        // }
+        // else
+        // {
+        //     vTaskDelay(10);
+        // }
     }
 }
 
@@ -285,7 +297,6 @@ void hb_task(void *parameters)
         vTaskDelay(xDelay);
         pi_gpio_pin_write(&led_gpio_dev, LED_PIN, 0);
         vTaskDelay(xDelay);
-        printf("Printing LED\n");
     }
 }
 
