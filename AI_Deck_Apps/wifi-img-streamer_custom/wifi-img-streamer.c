@@ -56,35 +56,35 @@ static CPXPacket_t txp; // Transfer packet
 static CPXPacket_t rxp; // Receive packet
 
 
-// static int open_pi_camera_himax(struct pi_device *device)
-// {
-//   struct pi_himax_conf cam_conf;
+static int open_pi_camera_himax(struct pi_device *device)
+{
+    struct pi_himax_conf cam_conf;
 
-//   pi_himax_conf_init(&cam_conf);
+    pi_himax_conf_init(&cam_conf);
 
-//   cam_conf.format = PI_CAMERA_QVGA;
+    cam_conf.format = PI_CAMERA_QVGA;
 
-//   pi_open_from_conf(device, &cam_conf);
-//   if (pi_camera_open(device))
-//     return -1;
+    pi_open_from_conf(device, &cam_conf);
+    if (pi_camera_open(device))
+        return -1;
 
-//   // rotate image
-//   pi_camera_control(device, PI_CAMERA_CMD_START, 0);
-//   uint8_t set_value = 3;
-//   uint8_t reg_value;
-//   pi_camera_reg_set(device, IMG_ORIENTATION, &set_value);
-//   pi_time_wait_us(1000000);
-//   pi_camera_reg_get(device, IMG_ORIENTATION, &reg_value);
-//   if (set_value != reg_value)
-//   {
-//     printf("Failed to rotate camera image\n");
-//     return -1;
-//   }
-//   pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
-//   pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
+    // rotate image
+    pi_camera_control(device, PI_CAMERA_CMD_START, 0);
+    uint8_t set_value = 3;
+    uint8_t reg_value;
+    pi_camera_reg_set(device, IMG_ORIENTATION, &set_value);
+    pi_time_wait_us(1000000);
+    pi_camera_reg_get(device, IMG_ORIENTATION, &reg_value);
+    if (set_value != reg_value)
+    {
+        printf("Failed to rotate camera image\n");
+        return -1;
+    }
+    pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
+    pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
 
-//   return 0;
-// }
+    return 0;
+}
 
 static int wifiConnected = 0;
 static int wifiClientConnected = 0;
@@ -131,29 +131,24 @@ typedef struct
 } __attribute__((packed)) img_header_t;
 
 
-typedef enum
-{
-  RAW_ENCODING = 0,
-  JPEG_ENCODING = 1
-} __attribute__((packed)) StreamerMode_t;
 
 pi_buffer_t header;
 uint32_t headerSize;
 pi_buffer_t footer;
 uint32_t footerSize;
 
-static StreamerMode_t streamerMode = RAW_ENCODING;
 
 
 
 
-void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize, StreamerMode_t imgType) {
+
+void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize) {
   img_header_t *imgHeader = (img_header_t *) packet->data;
   imgHeader->magic = 0xBC;
   imgHeader->width = CAM_WIDTH;
   imgHeader->height = CAM_HEIGHT;
   imgHeader->depth = 1;
-  imgHeader->type = imgType;
+  imgHeader->type = 0;
   imgHeader->size = imgSize;
   packet->dataLength = sizeof(img_header_t);
 }
@@ -211,11 +206,11 @@ void camera_task(void *parameters)
         return;
     }
 
-//   if (open_pi_camera_himax(&camera))
-//   {
-//     printf("Failed to open camera\n");
-//     return;
-//   }
+    if (open_pi_camera_himax(&camera))
+    {
+        printf("Failed to open camera\n");
+        return;
+    }
 
 
     pi_buffer_init(&buffer, PI_BUFFER_TYPE_L2, imgBuff);
@@ -227,9 +222,9 @@ void camera_task(void *parameters)
     footer.size = 10;
     footer.data = pmsis_l2_malloc(10);
 
-//   pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+    pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
-//   // We're reusing the same packet, so initialize the route once
+    // We're reusing the same packet, so initialize the route once
     cpxInitRoute(CPX_T_GAP8, CPX_T_WIFI_HOST, CPX_F_APP, &txp.route);
 
     uint32_t imgSize = 0;
@@ -238,12 +233,12 @@ void camera_task(void *parameters)
     {
         if (wifiClientConnected == 1)
         {
-//       start = xTaskGetTickCount();
-//       pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-//       pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-//       xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-//       pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-//       captureTime = xTaskGetTickCount() - start;
+            start = xTaskGetTickCount();
+            pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+            pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+            xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+            pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+            captureTime = xTaskGetTickCount() - start;
 
 
 
@@ -251,7 +246,7 @@ void camera_task(void *parameters)
             start = xTaskGetTickCount();
 
             // First send information about the image
-            createImageHeaderPacket(&txp, imgSize, RAW_ENCODING);
+            createImageHeaderPacket(&txp, imgSize);
             cpxSendPacketBlocking(&txp);
 
             start = xTaskGetTickCount();
@@ -260,10 +255,10 @@ void camera_task(void *parameters)
 
             transferTime = xTaskGetTickCount() - start;
 
-// // #ifdef OUTPUT_PROFILING_DATA
-//       printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
-//                         captureTime, encodingTime, imgSize, transferTime);
-// // #endif
+
+            printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
+                                captureTime, encodingTime, imgSize, transferTime);
+
         }
         else
         {
