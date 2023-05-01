@@ -115,67 +115,64 @@ void rx_task(void *parameters)
   }
 }
 
-// static void capture_done_cb(void *arg)
-// {
-//   xEventGroupSetBits(evGroup, CAPTURE_DONE_BIT);
-// }
+static void capture_done_cb(void *arg)
+{
+  xEventGroupSetBits(evGroup, CAPTURE_DONE_BIT);
+}
 
-// typedef struct
-// {
-//   uint8_t magic;
-//   uint16_t width;
-//   uint16_t height;
-//   uint8_t depth;
-//   uint8_t type;
-//   uint32_t size;
-// } __attribute__((packed)) img_header_t;
+typedef struct
+{
+  uint8_t magic;
+  uint16_t width;
+  uint16_t height;
+  uint8_t depth;
+  uint8_t type;
+  uint32_t size;
+} __attribute__((packed)) img_header_t;
 
-// static jpeg_encoder_t jpeg_encoder;
 
-// typedef enum
-// {
-//   RAW_ENCODING = 0,
-//   JPEG_ENCODING = 1
-// } __attribute__((packed)) StreamerMode_t;
+typedef enum
+{
+  RAW_ENCODING = 0,
+  JPEG_ENCODING = 1
+} __attribute__((packed)) StreamerMode_t;
 
-// pi_buffer_t header;
-// uint32_t headerSize;
-// pi_buffer_t footer;
-// uint32_t footerSize;
-// pi_buffer_t jpeg_data;
-// uint32_t jpegSize;
+pi_buffer_t header;
+uint32_t headerSize;
+pi_buffer_t footer;
+uint32_t footerSize;
 
-// static StreamerMode_t streamerMode = RAW_ENCODING;
+static StreamerMode_t streamerMode = RAW_ENCODING;
 
 
 
 
-// void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize, StreamerMode_t imgType) {
-//   img_header_t *imgHeader = (img_header_t *) packet->data;
-//   imgHeader->magic = 0xBC;
-//   imgHeader->width = CAM_WIDTH;
-//   imgHeader->height = CAM_HEIGHT;
-//   imgHeader->depth = 1;
-//   imgHeader->type = imgType;
-//   imgHeader->size = imgSize;
-//   packet->dataLength = sizeof(img_header_t);
-// }
+void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize, StreamerMode_t imgType) {
+  img_header_t *imgHeader = (img_header_t *) packet->data;
+  imgHeader->magic = 0xBC;
+  imgHeader->width = CAM_WIDTH;
+  imgHeader->height = CAM_HEIGHT;
+  imgHeader->depth = 1;
+  imgHeader->type = imgType;
+  imgHeader->size = imgSize;
+  packet->dataLength = sizeof(img_header_t);
+}
 
-// void sendBufferViaCPX(CPXPacket_t * packet, uint8_t * buffer, uint32_t bufferSize) {
-//   uint32_t offset = 0;
-//   uint32_t size = 0;
-//   do {
-//     size = sizeof(packet->data);
-//     if (offset + size > bufferSize)
-//     {
-//       size = bufferSize - offset;
-//     }
-//     memcpy(packet->data, &buffer[offset], sizeof(packet->data));
-//     packet->dataLength = size;
-//     cpxSendPacketBlocking(packet);
-//     offset += size;
-//   } while (size == sizeof(packet->data));
-// }
+void sendBufferViaCPX(CPXPacket_t * packet, uint8_t * buffer, uint32_t bufferSize) {
+  uint32_t offset = 0;
+  uint32_t size = 0;
+  do {
+    size = sizeof(packet->data);
+    if (offset + size > bufferSize)
+    {
+      size = bufferSize - offset;
+    }
+    memcpy(packet->data, &buffer[offset], sizeof(packet->data));
+    packet->dataLength = size;
+    cpxSendPacketBlocking(packet);
+    offset += size;
+  } while (size == sizeof(packet->data));
+}
 
 void setupWiFi(void) {
     static char ssid[] = "WiFi streaming example";
@@ -203,22 +200,16 @@ void camera_task(void *parameters)
 
     setupWiFi();
 
-    while (1)
+
+    printf("Starting camera task...\n");
+    uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
+    uint32_t captureSize = resolution * sizeof(unsigned char);
+    imgBuff = (unsigned char *)pmsis_l2_malloc(captureSize);
+    if (imgBuff == NULL)
     {
-        pi_yield();
+        printf("Failed to allocate Memory for Image \n");
+        return;
     }
-    
-
-
-//   printf("Starting camera task...\n");
-//   uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
-//   uint32_t captureSize = resolution * sizeof(unsigned char);
-//   imgBuff = (unsigned char *)pmsis_l2_malloc(captureSize);
-//   if (imgBuff == NULL)
-//   {
-//     printf("Failed to allocate Memory for Image \n");
-//     return;
-//   }
 
 //   if (open_pi_camera_himax(&camera))
 //   {
@@ -226,50 +217,27 @@ void camera_task(void *parameters)
 //     return;
 //   }
 
-//   struct jpeg_encoder_conf enc_conf;
-//   jpeg_encoder_conf_init(&enc_conf);
-//   enc_conf.width = CAM_WIDTH;
-//   enc_conf.height = CAM_HEIGHT;
-//   enc_conf.flags = 0; // Move this to the cluster
 
-//   if (jpeg_encoder_open(&jpeg_encoder, &enc_conf))
-//   {
-//     printf("Failed initialize JPEG encoder\n");
-//     return;
-//   }
+    pi_buffer_init(&buffer, PI_BUFFER_TYPE_L2, imgBuff);
+    pi_buffer_set_format(&buffer, CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
 
-//   pi_buffer_init(&buffer, PI_BUFFER_TYPE_L2, imgBuff);
-//   pi_buffer_set_format(&buffer, CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
+    header.size = 1024;
+    header.data = pmsis_l2_malloc(1024);
 
-//   header.size = 1024;
-//   header.data = pmsis_l2_malloc(1024);
-
-//   footer.size = 10;
-//   footer.data = pmsis_l2_malloc(10);
-
-//   // This must fit the full encoded JPEG
-//   jpeg_data.size = 1024 * 15;
-//   jpeg_data.data = pmsis_l2_malloc(1024 * 15);
-
-//   if (header.data == 0 || footer.data == 0 || jpeg_data.data == 0) {
-//     printf("Could not allocate memory for JPEG image\n");
-//     return;
-//   }
-
-//   jpeg_encoder_header(&jpeg_encoder, &header, &headerSize);
-//   jpeg_encoder_footer(&jpeg_encoder, &footer, &footerSize);
+    footer.size = 10;
+    footer.data = pmsis_l2_malloc(10);
 
 //   pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
 //   // We're reusing the same packet, so initialize the route once
-//   cpxInitRoute(CPX_T_GAP8, CPX_T_WIFI_HOST, CPX_F_APP, &txp.route);
+    cpxInitRoute(CPX_T_GAP8, CPX_T_WIFI_HOST, CPX_F_APP, &txp.route);
 
-//   uint32_t imgSize = 0;
+    uint32_t imgSize = 0;
 
-//   while (1)
-//   {
-//     if (wifiClientConnected == 1)
-//     {
+    while (1)
+    {
+        if (wifiClientConnected == 1)
+        {
 //       start = xTaskGetTickCount();
 //       pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
 //       pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
@@ -277,62 +245,31 @@ void camera_task(void *parameters)
 //       pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 //       captureTime = xTaskGetTickCount() - start;
 
-//       if (streamerMode == JPEG_ENCODING)
-//       {
-//         //jpeg_encoder_process_async(&jpeg_encoder, &buffer, &jpeg_data, pi_task_callback(&task1, encoding_done_cb, NULL));
-//         //xEventGroupWaitBits(evGroup, JPEG_ENCODING_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-//         //jpeg_encoder_process_status(&jpegSize, NULL);
-//         start = xTaskGetTickCount();
-//         jpeg_encoder_process(&jpeg_encoder, &buffer, &jpeg_data, &jpegSize);
-//         encodingTime = xTaskGetTickCount() - start;
 
-//         imgSize = headerSize + jpegSize + footerSize;
 
-//         // First send information about the image
-//         createImageHeaderPacket(&txp, imgSize, JPEG_ENCODING);
-//         cpxSendPacketBlocking(&txp);
+            imgSize = captureSize;
+            start = xTaskGetTickCount();
 
-//         start = xTaskGetTickCount();
-//         // First send header
-//         memcpy(txp.data, header.data, headerSize);
-//         txp.dataLength = headerSize;
-//         cpxSendPacketBlocking(&txp);
-        
-//         // Send image data
-//         sendBufferViaCPX(&txp, (uint8_t*) jpeg_data.data, jpegSize);
+            // First send information about the image
+            createImageHeaderPacket(&txp, imgSize, RAW_ENCODING);
+            cpxSendPacketBlocking(&txp);
 
-//         // Send footer
-//         memcpy(txp.data, footer.data, footerSize);
-//         txp.dataLength = footerSize;
-//         cpxSendPacketBlocking(&txp);
+            start = xTaskGetTickCount();
+            // Send image
+            sendBufferViaCPX(&txp, imgBuff, imgSize);
 
-//         transferTime = xTaskGetTickCount() - start;
-//       }
-//       else
-//       {
-//         imgSize = captureSize;
-//         start = xTaskGetTickCount();
+            transferTime = xTaskGetTickCount() - start;
 
-//         // First send information about the image
-//         createImageHeaderPacket(&txp, imgSize, RAW_ENCODING);
-//         cpxSendPacketBlocking(&txp);
-
-//         start = xTaskGetTickCount();
-//         // Send image
-//         sendBufferViaCPX(&txp, imgBuff, imgSize);
-
-//         transferTime = xTaskGetTickCount() - start;
-//       }
 // // #ifdef OUTPUT_PROFILING_DATA
 //       printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
 //                         captureTime, encodingTime, imgSize, transferTime);
 // // #endif
-//     }
-//     else
-//     {
-//       vTaskDelay(10);
-//     }
-//   }
+        }
+        else
+        {
+            vTaskDelay(10);
+        }
+    }
 }
 
 #define LED_PIN 2
