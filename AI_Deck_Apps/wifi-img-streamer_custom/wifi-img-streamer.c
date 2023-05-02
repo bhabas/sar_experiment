@@ -34,6 +34,7 @@
 #include "cpx.h"
 #include "wifi.h"
 
+#define MS_2_US 1000
 #define IMG_ORIENTATION 0x0101
 #define CAM_WIDTH 162
 #define CAM_HEIGHT 122
@@ -264,7 +265,15 @@ void camera_task(void *parameters)
     //     printf("\n\n");
     // }
     
-    
+    pi_perf_conf(1 << PI_PERF_CYCLES | 1 << PI_PERF_ACTIVE_CYCLES);
+    pi_perf_start();
+    printf("Entering main controller\n");
+    uint32_t errors = 0;
+    uint32_t core_id = pi_core_id(), cluster_id = pi_cluster_id();
+    printf("[%d %d] Hello World!\n", cluster_id, core_id);
+    uint32_t fc_perf = pi_perf_read(PI_PERF_CYCLES);
+    printf("[%d %d] Perf : %d cycles\n", cluster_id, core_id, fc_perf);
+   
 
     while (1)
     {
@@ -275,8 +284,10 @@ void camera_task(void *parameters)
             pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
             pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
             xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+
             pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
             captureTime = xTaskGetTickCount() - start;
+
 
             imgSize = captureSize;
             start = xTaskGetTickCount();
@@ -292,7 +303,7 @@ void camera_task(void *parameters)
             transferTime = xTaskGetTickCount() - start;
 
 
-            printf("capture=%dms, encoding=%d ms (%d bytes), transfer=%d ms\n",
+            printf("capture=%d cycles, encoding=%d ms (%d bytes), transfer=%d ms\n",
                                 captureTime, encodingTime, imgSize, transferTime);
 
         }
@@ -326,13 +337,18 @@ void hb_task(void *parameters)
 
 void start_example(void)
 {
+    
+
     printf("Testing2\n");
     struct pi_uart_conf conf;
     struct pi_device device;
     pi_uart_conf_init(&conf);
     conf.baudrate_bps = 115200;
 
-    printf("-- LED_  --\n");
+
+    
+
+
 
 
     pi_open_from_conf(&device, &conf);
@@ -359,23 +375,23 @@ void start_example(void)
         pmsis_exit(-1);
     }
 
-  xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
-                      NULL, tskIDLE_PRIORITY + 1, NULL);
+    xTask = xTaskCreate(camera_task, "camera_task", configMINIMAL_STACK_SIZE * 4,
+                        NULL, tskIDLE_PRIORITY + 1, NULL);
 
-  if (xTask != pdPASS)
-  {
-        printf("Camera task did not start !\n");
+    if (xTask != pdPASS)
+    {
+            printf("Camera task did not start !\n");
+            pmsis_exit(-1);
+    }
+
+    xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
+                        NULL, tskIDLE_PRIORITY + 1, NULL);
+
+    if (xTask != pdPASS)
+    {
+        printf("RX task did not start !\n");
         pmsis_exit(-1);
-  }
-
-  xTask = xTaskCreate(rx_task, "rx_task", configMINIMAL_STACK_SIZE * 2,
-                      NULL, tskIDLE_PRIORITY + 1, NULL);
-
-  if (xTask != pdPASS)
-  {
-    printf("RX task did not start !\n");
-    pmsis_exit(-1);
-  }
+    }
 
     while (1)
     {
