@@ -1,5 +1,9 @@
 # User Test
 #------------------------------------
+PMSIS_OS = freertos
+platform = board
+
+
 APP              = wifi-img-streamer
 # App sources
 APP_SRCS         += wifi-img-streamer.c lib/cpx/src/com.c lib/cpx/src/cpx.c

@@ -76,13 +76,14 @@ static int open_pi_camera_himax(struct pi_device *device)
     uint8_t set_value = 3;
     uint8_t reg_value;
     pi_camera_reg_set(device, IMG_ORIENTATION, &set_value);
-    pi_time_wait_us(1000000);
-    pi_camera_reg_get(device, IMG_ORIENTATION, &reg_value);
-    if (set_value != reg_value)
-    {
-        printf("Failed to rotate camera image\n");
-        return -1;
-    }
+    // pi_time_wait_us(1000000);
+    vTaskDelay(500);
+    // // pi_camera_reg_get(device, IMG_ORIENTATION, &reg_value);
+    // // if (set_value != reg_value)
+    // // {
+    // //     printf("Failed to rotate camera image\n");
+    // //     return -1;
+    // // }
     pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
     // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
 
@@ -232,86 +233,72 @@ void camera_task(void *parameters)
 
     uint32_t imgSize = 0;
 
-    for (uint32_t i = 0; i < resolution; i++)
-    {
-        imgBuff[i] = 0;
-    }
-
     printf("Image: \n");
-    for (uint32_t i = 50; i < 100; i++)
-    {
-        printf("%d ",imgBuff[i]);
-    }
 
-    // while (1)
-    // {
-    //     pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-    //     printf("1\n");
-
-    //     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-    //     printf("2\n");
-
-    //     xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-    //     printf("3\n");
-
-    //     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-    //     printf("4\n");
-
-    //     printf("Image: \n");
-    //     for (uint32_t i = 76500; i < 76600; i++)
-    //     {
-    //         printf("%d ",imgBuff[i]);
-    //     }
-    //     printf("\n\n");
-    // }
-    
     pi_perf_conf(1 << PI_PERF_CYCLES | 1 << PI_PERF_ACTIVE_CYCLES);
-    pi_perf_start();
-    printf("Entering main controller\n");
-    uint32_t errors = 0;
-    uint32_t core_id = pi_core_id(), cluster_id = pi_cluster_id();
-    printf("[%d %d] Hello World!\n", cluster_id, core_id);
-    uint32_t fc_perf = pi_perf_read(PI_PERF_CYCLES);
-    printf("[%d %d] Perf : %d cycles\n", cluster_id, core_id, fc_perf);
-   
 
     while (1)
     {
+        pi_perf_start();
+        start = pi_perf_read(PI_PERF_CYCLES);
+        pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+        pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+        xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
 
-        if (wifiClientConnected == 1)
-        {
-            start = xTaskGetTickCount();
-            pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
-            pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-            xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
-
-            pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-            captureTime = xTaskGetTickCount() - start;
-
-
-            imgSize = captureSize;
-            start = xTaskGetTickCount();
-
-            // First send information about the image
-            createImageHeaderPacket(&txp, imgSize);
-            cpxSendPacketBlocking(&txp);
-
-            start = xTaskGetTickCount();
-            // Send image
-            sendBufferViaCPX(&txp, imgBuff, imgSize);
-
-            transferTime = xTaskGetTickCount() - start;
+        pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+        pi_perf_stop();
+        pi_perf_reset();
 
 
-            printf("capture=%d cycles, encoding=%d ms (%d bytes), transfer=%d ms\n",
-                                captureTime, encodingTime, imgSize, transferTime);
+        printf("capture=%d cycles\n",captureTime);
 
-        }
-        else
-        {
-            vTaskDelay(10);
-        }
+ 
+        printf("\n\n");
     }
+    
+
+
+    // while (1)
+    // {
+
+    //     if (wifiClientConnected == 1)
+    //     {
+    //         pi_perf_start();
+    //         start = pi_perf_read(PI_PERF_CYCLES);
+    //         pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
+    //         pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+    //         xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+
+    //         pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+    //         captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
+
+
+    //         imgSize = captureSize;
+    //         start = pi_perf_read(PI_PERF_CYCLES);
+
+    //         // First send information about the image
+    //         createImageHeaderPacket(&txp, imgSize);
+    //         cpxSendPacketBlocking(&txp);
+
+    //         start = pi_perf_read(PI_PERF_CYCLES);
+    //         // Send image
+    //         sendBufferViaCPX(&txp, imgBuff, imgSize);
+
+    //         transferTime = pi_perf_read(PI_PERF_CYCLES) - start;
+    //         pi_perf_stop();
+    //         pi_perf_reset();
+
+
+    //         printf("capture=%d cycles, encoding=%d ms (%d bytes), transfer=%d ms\n",
+    //                             captureTime, encodingTime, imgSize, transferTime);
+
+    //     }
+    //     else
+    //     {
+    //         vTaskDelay(10);
+    //     }
+    // }
 }
 
 #define LED_PIN 2
