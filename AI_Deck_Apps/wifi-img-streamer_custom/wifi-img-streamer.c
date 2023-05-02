@@ -35,8 +35,8 @@
 #include "wifi.h"
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 324
-#define CAM_HEIGHT 244
+#define CAM_WIDTH 162
+#define CAM_HEIGHT 122
 
 static pi_task_t task1;
 static unsigned char *imgBuff;
@@ -63,6 +63,8 @@ static int open_pi_camera_himax(struct pi_device *device)
     pi_himax_conf_init(&cam_conf);
 
     cam_conf.format = PI_CAMERA_QQVGA;
+    cam_conf.skip_pads_config = 0;
+
 
     pi_open_from_conf(device, &cam_conf);
     if (pi_camera_open(device))
@@ -81,7 +83,7 @@ static int open_pi_camera_himax(struct pi_device *device)
         return -1;
     }
     pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
-    pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
+    // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
 
     return 0;
 }
@@ -235,7 +237,7 @@ void camera_task(void *parameters)
     }
 
     printf("Image: \n");
-    for (uint32_t i = 76500; i < 76600; i++)
+    for (uint32_t i = 50; i < 100; i++)
     {
         printf("%d ",imgBuff[i]);
     }
