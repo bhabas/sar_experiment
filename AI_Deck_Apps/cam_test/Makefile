@@ -1,5 +1,9 @@
 # User Test
 #------------------------------------
+PMSIS_OS = freertos
+platform = board
+
+
 APP              = test
 # App sources
 APP_SRCS         = cam_test.c

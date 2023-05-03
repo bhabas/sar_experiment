@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdint.h>
+
+
 /* PMSIS includes */
 #include "pmsis.h"
 
@@ -5,109 +9,102 @@
 #include "bsp/camera.h"
 #include "bsp/camera/himax.h"
 #include "bsp/buffer.h"
-#include "stdio.h"
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 324
-#define CAM_HEIGHT 244
+#define CAM_WIDTH 162
+#define CAM_HEIGHT 122
 
 static unsigned char *imgBuff;
 static struct pi_device camera;
 static pi_buffer_t buffer;
 
+// Performance menasuring variables
+static uint32_t start = 0;
+static uint32_t captureTime = 0;
+
 static int open_pi_camera_himax(struct pi_device *device)
 {
-    
-
-    printf("Opening Himax camera\n");
     struct pi_himax_conf cam_conf;
+
     pi_himax_conf_init(&cam_conf);
 
-    cam_conf.format = PI_CAMERA_QVGA;
+    cam_conf.format = PI_CAMERA_QQVGA;
+    cam_conf.skip_pads_config = 0;
+
 
     pi_open_from_conf(device, &cam_conf);
     if (pi_camera_open(device))
-    {
         return -1;
-    }
 
-    // ROTATE IMAGE
+    // rotate image
     pi_camera_control(device, PI_CAMERA_CMD_START, 0);
     uint8_t set_value = 3;
     uint8_t reg_value;
     pi_camera_reg_set(device, IMG_ORIENTATION, &set_value);
-    pi_time_wait_us(1000000);
-    pi_camera_reg_get(device, IMG_ORIENTATION, &reg_value);
-
-    if (set_value != reg_value)
-    {
-        printf( "Failed to rotate camera image\n");
-        return -1;
-    }
-
+    vTaskDelay(500);
     pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
-
-    // TURN ON/OFF AUTO EXPOSURE GAIN (NOT SURE IF ON?)
-    pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
-    printf("Camera opened successfully\n");
-
+    // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
 
     return 0;
 }
 
-void test_camera(void)
-{
-    printf("\n\n\t *** PMSIS Camera Example Test ***\n\n");
 
-    // SET UP IMAGE BUFFER AND CAMERA CAPTURE SETTINGS
-    uint32_t resolution = CAM_WIDTH*CAM_HEIGHT;
-    uint32_t captureSize = resolution*sizeof(unsigned char);
+void start_example(void)
+{
+    printf("-- Starting Camera Test --\n");
+    pi_perf_conf(1 << PI_PERF_CYCLES);
+
+    if (open_pi_camera_himax(&camera))
+    {
+        printf("Failed to open camera\n");
+        return;
+    }
+
+    uint32_t imgSize = 0;
+    uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
+    uint32_t captureSize = resolution * sizeof(unsigned char);
+
     imgBuff = (unsigned char *)pmsis_l2_malloc(captureSize);
     if (imgBuff == NULL)
     {
-        printf( "Failed to allocate Memory for Image \n");
+        printf("Failed to allocate Memory for Image \n");
         return;
     }
 
-    // CONFIGURE CAMERA
-    if (open_pi_camera_himax(&camera))
-    {
-        printf( "Failed to open camera\n");
-        return;
-    }
-    
     pi_buffer_init(&buffer, PI_BUFFER_TYPE_L2, imgBuff);
     pi_buffer_set_format(&buffer, CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
-
-    // CAPTURE CAMERA IMAGE
-    pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-    pi_camera_capture(&camera, imgBuff, resolution);
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
-
-
-    //  // Start the camera
-    // pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-    // pi_camera_capture(&camera, buff, BUFF_SIZE);
-
-    // // Stop the camera and immediately close it
-    // pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-    // pi_camera_close(&camera);
-
-    printf("Print Image:\n\n");
-
-    for (size_t i = 324*50; i < 324*52; i++)
+    uint8_t i = 0;
+    while (i < 5)
     {
-        printf("%d ",imgBuff[i]);
+        // pi_perf_start();
+        // start = pi_perf_read(PI_PERF_CYCLES);
+        uint32_t time_before = pi_time_get_us();
+        pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+        pi_camera_capture(&camera,imgBuff,resolution);
+        // captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
+        pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+
+        // pi_time_wait_us(500);
+        // pi_perf_stop();
+        // pi_perf_reset();
+        // printf("\n");
+        vTaskDelay(5);
+        i++;
     }
-    printf("\n\nPrint Image:\n");
+    printf("dsfsdf\n\n");
+    
+    
 
     
 
 
-    // printf("Test success !\n");
+    
+
 
     pmsis_exit(0);
+
 }
 
 /* Program Entry. */
@@ -115,11 +112,10 @@ int main(void)
 {
     pi_bsp_init();
 
-
     // Increase the FC freq to 250 MHz
     pi_freq_set(PI_FREQ_DOMAIN_FC, 250000000);
-    __pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200);
+    pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200);
 
-    return pmsis_kickoff((void *) test_camera);
+    return pmsis_kickoff((void *)start_example);
 }
 
