@@ -13,6 +13,8 @@
 #define IMG_ORIENTATION 0x0101
 #define CAM_WIDTH 162
 #define CAM_HEIGHT 122
+#define CLOCK_FREQ 250000000
+#define IMAGE_NUM 15
 
 static pi_task_t task1;
 static unsigned char *imgBuff;
@@ -20,13 +22,15 @@ static struct pi_device camera;
 static pi_buffer_t buffer;
 
 // Performance menasuring variables
-static uint32_t start = 0;
+static uint32_t start_full = 0;
+static uint32_t start_img = 0;
 static uint32_t captureTime = 0;
-uint32_t capture_arr[5] = {0};
+uint32_t capture_arr[IMAGE_NUM] = {0};
 uint32_t image = 0;
 
 static EventGroupHandle_t evGroup;
 #define CAPTURE_DONE_BIT (1 << 0)
+static volatile uint8_t done;
 
 static int open_pi_camera_himax(struct pi_device *device)
 {
@@ -54,10 +58,10 @@ static int open_pi_camera_himax(struct pi_device *device)
     return 0;
 }
 
-
 static void capture_done_cb(void *arg)
 {
-  xEventGroupSetBits(evGroup, CAPTURE_DONE_BIT);
+//   xEventGroupSetBits(evGroup, CAPTURE_DONE_BIT);
+  done = 1;
 }
 
 
@@ -91,39 +95,41 @@ void start_example(void)
 
     
 
-
+    done = 0;
     printf("Camera Start...\n");
     pi_perf_start();
-    start = pi_perf_read(PI_PERF_CYCLES);
-    while (image < 5)
+    start_full = pi_perf_read(PI_PERF_CYCLES);
+    while (image < IMAGE_NUM)
     {
-        
-        
+        start_img = pi_perf_read(PI_PERF_CYCLES);
         pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
         pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-        // pi_camera_capture(&camera,imgBuff,resolution);
-        // captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
-        // capture_arr[image] = captureTime;
-        xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        while(!done){pi_yield();}
+        // xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
+        capture_arr[image] = pi_perf_read(PI_PERF_CYCLES) - start_img;
+        done = 0;
         pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
-        vTaskDelay(4);
+        vTaskDelay(5);
         
         image++;
 
     }
     pi_perf_stop();
     printf("Camera End...\n");
-    captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
-    printf("Capture_Time %d\n",captureTime);
     
 
-
-    for (uint8_t i = 0; i < 5; i++)
+    for (uint8_t i = 0; i < IMAGE_NUM; i++)
     {
         printf("Image %d = %d cycles\n",i,capture_arr[i]);
 
     }
+
+    captureTime = pi_perf_read(PI_PERF_CYCLES) - start_full;
+    printf("Capture_Time %d\n",captureTime);
+
+    float FPS = ((float)CLOCK_FREQ/(float)captureTime)*IMAGE_NUM;
+    printf("FPS: %.3f\n",FPS);
    
 
     pmsis_exit(0);
@@ -136,7 +142,7 @@ int main(void)
     pi_bsp_init();
 
     // Increase the FC freq to 250 MHz
-    pi_freq_set(PI_FREQ_DOMAIN_FC, 250000000);
+    pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);
     pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200);
 
     return pmsis_kickoff((void *)start_example);
