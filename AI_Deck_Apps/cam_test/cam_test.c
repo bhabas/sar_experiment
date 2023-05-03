@@ -28,8 +28,6 @@ static uint32_t captureTime = 0;
 uint32_t capture_arr[IMAGE_NUM] = {0};
 uint32_t image = 0;
 
-static EventGroupHandle_t evGroup;
-#define CAPTURE_DONE_BIT (1 << 0)
 static volatile uint8_t done;
 
 static int open_pi_camera_himax(struct pi_device *device)
@@ -73,7 +71,6 @@ void start_example(void)
     uint32_t imgSize = 0;
     uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
     uint32_t captureSize = resolution * sizeof(unsigned char);
-    evGroup = xEventGroupCreate();
 
     imgBuff = (unsigned char *)pmsis_l2_malloc(captureSize);
     if (imgBuff == NULL)
@@ -105,7 +102,6 @@ void start_example(void)
         pi_camera_capture_async(&camera, imgBuff, resolution, pi_task_callback(&task1, capture_done_cb, NULL));
         pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
         while(!done){pi_yield();}
-        // xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
         capture_arr[image] = pi_perf_read(PI_PERF_CYCLES) - start_img;
         done = 0;
         pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
