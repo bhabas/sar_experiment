@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 
@@ -18,15 +19,15 @@
 // CAMERA BUFFERS AND TASKS
 static struct pi_device camera;
 
-static unsigned char *imgBuff1;
-static volatile uint8_t done1 = 0;
-static pi_buffer_t buffer1;
-static pi_task_t task1;
+unsigned char *imgBuff1;
+volatile uint8_t done1 = 0;
+pi_buffer_t buffer1;
+pi_task_t task1;
 
-static unsigned char *imgBuff2;
-static volatile uint8_t done2 = 0;
-static pi_buffer_t buffer2;
-static pi_task_t task2;
+unsigned char *imgBuff2;
+volatile uint8_t done2 = 0;
+pi_buffer_t buffer2;
+pi_task_t task2;
 
 volatile uint8_t img_num_sync = 0;
 volatile uint8_t img_num_async = 0;
@@ -71,11 +72,13 @@ static int open_pi_camera_himax(struct pi_device *device)
 static void capture_done_cb1(void *arg)
 {
     done1++;
+    img_num_async++;
 }
 
 static void capture_done_cb2(void *arg)
 {
     done2++;
+    img_num_async++;
 
 }
 
@@ -148,14 +151,26 @@ void cam_example(void)
     while (pi_perf_read(PI_PERF_CYCLES) < CLOCK_FREQ)
     {
         done1 = 0;
-        pi_camera_capture_async(&camera, imgBuff1, resolution, pi_task_callback(&task1, capture_done_cb1, NULL));
+        done2 = 0;
 
-        while (done1 == 0)
+        pi_camera_capture_async(&camera, imgBuff1, resolution, pi_task_callback(&task1, capture_done_cb1, NULL));
+        // pi_camera_capture_async(&camera, imgBuff2, resolution, pi_task_callback(&task2, capture_done_cb2, NULL));
+
+
+        while (true)
         {
-            pi_yield();
+            if (done1 >= 1 || done2 >= 1)
+            {
+                break;
+            }
+            else
+            {
+                pi_yield();
+            }
+ 
         }
         
-        img_num_async++;
+        
     }
     pi_perf_stop();
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
