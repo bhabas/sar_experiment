@@ -22,7 +22,7 @@ static uint32_t transferTime = 0;
 static uint32_t encodingTime = 0;
 
 uint32_t capture_arr[5] = {0};
-uint32_t image = 0;
+uint32_t capture_count = 0;
 
 
 static int open_pi_camera_himax(struct pi_device *device)
@@ -101,7 +101,7 @@ void camera_task(void *parameters)
     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
     pi_camera_capture(&camera,imgBuff,resolution);
     captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
-    capture_arr[image] = captureTime;
+    capture_arr[capture_count] = captureTime;
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
     pi_perf_stop();
@@ -110,9 +110,9 @@ void camera_task(void *parameters)
     printf("dsfsdf\n\n");
 
 
-    image = 0;
+    capture_count = 0;
 
-    while (image < 5)
+    while (capture_count < 5)
     {
         pi_perf_start();
         start = pi_perf_read(PI_PERF_CYCLES);
@@ -120,14 +120,14 @@ void camera_task(void *parameters)
         pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
         pi_camera_capture(&camera,imgBuff,resolution);
         captureTime = pi_perf_read(PI_PERF_CYCLES) - start;
-        capture_arr[image] = captureTime;
+        capture_arr[capture_count] = captureTime;
         pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
         // xEventGroupWaitBits(evGroup, CAPTURE_DONE_BIT, pdTRUE, pdFALSE, (TickType_t)portMAX_DELAY);
 
         vTaskDelay(5);
         pi_perf_stop();
         pi_perf_reset();
-        image++;
+        capture_count++;
 
     }
 
