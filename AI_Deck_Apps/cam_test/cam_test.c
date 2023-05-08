@@ -14,36 +14,32 @@
 #define CAM_WIDTH 162
 #define CAM_HEIGHT 122
 #define CLOCK_FREQ 250000000
-#define CAPTURE_NUM 2
+
+#define NUM_BUFFERS 2
+#define RESOLUTION CAM_WIDTH*CAM_HEIGHT
+#define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
+
 
 // CAMERA BUFFERS AND TASKS
 static struct pi_device camera;
 
-unsigned char *imgBuff1;
+uint8_t *imgBuff1;
 volatile uint8_t done1 = 0;
 pi_buffer_t buffer1;
-pi_task_t task1;
 
-unsigned char *imgBuff2;
+
+uint8_t *imgBuff2;
 volatile uint8_t done2 = 0;
 pi_buffer_t buffer2;
 pi_task_t task2;
 
+
+// PERFORMANCE MEASURING VARIABLES
 volatile uint8_t img_num_sync = 0;
 volatile uint8_t img_num_async = 0;
 
 volatile uint32_t clock_cycles_sync = 0;
 volatile uint32_t clock_cycles_async = 0;
-
-
-
-// PERFORMANCE MEASURING VARIABLES
-
-
-
-uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
-uint32_t captureSize = CAM_WIDTH * CAM_HEIGHT * sizeof(unsigned char);
-
 
 
 static int open_pi_camera_himax(struct pi_device *device)
@@ -99,7 +95,7 @@ void cam_example(void)
 
 
     // INITIALIZE BUFFER 1
-    imgBuff1 = (unsigned char *)pmsis_l2_malloc(captureSize);
+    imgBuff1 = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
     if (imgBuff1 == NULL)
     {
         printf("Failed to allocate memory_1 for image \n");
@@ -109,7 +105,7 @@ void cam_example(void)
     pi_buffer_set_format(&buffer1, CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
 
     // INITIALIZE BUFFER 2
-    imgBuff2 = (unsigned char *)pmsis_l2_malloc(captureSize);
+    imgBuff2 = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
     if (imgBuff2 == NULL)
     {
         printf("Failed to allocate memory_2 for image \n");
@@ -130,7 +126,7 @@ void cam_example(void)
     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
     while (pi_perf_read(PI_PERF_CYCLES) < CLOCK_FREQ)
     {
-        pi_camera_capture(&camera, imgBuff1, resolution);
+        pi_camera_capture(&camera, imgBuff1, RESOLUTION);
         img_num_sync++;
     }
     pi_perf_stop();
@@ -153,8 +149,8 @@ void cam_example(void)
         done1 = 0;
         done2 = 0;
 
-        pi_camera_capture_async(&camera, imgBuff1, resolution, pi_task_callback(&task1, capture_done_cb1, NULL));
-        // pi_camera_capture_async(&camera, imgBuff2, resolution, pi_task_callback(&task2, capture_done_cb2, NULL));
+        pi_task_t task1;
+        pi_camera_capture_async(&camera, imgBuff1, RESOLUTION, pi_task_callback(&task1, capture_done_cb1, NULL));
 
 
         while (true)
