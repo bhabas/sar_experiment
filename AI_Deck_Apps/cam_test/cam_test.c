@@ -15,12 +15,11 @@
 #define CAM_HEIGHT 122
 #define CLOCK_FREQ 250000000
 
-#define NUM_BUFFERS 2
+#define NUM_BUFFERS 4
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
 #define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 
-void capture_callback1(void *arg);
-void capture_callback2(void *arg);
+void capture_callback(void *arg);
 
 // CAMERA BUFFERS AND TASKS
 static struct pi_device camera;
@@ -57,26 +56,18 @@ static int open_pi_camera_himax(struct pi_device *device)
     return 0;
 }
 
-void capture_callback2(void *arg)
+void capture_callback(void *arg)
 {
+    // uint8_t value = *((uint8_t *)arg);
+
+    // printf("Value %d\n",value);
     img_num_async++;
-    buffer_index = (buffer_index + 1) % NUM_BUFFERS;
-    // printf("CB2: Buffer index %d\n",buffer_index);
+    // // buffer_index = (buffer_index + 1) % NUM_BUFFERS;
 
     pi_task_t capture_task;
-    pi_task_callback(&capture_task, capture_callback1, NULL);
-    pi_camera_capture_async(&camera, buffers, BUFFER_SIZE, &capture_task);
-}
-
-void capture_callback1(void *arg)
-{
-    img_num_async++;
-    buffer_index = (buffer_index + 1) % NUM_BUFFERS;
-    // printf("CB1: Buffer index %d\n",buffer_index);
-    
-    pi_task_t capture_task;
-    pi_task_callback(&capture_task, capture_callback2, NULL);
-    pi_camera_capture_async(&camera, buffers, BUFFER_SIZE, &capture_task);
+    pi_task_callback(&capture_task, capture_callback, NULL);
+    pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
+        
 }
 
 
@@ -107,9 +98,10 @@ void cam_example(void)
         pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
     }
 
+    uint8_t val = 5;
     pi_task_t capture_task;
-    pi_task_callback(&capture_task, capture_callback1, NULL);
-    pi_camera_capture_async(&camera, buffers, BUFFER_SIZE, &capture_task);
+    pi_task_callback(&capture_task, capture_callback, NULL);
+    pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
     printf("Allocated buffer\n");
 
     
