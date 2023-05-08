@@ -126,7 +126,7 @@ void cam_example(void)
     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
     while (pi_perf_read(PI_PERF_CYCLES) < CLOCK_FREQ)
     {
-        pi_camera_capture(&camera, imgBuff1, RESOLUTION);
+        pi_camera_capture(&camera, imgBuff1, BUFFER_SIZE);
         img_num_sync++;
     }
     pi_perf_stop();
@@ -150,7 +150,7 @@ void cam_example(void)
         done2 = 0;
 
         pi_task_t task1;
-        pi_camera_capture_async(&camera, imgBuff1, RESOLUTION, pi_task_callback(&task1, capture_done_cb1, NULL));
+        pi_camera_capture_async(&camera, imgBuff1, BUFFER_SIZE, pi_task_callback(&task1, capture_done_cb1, NULL));
 
 
         while (true)
