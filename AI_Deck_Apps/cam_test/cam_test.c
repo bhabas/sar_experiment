@@ -15,7 +15,7 @@
 #define CAM_HEIGHT 122
 #define CLOCK_FREQ 250000000
 
-#define NUM_BUFFERS 1
+#define NUM_BUFFERS 2
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
 #define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 
@@ -25,11 +25,11 @@ void capture_callback2(void *arg);
 // CAMERA BUFFERS AND TASKS
 static struct pi_device camera;
 
-uint8_t *buffers;
-pi_buffer_t pi_buffers;
-int current_buffer = 0;
+uint8_t *buffers[NUM_BUFFERS];
+pi_buffer_t pi_buffers[NUM_BUFFERS];
 
 // PERFORMANCE MEASURING VARIABLES
+volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 volatile uint32_t clock_cycles_async = 0;
 
@@ -59,10 +59,9 @@ static int open_pi_camera_himax(struct pi_device *device)
 
 void capture_callback2(void *arg)
 {
-    // int buffer_index = (int)arg;
-    // printf("HERE\n");
     img_num_async++;
-
+    buffer_index = (buffer_index + 1) % NUM_BUFFERS;
+    // printf("CB2: Buffer index %d\n",buffer_index);
 
     pi_task_t capture_task;
     pi_task_callback(&capture_task, capture_callback1, NULL);
@@ -71,16 +70,9 @@ void capture_callback2(void *arg)
 
 void capture_callback1(void *arg)
 {
-    // int buffer_index = 0;
-    // printf("buffer index %d\n",buffer_index);
     img_num_async++;
-
-    // // QUEUE THE NEXT BUFFER FOR CAPTURING
-    // current_buffer = 0;
-    // printf("here \n");    
-    // pi_task_t capture_task2;
-    // pi_task_callback(&capture_task2, capture_callback2, (void *)current_buffer);
-    // // pi_camera_capture_async(&camera, buffers[current_buffer], BUFFER_SIZE, &capture_task2);
+    buffer_index = (buffer_index + 1) % NUM_BUFFERS;
+    // printf("CB1: Buffer index %d\n",buffer_index);
     
     pi_task_t capture_task;
     pi_task_callback(&capture_task, capture_callback2, NULL);
@@ -102,22 +94,25 @@ void cam_example(void)
         return;
     }
 
-
-    // INITIALIZE BUFFERS
-    buffers = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
-    if (buffers == NULL)
+    for (int i = 0; i < NUM_BUFFERS; i++)
     {
-        printf("Failed to allocate memory for image buffer for \n");
-        return ;
+        // INITIALIZE BUFFERS
+        buffers[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
+        if (buffers[i] == NULL)
+        {
+            printf("Failed to allocate memory for image buffer for %d\n",i);
+            return;
+        }
+        pi_buffer_init(&pi_buffers[i],PI_BUFFER_TYPE_L2, buffers[i]);
+        pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
     }
-    pi_buffer_init(&pi_buffers,PI_BUFFER_TYPE_L2, buffers);
-    pi_buffer_set_format(&pi_buffers, CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
 
     pi_task_t capture_task;
     pi_task_callback(&capture_task, capture_callback1, NULL);
     pi_camera_capture_async(&camera, buffers, BUFFER_SIZE, &capture_task);
-    printf("Allocated buffer \n");
+    printf("Allocated buffer\n");
 
+    
 
 
     // ASYNC CAMERA CAPTURE
