@@ -58,11 +58,12 @@ static int open_pi_camera_himax(struct pi_device *device)
 
 void capture_callback(void *arg)
 {
-    // uint8_t value = *((uint8_t *)arg);
+    // uint32_t value = (uint32_t)(uintptr_t)arg;
 
     // printf("Value %d\n",value);
     img_num_async++;
     // // buffer_index = (buffer_index + 1) % NUM_BUFFERS;
+    // vTaskDelay(200);
 
     pi_task_t capture_task;
     pi_task_callback(&capture_task, capture_callback, NULL);
@@ -98,9 +99,9 @@ void cam_example(void)
         pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
     }
 
-    uint8_t val = 5;
+    uint32_t val = 5;
     pi_task_t capture_task;
-    pi_task_callback(&capture_task, capture_callback, NULL);
+    pi_task_callback(&capture_task, capture_callback, (void *)(uintptr_t)val);
     pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
     printf("Allocated buffer\n");
 
