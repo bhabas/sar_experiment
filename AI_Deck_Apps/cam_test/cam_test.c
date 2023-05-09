@@ -31,7 +31,9 @@ pi_buffer_t pi_buffers[NUM_BUFFERS];
 volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 volatile uint32_t clock_cycles_async = 0;
+uint32_t test_value = 20;
 
+pi_task_t capture_task;
 
 static int open_pi_camera_himax(struct pi_device *device)
 {
@@ -69,11 +71,12 @@ static int open_pi_camera_himax(struct pi_device *device)
 
 void capture_callback(void *arg)
 {
-    // pi_time_wait_us(100000);
-    img_num_async++;
 
-    pi_task_t capture_task = {0};
-    pi_task_callback(&capture_task, capture_callback, NULL);
+    img_num_async++;
+    uint32_t valu = 5;
+    test_value = ((uint32_t) arg) + 1;
+
+    pi_task_callback(&capture_task, capture_callback, (void *) valu);
     pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
         
 }
@@ -83,8 +86,6 @@ void capture_callback(void *arg)
 void Cam_Example(void)
 {
     printf("-- Starting Camera Test --\n");
-    pi_perf_conf(1 << PI_PERF_CYCLES);
-
     
     // INITIALIZE CAMERA
     if (open_pi_camera_himax(&camera))
@@ -104,14 +105,12 @@ void Cam_Example(void)
         }
         pi_buffer_init(&pi_buffers[i],PI_BUFFER_TYPE_L2, buffers[i]);
         pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
+        
     }
 
-    pi_task_t capture_task = {0};
-    pi_task_callback(&capture_task, capture_callback, NULL);
+    pi_task_callback(&capture_task, capture_callback, (void*) 0);
     pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
     printf("Allocated buffer\n");
-
-    
 
 
     // ASYNC CAMERA CAPTURE
@@ -134,7 +133,9 @@ void Cam_Example(void)
     float FPS_async = (float)img_num_async/capture_time;
     printf("Async Capture: %d images\n",img_num_async);
     printf("Async Capture: %.3f FPS\n",FPS_async);
-    printf("Val: %.6f\n",capture_time);
+    printf("Async Capture: %.6f\n",capture_time);
+    printf("Value: %d\n",test_value);
+
 
 
     pmsis_exit(0);
