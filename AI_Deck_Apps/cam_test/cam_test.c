@@ -46,26 +46,33 @@ static int open_pi_camera_himax(struct pi_device *device)
         return -1;
 
     // ROTATE CAMERA IMAGE
-    pi_camera_control(device, PI_CAMERA_CMD_START, 0);
+    pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
     uint8_t set_value = 3;
     uint8_t reg_value;
-    pi_camera_reg_set(device, IMG_ORIENTATION, &set_value);
-    vTaskDelay(500);
-    pi_camera_control(device, PI_CAMERA_CMD_STOP, 0);
+    pi_camera_reg_set(&camera, IMG_ORIENTATION, &set_value);
+    pi_time_wait_us(500000);
+    pi_camera_reg_get(&camera, IMG_ORIENTATION, &reg_value);
+
+    if (set_value != reg_value)
+    {
+        printf("Failed to rotate camera image\n");
+        return -1;
+    }
+                
+    pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
+    pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
+    pi_time_wait_us(1000000); // Give time for camera to adjust exposure
+
 
     return 0;
 }
 
 void capture_callback(void *arg)
 {
-    // uint32_t value = (uint32_t)(uintptr_t)arg;
-
-    // printf("Value %d\n",value);
+    // pi_time_wait_us(100000);
     img_num_async++;
-    // // buffer_index = (buffer_index + 1) % NUM_BUFFERS;
-    // vTaskDelay(200);
 
-    pi_task_t capture_task;
+    pi_task_t capture_task = {0};
     pi_task_callback(&capture_task, capture_callback, NULL);
     pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
         
@@ -73,7 +80,7 @@ void capture_callback(void *arg)
 
 
 
-void cam_example(void)
+void Cam_Example(void)
 {
     printf("-- Starting Camera Test --\n");
     pi_perf_conf(1 << PI_PERF_CYCLES);
@@ -99,9 +106,8 @@ void cam_example(void)
         pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
     }
 
-    uint32_t val = 5;
-    pi_task_t capture_task;
-    pi_task_callback(&capture_task, capture_callback, (void *)(uintptr_t)val);
+    pi_task_t capture_task = {0};
+    pi_task_callback(&capture_task, capture_callback, NULL);
     pi_camera_capture_async(&camera, buffers[0], BUFFER_SIZE, &capture_task);
     printf("Allocated buffer\n");
 
@@ -110,28 +116,25 @@ void cam_example(void)
 
     // ASYNC CAMERA CAPTURE
     printf("Async Camera Start...\n");
-    pi_perf_stop();
-    pi_perf_reset();
-
-    pi_perf_start();
+    uint32_t time_before = pi_time_get_us();
     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-    while (pi_perf_read(PI_PERF_CYCLES) < CLOCK_FREQ)
+
+    while (pi_time_get_us() - time_before < 1000000)
     {
 
-        // printf("cycles %d\n",pi_perf_read(PI_PERF_CYCLES));
         pi_yield();
         
     }
-    pi_perf_stop();
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
-    clock_cycles_async = pi_perf_read(PI_PERF_CYCLES);
+    uint32_t time_after = pi_time_get_us();
     printf("Async Camera End...\n\n");
 
-    float FPS_async = ((float)CLOCK_FREQ/(float)clock_cycles_async)*img_num_async;
-    printf("Async Capture: %d cycles\n",clock_cycles_async);
+    float capture_time = (float)(time_after-time_before)/1000000;
+    float FPS_async = (float)img_num_async/capture_time;
     printf("Async Capture: %d images\n",img_num_async);
     printf("Async Capture: %.3f FPS\n",FPS_async);
+    printf("Val: %.6f\n",capture_time);
 
 
     pmsis_exit(0);
@@ -147,6 +150,6 @@ int main(void)
     pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);
     __pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200); // Not sure on why set voltage?
 
-    return pmsis_kickoff((void *)cam_example);
+    return pmsis_kickoff((void *)Cam_Example);
 }
 
