@@ -23,7 +23,6 @@
 static struct pi_device camera;
 
 uint8_t *buffers[NUM_BUFFERS];
-pi_buffer_t pi_buffers[NUM_BUFFERS];
 pi_task_t capture_task[NUM_BUFFERS];
 
 // PERFORMANCE MEASURING VARIABLES
@@ -98,10 +97,10 @@ void capture_callback(void *arg)
     // printf("Task:\t%d\n",index_ptr->task_index);
     // printf("Buffer:\t%d\n",current_buffer);
 
-
-    // // PASS UPDATED STRUCT TO NEXT CALL
+    // PASS UPDATED STRUCT TO NEXT CALL
     pi_task_callback(&capture_task[index_ptr->task_index], capture_callback, arg);
     pi_camera_capture_async(&camera, buffers[next_buffer], BUFFER_SIZE, &capture_task[index_ptr->task_index]);
+
         
 }
 
@@ -127,8 +126,6 @@ void Cam_Example(void)
             printf("Failed to allocate memory for image buffer for %d\n",i);
             return;
         }
-        pi_buffer_init(&pi_buffers[i],PI_BUFFER_TYPE_L2, buffers[i]);
-        pi_buffer_set_format(&pi_buffers[i], CAM_WIDTH, CAM_HEIGHT, 1, PI_BUFFER_FORMAT_GRAY);
         test_index[i].task_index = i;
         test_index[i].buffer_index = i;
 
