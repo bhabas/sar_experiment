@@ -14,7 +14,7 @@
 #define IMG_ORIENTATION 0x0101
 #define CAM_WIDTH 162
 #define CAM_HEIGHT 122
-#define CLOCK_FREQ 250000000
+#define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
@@ -73,12 +73,17 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 
 static void process_image(uint8_t* image_buffer)
 {
-    uint32_t sum = 0;
-    for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
-    {
-        sum += image_buffer[i];
-    }
-    // printf("Pixel Sum: %d\n",sum);    
+
+    // uint32_t time_before = pi_time_get_us();
+    // uint32_t sum = 0;
+    // for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
+    // {
+    //     sum += image_buffer[i];
+    // }
+    // uint32_t time_after = pi_time_get_us();
+
+    // printf("Pixel Sum: %d\n",time_after-time_before);    
+    pi_time_wait_us(9000);
 }
 
 
@@ -125,17 +130,12 @@ void test_camera_double_buffer(void)
         current_idx = next_idx;
         next_idx ^= 1;
 
-        pi_task_block(&task);
-        // pi_camera_control(&camera, PI_CAMERA_CMD_STOP,0);
-        // pi_time_wait_us(3000);
-
         // LAUNCH CAPTURE OF NEXT IMAGE
+        pi_task_block(&task);
         pi_camera_capture_async(&camera, img_buffers[next_idx],CAM_WIDTH*CAM_HEIGHT, &task);
-        // pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
 
         // PROCESS THE CURRENT IMAGE
         process_image(img_buffers[current_idx]);
-
         pi_task_wait_on(&task);
 
         img_num_async++;
@@ -145,43 +145,11 @@ void test_camera_double_buffer(void)
     float capture_time = (float)(time_after-time_before)/1000000;
     float FPS_async = (float)img_num_async/capture_time;
     printf("Async Capture: %d images\n",img_num_async);
-    printf("Async Capture: %.3f FPS\n",FPS_async);
-    printf("Async Capture: %.6f\n",capture_time);
+    printf("Async Capture: %.6f FPS\n",FPS_async);
+    printf("Async Capture: %.6f ms\n",1/FPS_async);
+    printf("Async Capture: %.6f s\n",capture_time);
     printf("Exiting... \n");
 
-    // for (uint32_t i = 0; i < NUM_BUFFERS; i++)
-    // {
-    //     // uint32_t i = 1;
-    //     pi_task_callback(&capture_task[i], capture_callback, (void*) &test_index[i]);
-    //     pi_camera_capture_async(&camera, img_buffers[i], BUFFER_SIZE, &capture_task[i]);
-    // }
-    
-    // printf("Allocated buffer\n");
-
-
-    // // ASYNC CAMERA CAPTURE
-    // printf("Async Camera Start...\n");
-    // uint32_t time_before = pi_time_get_us();
-    // pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
-
-    // while (pi_time_get_us() - time_before < 1000000)
-    // {
-
-    //     pi_yield();
-        
-    // }
-    // pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
-
-    // uint32_t time_after = pi_time_get_us();
-    // printf("Async Camera End...\n\n");
-
-    
-
-
-    // for (uint32_t i = 0; i < NUM_BUFFERS; i++)
-    // {
-    //     printf("Time:\t%d\n",test_index[i].time_complete);
-    // }
 
     pmsis_exit(0);
 

@@ -6,7 +6,7 @@ platform = board
 
 APP              = test
 # App sources
-APP_SRCS         = cam_test.c
+APP_SRCS         = double_buffer_test.c
 # App includes
 APP_INC	         =
 # Compiler flags
