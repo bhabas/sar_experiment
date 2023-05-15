@@ -13,7 +13,7 @@
 
 #define IMG_ORIENTATION 0x0101
 #define CAM_WIDTH 162
-#define CAM_HEIGHT 122
+#define CAM_HEIGHT 80
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -90,6 +90,11 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 
     // ROTATE CAMERA IMAGE
     pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
+
+ 
+
+
+    
     uint8_t set_value = 3;
     uint8_t reg_value;
     pi_camera_reg_set(&camera, IMG_ORIENTATION, &set_value);
@@ -185,7 +190,7 @@ void test_camera_double_buffer(void)
         pi_camera_capture_async(&camera, img_buffers[next_idx],CAM_WIDTH*CAM_HEIGHT, &task);
 
         // PROCESS THE CURRENT IMAGE
-        // process_image(img_buffers[current_idx]);
+        process_image(img_buffers[current_idx]);
         // pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
         pi_task_wait_on(&task);
         img_num_async++;
@@ -197,7 +202,7 @@ void test_camera_double_buffer(void)
     float capture_time = (float)(time_after-time_before)/1000000;
     float FPS_async = (float)img_num_async/capture_time;
     printf("Capture FPS:        %.6f FPS\n",FPS_async);
-    printf("Capture Duration:   %.6f ms\n",1/FPS_async);
+    printf("Capture Duration:   %.3f s\n",1/FPS_async);
     printf("Capture Count:      %d images\n",img_num_async);
     printf("Capture Time:       %.6f s\n",capture_time);
     printf("Exiting... \n");
