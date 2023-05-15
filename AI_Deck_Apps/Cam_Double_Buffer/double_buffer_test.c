@@ -119,10 +119,30 @@ void test_camera_double_buffer(void)
     pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
     pi_task_wait_on(&task);
 
-    process_image(img_buffers[current_idx]);
-    
+    // static pi_task_t task0;
+    // static pi_task_t task1;
+    // static pi_task_t task2;
+    // static pi_task_t task3;
+
+    // pi_task_block(&task0);
+    // pi_task_block(&task1);
+    // pi_task_block(&task2);
+    // pi_task_block(&task3);
+
+    // pi_camera_capture_async(&camera, img_buffers[0],CAM_WIDTH*CAM_HEIGHT, &task0);
+    // pi_camera_capture_async(&camera, img_buffers[1],CAM_WIDTH*CAM_HEIGHT, &task1);
+    // pi_camera_capture_async(&camera, img_buffers[2],CAM_WIDTH*CAM_HEIGHT, &task2);
+    // pi_camera_capture_async(&camera, img_buffers[3],CAM_WIDTH*CAM_HEIGHT, &task3);
+
+
+    // uint32_t time_before = pi_time_get_us();
+    // pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
+    // pi_task_wait_on(&task3);
+
+
     // CAPTURE IMAGES
     printf("Main Loop start\n");
+
     uint32_t time_before = pi_time_get_us();
     while (pi_time_get_us() - time_before < 1000000)
     {
@@ -144,10 +164,10 @@ void test_camera_double_buffer(void)
     uint32_t time_after = pi_time_get_us();
     float capture_time = (float)(time_after-time_before)/1000000;
     float FPS_async = (float)img_num_async/capture_time;
-    printf("Async Capture: %d images\n",img_num_async);
-    printf("Async Capture: %.6f FPS\n",FPS_async);
-    printf("Async Capture: %.6f ms\n",1/FPS_async);
-    printf("Async Capture: %.6f s\n",capture_time);
+    printf("Capture FPS:        %.6f FPS\n",FPS_async);
+    printf("Capture Duration:   %.6f ms\n",1/FPS_async);
+    printf("Capture Count:      %d images\n",img_num_async);
+    printf("Capture Time:       %.6f s\n",capture_time);
     printf("Exiting... \n");
 
 
