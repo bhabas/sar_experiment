@@ -20,6 +20,11 @@
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
 #define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 
+// CLUSTER SETUP
+struct pi_device cl_dev;
+struct pi_cluster_task cl_task;
+
+
 // CAMERA BUFFERS AND TASKS
 static struct pi_device camera;
 
@@ -34,7 +39,41 @@ static volatile int next_idx = 0;
 volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 
+uint32_t value[8] = {0};
 
+/* Task executed by cluster cores. */
+void cluster_helloworld(void *arg)
+{
+    uint32_t core_id = pi_core_id(), cluster_id = pi_cluster_id();
+    value[pi_cluster_id()] = pi_cluster_id();
+    pi_cl_team_barrier();
+}
+
+/* Cluster main entry, executed by core 0. */
+void cluster_delegate(void *arg)
+{
+    // Cluster master core entry
+    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_helloworld, arg);
+    // Cluster master core exit
+
+}
+
+static int32_t open_cluster(struct pi_device *device)
+{
+    struct pi_cluster_conf cl_conf;
+
+    // CLUSTER CONFIG
+    pi_cluster_conf_init(&cl_conf);
+    cl_conf.id = 0;
+    
+    // OPEN CLUSTER
+    pi_open_from_conf(&cl_dev, &cl_conf);
+    if (pi_cluster_open(device))
+        return -1;
+
+
+    return 0;
+}
 
 
 static int32_t open_pi_camera_himax(struct pi_device *device)
@@ -84,6 +123,7 @@ static void process_image(uint8_t* image_buffer)
 
     // printf("Pixel Sum: %d\n",time_after-time_before);    
     pi_time_wait_us(9000);
+    // img_num_async++;
 }
 
 
@@ -107,7 +147,14 @@ void test_camera_double_buffer(void)
     if (open_pi_camera_himax(&camera))
     {
         printf("Failed to open camera\n");
-        return;
+        pmsis_exit(-1);
+    }
+
+    // INITIALIZE CLUSTER
+    if (open_cluster(&cl_dev))
+    {
+        printf("Failed to open cluster\n");
+        pmsis_exit(-1);
     }
 
     // MAKE SURE CAMEAR IS NOT SENDING DATA
@@ -119,25 +166,8 @@ void test_camera_double_buffer(void)
     pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
     pi_task_wait_on(&task);
 
-    // static pi_task_t task0;
-    // static pi_task_t task1;
-    // static pi_task_t task2;
-    // static pi_task_t task3;
-
-    // pi_task_block(&task0);
-    // pi_task_block(&task1);
-    // pi_task_block(&task2);
-    // pi_task_block(&task3);
-
-    // pi_camera_capture_async(&camera, img_buffers[0],CAM_WIDTH*CAM_HEIGHT, &task0);
-    // pi_camera_capture_async(&camera, img_buffers[1],CAM_WIDTH*CAM_HEIGHT, &task1);
-    // pi_camera_capture_async(&camera, img_buffers[2],CAM_WIDTH*CAM_HEIGHT, &task2);
-    // pi_camera_capture_async(&camera, img_buffers[3],CAM_WIDTH*CAM_HEIGHT, &task3);
-
-
-    // uint32_t time_before = pi_time_get_us();
-    // pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
-    // pi_task_wait_on(&task3);
+    
+    pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
 
 
     // CAPTURE IMAGES
@@ -155,10 +185,12 @@ void test_camera_double_buffer(void)
         pi_camera_capture_async(&camera, img_buffers[next_idx],CAM_WIDTH*CAM_HEIGHT, &task);
 
         // PROCESS THE CURRENT IMAGE
-        process_image(img_buffers[current_idx]);
+        // process_image(img_buffers[current_idx]);
+        // pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
         pi_task_wait_on(&task);
-
         img_num_async++;
+
+        
         
     }
     uint32_t time_after = pi_time_get_us();
@@ -169,6 +201,7 @@ void test_camera_double_buffer(void)
     printf("Capture Count:      %d images\n",img_num_async);
     printf("Capture Time:       %.6f s\n",capture_time);
     printf("Exiting... \n");
+    pi_cluster_close(&cl_dev);
 
 
     pmsis_exit(0);
