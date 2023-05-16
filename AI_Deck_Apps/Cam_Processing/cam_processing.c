@@ -12,8 +12,8 @@
 
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162
-#define CAM_HEIGHT 80
+#define CAM_WIDTH 12
+#define CAM_HEIGHT 12
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -29,7 +29,7 @@ struct pi_cluster_task cl_task;
 static struct pi_device camera;
 
 static pi_task_t task;
-static uint8_t* img_buffers[NUM_BUFFERS];
+static uint8_t* ImgBuff[NUM_BUFFERS];
 
 static volatile int current_idx = 0;
 static volatile int next_idx = 0;
@@ -42,19 +42,22 @@ volatile uint8_t img_num_async = 0;
 uint32_t value[8] = {0};
 
 /* Task executed by cluster cores. */
-void cluster_helloworld(void *arg)
+void cluster_task(void *arg)
 {
-    uint32_t core_id = pi_core_id(), cluster_id = pi_cluster_id();
-    value[pi_cluster_id()] = pi_cluster_id();
+    uint32_t core_id = pi_core_id();
+    uint32_t cluster_id = pi_cluster_id();
+
+    pi_time_wait_us(cluster_id*1000000);
+    value[cluster_id] = 1;
+
     pi_cl_team_barrier();
 }
 
 /* Cluster main entry, executed by core 0. */
 void cluster_delegate(void *arg)
 {
-    // Cluster master core entry
-    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_helloworld, arg);
-    // Cluster master core exit
+
+    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_task, arg);
 
 }
 
@@ -115,22 +118,39 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     return 0;
 }
 
-static void process_image(uint8_t* image_buffer)
+static void process_image(uint8_t* img_buff_cur, uint8_t* img_buff_prev)
 {
 
-    // uint32_t time_before = pi_time_get_us();
-    // uint32_t sum = 0;
-    // for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
-    // {
-    //     sum += image_buffer[i];
-    // }
-    // uint32_t time_after = pi_time_get_us();
+    // pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
 
-    // printf("Pixel Sum: %d\n",time_after-time_before);    
-    pi_time_wait_us(9000);
-    // img_num_async++;
+    uint32_t time_before = pi_time_get_us();
+    for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
+    {
+        // img_buff_cur[i]
+    }
+    
+   
+    uint32_t time_after = pi_time_get_us();
+
+    // // printf("Pixel Sum: %d\n",time_after-time_before);   
+    // for (int i = 0; i < CAM_HEIGHT; i++) {
+    //     for (int j = 0; j < CAM_WIDTH; j++) {
+    //         img_buff_cur[i * CAM_WIDTH + j] = i;
+    //     }
+    // }
+
 }
 
+void print_image(uint8_t* ImgBuff)
+{
+    for (int i = 0; i < CAM_HEIGHT; i++) {
+        for (int j = 0; j < CAM_WIDTH; j++) {
+            printf("%3d ",ImgBuff[i*CAM_WIDTH + j]);
+        }
+        printf("\n");
+    }
+
+}
 
 void test_camera_double_buffer(void)
 {
@@ -139,8 +159,8 @@ void test_camera_double_buffer(void)
     // ALLOCATE MEMORY FOR IMAGES
     for (int i = 0; i < NUM_BUFFERS; i++)
     {
-        img_buffers[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
-        if (img_buffers[i] == NULL)
+        ImgBuff[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
+        if (ImgBuff[i] == NULL)
         {
             printf("Failed to allocate memory for image\n");
             pmsis_exit(-1);
@@ -165,48 +185,27 @@ void test_camera_double_buffer(void)
     // MAKE SURE CAMEAR IS NOT SENDING DATA
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP,0);
 
-    // CAPTURE FIRST IMAGE BEFORE LAUNCHING DOUBLE BUFFER LOOP
-    pi_task_block(&task);
-    pi_camera_capture_async(&camera, img_buffers[current_idx],CAM_WIDTH*CAM_HEIGHT, &task);
-    pi_camera_control(&camera,PI_CAMERA_CMD_START,0);
-    pi_task_wait_on(&task);
-
-    
-    pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
-
-
-    // CAPTURE IMAGES
-    printf("Main Loop start\n");
-
-    uint32_t time_before = pi_time_get_us();
-    while (pi_time_get_us() - time_before < 1000000)
-    {
-
-        current_idx = next_idx;
-        next_idx ^= 1;
-
-        // LAUNCH CAPTURE OF NEXT IMAGE
-        pi_task_block(&task);
-        pi_camera_capture_async(&camera, img_buffers[next_idx],CAM_WIDTH*CAM_HEIGHT, &task);
-
-        // PROCESS THE CURRENT IMAGE
-        process_image(img_buffers[current_idx]);
-        // pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
-        pi_task_wait_on(&task);
-        img_num_async++;
-
-        
-        
+    // CAPTURE FIRST IMAGE (BUFFER 1)
+    for (int i = 0; i < CAM_HEIGHT; i++) {
+        for (int j = 0; j < CAM_WIDTH; j++) {
+            ImgBuff[0][i * CAM_WIDTH + j] = i;
+        }
     }
-    uint32_t time_after = pi_time_get_us();
-    float capture_time = (float)(time_after-time_before)/1000000;
-    float FPS_async = (float)img_num_async/capture_time;
-    printf("Capture FPS:        %.6f FPS\n",FPS_async);
-    printf("Capture Duration:   %.3f s\n",1/FPS_async);
-    printf("Capture Count:      %d images\n",img_num_async);
-    printf("Capture Time:       %.6f s\n",capture_time);
-    printf("Exiting... \n");
-    pi_cluster_close(&cl_dev);
+
+    // // CAPTURE NEXT IMAGE (BUFFER 2)
+    // for (int i = 0; i < CAM_HEIGHT; i++) {
+    //     for (int j = 0; j < CAM_WIDTH; j++) {
+    //         ImgBuff[1][i * CAM_WIDTH + j] = i;
+    //     }
+    // }
+
+    // PROCESS IMAGES
+
+    // PRINT IMAGE
+    print_image(ImgBuff[0]);
+    
+
+
 
 
     pmsis_exit(0);

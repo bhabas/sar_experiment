@@ -7,6 +7,11 @@
 #include "bsp/buffer.h"
 
 #define CLOCK_FREQ 250*1000000
+#define MS_2_US 1000
+#define IMG_ORIENTATION 0x0101
+#define CAM_WIDTH 162
+#define CAM_HEIGHT 122
+
 static unsigned char *imgBuff;
 static struct pi_device camera;
 static pi_buffer_t buffer;
@@ -19,6 +24,16 @@ static uint32_t captureTime = 0;
 static uint32_t transferTime = 0;
 
 
+void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize) {
+  img_header_t *imgHeader = (img_header_t *) packet->data;
+  imgHeader->magic = 0xBC;
+  imgHeader->width = CAM_WIDTH;
+  imgHeader->height = CAM_HEIGHT;
+  imgHeader->depth = 1;
+  imgHeader->type = 0;
+  imgHeader->size = imgSize;
+  packet->dataLength = sizeof(img_header_t);
+}
 
 static int open_pi_camera_himax(struct pi_device *device)
 {
@@ -27,11 +42,6 @@ static int open_pi_camera_himax(struct pi_device *device)
     pi_himax_conf_init(&cam_config);
     cam_config.format = PI_CAMERA_QQVGA;
 
-    cam_config.roi.slice_en = 1;
-    cam_config.roi.x = 20;
-    cam_config.roi.y = 20;
-    cam_config.roi.w = 40;
-    cam_config.roi.h = 40;
 
     // OPEN CAMERA
     pi_open_from_conf(device, &cam_config);
@@ -69,7 +79,6 @@ void camera_task(void *parameters)
 {
 
     printf("Starting camera task...\n");
-    uint32_t imgSize = 0;
     uint32_t resolution = CAM_WIDTH * CAM_HEIGHT;
     uint32_t captureSize = resolution * sizeof(unsigned char);
 
@@ -95,22 +104,28 @@ void camera_task(void *parameters)
 
         if (wifiClientConnected == 1)
         {
+            // CAPTURE IMAGE
             pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
             start = pi_time_get_us();
             pi_camera_capture(&camera, imgBuff, resolution);
             captureTime = pi_time_get_us() - start;
             pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
+            // PROCESS IMAGE
+            for (int i = 0; i < CAM_HEIGHT; i++) {
+                for (int j = 0; j < CAM_WIDTH; j++) {
+                    imgBuff[i * CAM_WIDTH + j] = i;
+                }
+            }
+            
 
-            imgSize = captureSize;
-
-            // First send information about the image
-            createImageHeaderPacket(&txp, imgSize);
+            // SEND INFORMATION ABOUT THE IMAGE
+            createImageHeaderPacket(&txp, captureSize);
             cpxSendPacketBlocking(&txp);
 
+            // SEND IMAGE
             start = pi_time_get_us();
-            // Send image
-            sendBufferViaCPX(&txp, imgBuff, imgSize);
+            sendBufferViaCPX(&txp, imgBuff, captureSize);
             transferTime = pi_time_get_us() - start;
 
             printf("capture = %d ms, transfer=%d ms\n", captureTime/1000, transferTime/1000);

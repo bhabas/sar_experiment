@@ -10,10 +10,7 @@
 #include "bsp/camera/himax.h"
 #include "bsp/buffer.h"
 
-#define MS_2_US 1000
-#define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 40
-#define CAM_HEIGHT 40
+
 
 typedef enum {
   WIFI_CTRL_SET_SSID                = 0x10,
@@ -104,16 +101,7 @@ pi_buffer_t footer;
 uint32_t footerSize;
 
 
-void createImageHeaderPacket(CPXPacket_t * packet, uint32_t imgSize) {
-  img_header_t *imgHeader = (img_header_t *) packet->data;
-  imgHeader->magic = 0xBC;
-  imgHeader->width = CAM_WIDTH;
-  imgHeader->height = CAM_HEIGHT;
-  imgHeader->depth = 1;
-  imgHeader->type = 0;
-  imgHeader->size = imgSize;
-  packet->dataLength = sizeof(img_header_t);
-}
+
 
 void sendBufferViaCPX(CPXPacket_t * packet, uint8_t * buffer, uint32_t bufferSize) {
   uint32_t offset = 0;
