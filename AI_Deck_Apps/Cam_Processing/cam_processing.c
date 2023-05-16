@@ -10,10 +10,12 @@
 #include "bsp/bsp.h"
 #include "bsp/camera.h"
 
+#include "processing.h"
+
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 12
-#define CAM_HEIGHT 12
+#define CAM_WIDTH 8
+#define CAM_HEIGHT 8
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -22,7 +24,7 @@
 
 // CLUSTER SETUP
 struct pi_device cl_dev;
-struct pi_cluster_task cl_task;
+// struct pi_cluster_task cl_task;
 
 
 // CAMERA BUFFERS AND TASKS
@@ -35,29 +37,33 @@ static volatile int current_idx = 0;
 static volatile int next_idx = 0;
 
 
+uint32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
+
 // PERFORMANCE MEASURING VARIABLES
 volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 
-uint32_t value[8] = {0};
 
 /* Task executed by cluster cores. */
-void cluster_task(void *arg)
+void cluster_processing(void *arg)
 {
     uint32_t core_id = pi_core_id();
-    uint32_t cluster_id = pi_cluster_id();
 
-    pi_time_wait_us(cluster_id*1000000);
-    value[cluster_id] = 1;
+    for (int i = 0; i < CAM_WIDTH; i++)
+    {
+        G_tp[core_id*CAM_WIDTH + i] = ImgBuff[1][core_id*CAM_WIDTH + i]-ImgBuff[0][core_id*CAM_WIDTH + i];
+    }
 
     pi_cl_team_barrier();
+
 }
 
 /* Cluster main entry, executed by core 0. */
 void cluster_delegate(void *arg)
 {
-
-    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_task, arg);
+    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_processing, arg);
+    
+    // printf("Sending via UART\n");
 
 }
 
@@ -118,39 +124,35 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     return 0;
 }
 
-static void process_image(uint8_t* img_buff_cur, uint8_t* img_buff_prev)
+
+
+
+static void process_images(uint8_t* img_buff_cur, uint8_t* img_buff_prev)
 {
 
-    // pi_cluster_send_task_to_cl(&cl_dev, pi_cluster_task(&cl_task, cluster_delegate, NULL));
+
+    // uint32_t time_before = pi_time_get_us();
+    // for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
+    // {
+    //     G_tp[i] = img_buff_cur[i]-img_buff_prev[i];
+    // }
+    // uint32_t time_after = pi_time_get_us();
+
+
+    struct pi_cluster_task cl_task;
+    pi_cluster_task(&cl_task, cluster_delegate, NULL);
 
     uint32_t time_before = pi_time_get_us();
-    for (int i = 0; i < CAM_HEIGHT*CAM_WIDTH; i++)
-    {
-        // img_buff_cur[i]
-    }
-    
-   
+    pi_cluster_send_task(&cl_dev,&cl_task);
     uint32_t time_after = pi_time_get_us();
 
-    // // printf("Pixel Sum: %d\n",time_after-time_before);   
-    // for (int i = 0; i < CAM_HEIGHT; i++) {
-    //     for (int j = 0; j < CAM_WIDTH; j++) {
-    //         img_buff_cur[i * CAM_WIDTH + j] = i;
-    //     }
-    // }
+
+    printf("Calc Time: %d us\n",(time_after-time_before));   
+    
 
 }
 
-void print_image(uint8_t* ImgBuff)
-{
-    for (int i = 0; i < CAM_HEIGHT; i++) {
-        for (int j = 0; j < CAM_WIDTH; j++) {
-            printf("%3d ",ImgBuff[i*CAM_WIDTH + j]);
-        }
-        printf("\n");
-    }
 
-}
 
 void test_camera_double_buffer(void)
 {
@@ -192,17 +194,28 @@ void test_camera_double_buffer(void)
         }
     }
 
-    // // CAPTURE NEXT IMAGE (BUFFER 2)
-    // for (int i = 0; i < CAM_HEIGHT; i++) {
-    //     for (int j = 0; j < CAM_WIDTH; j++) {
-    //         ImgBuff[1][i * CAM_WIDTH + j] = i;
-    //     }
-    // }
+    // CAPTURE NEXT IMAGE (BUFFER 2)
+    for (int i = 0; i < CAM_HEIGHT; i++) {
+        for (int j = 0; j < CAM_WIDTH; j++) {
+            ImgBuff[1][i * CAM_WIDTH + j] = i+1;
+        }
+    }
 
     // PROCESS IMAGES
+    process_images(ImgBuff[1],ImgBuff[0]);
+
 
     // PRINT IMAGE
-    print_image(ImgBuff[0]);
+    printf("Prev Image:\n");
+    print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
+
+
+    printf("Curr Image:\n");
+    print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+
+    printf("G_tp:\n");
+    print_image_uint32(G_tp,CAM_WIDTH,CAM_HEIGHT);
+
     
 
 
