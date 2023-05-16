@@ -27,6 +27,12 @@ static int open_pi_camera_himax(struct pi_device *device)
     pi_himax_conf_init(&cam_config);
     cam_config.format = PI_CAMERA_QQVGA;
 
+    cam_config.roi.slice_en = 1;
+    cam_config.roi.x = 20;
+    cam_config.roi.y = 20;
+    cam_config.roi.w = 40;
+    cam_config.roi.h = 40;
+
     // OPEN CAMERA
     pi_open_from_conf(device, &cam_config);
     if (pi_camera_open(device))

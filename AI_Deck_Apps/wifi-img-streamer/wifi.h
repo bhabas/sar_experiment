@@ -12,8 +12,8 @@
 
 #define MS_2_US 1000
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162
-#define CAM_HEIGHT 122
+#define CAM_WIDTH 40
+#define CAM_HEIGHT 40
 
 typedef enum {
   WIFI_CTRL_SET_SSID                = 0x10,
