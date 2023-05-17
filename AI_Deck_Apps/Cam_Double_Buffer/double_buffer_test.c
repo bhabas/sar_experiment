@@ -165,7 +165,7 @@ void test_camera_double_buffer(void)
     float capture_time = (float)(time_after-time_before)/1000000;
     float FPS_async = (float)img_num_async/capture_time;
     printf("Capture FPS:        %.6f FPS\n",FPS_async);
-    printf("Capture Duration:   %.6f ms\n",1/FPS_async);
+    printf("Capture Duration:   %.3f us\n",capture_time/img_num_async*1000000);
     printf("Capture Count:      %d images\n",img_num_async);
     printf("Capture Time:       %.6f s\n",capture_time);
     printf("Exiting... \n");
