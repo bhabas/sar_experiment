@@ -37,7 +37,12 @@ static volatile int current_idx = 0;
 static volatile int next_idx = 0;
 
 
-uint32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
+int32_t G_up[CAM_WIDTH*CAM_HEIGHT];
+int32_t G_vp[CAM_WIDTH*CAM_HEIGHT];
+int32_t G_rp[CAM_WIDTH*CAM_HEIGHT];
+int32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
+
+
 
 // PERFORMANCE MEASURING VARIABLES
 volatile uint8_t buffer_index = 0;
@@ -47,6 +52,14 @@ typedef struct cluster_stuff{
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
 } cluster_stuff_t;
+
+int32_t Ku[9] = {-1, 0, 1,
+                -2, 0, 2,
+                -1, 0, 1};
+
+// int32_t Kv[3][3] = {{-1,-2,-1},
+//                     { 0, 0, 0},
+//                     { 1, 2, 1}};
 
 
 /* Task executed by cluster cores. */
@@ -64,11 +77,37 @@ void cluster_processing(void *arg)
 
 }
 
+void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel)
+{
+    for (int32_t v_p = 1; v_p < CAM_HEIGHT - 1; v_p++)
+    {
+        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p++)
+        {
+            int32_t sum = 0;
+            for (int32_t i = 0; i <= 2; i++)
+            {
+                for (int32_t j = 0; j <= 2; j++)
+                {
+                    int32_t curPos = (v_p + i-1) * CAM_WIDTH + (u_p + j-1);
+                    int32_t kerPos = i*3 + j;
+                    sum += img[curPos] * kernel[kerPos];            
+                }
+            }
+            result[v_p*CAM_WIDTH + u_p] = sum;
+        }
+    }
+
+}
+
 /* Cluster main entry, executed by core 0. */
 void cluster_delegate(void *arg)
 {
     cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
-    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_processing, arg);
+
+    convolve2D(test_struct->Cur_img_buff,G_up,Ku);
+
+    
+    // pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_processing, arg);
 
 
 }
@@ -147,8 +186,8 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     pi_cluster_send_task(&cl_dev,&cl_task);
     uint32_t time_after = pi_time_get_us();
 
-
     printf("Calc Time: %d us\n",(time_after-time_before));   
+    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
     
 
 }
@@ -171,13 +210,6 @@ void Cam_Processing(void)
         
     }
 
-    // INITIALIZE CAMERA
-    if (open_pi_camera_himax(&camera))
-    {
-        printf("Failed to open camera\n");
-        pmsis_exit(-1);
-    }
-
     // INITIALIZE CLUSTER
     if (open_cluster(&cl_dev))
     {
@@ -185,8 +217,6 @@ void Cam_Processing(void)
         pmsis_exit(-1);
     }
 
-    // MAKE SURE CAMEAR IS NOT SENDING DATA
-    pi_camera_control(&camera, PI_CAMERA_CMD_STOP,0);
 
     // CAPTURE FIRST IMAGE (BUFFER 1)
     for (int i = 0; i < CAM_HEIGHT; i++)
@@ -211,16 +241,16 @@ void Cam_Processing(void)
     process_images(ImgBuff[1],ImgBuff[0]);
 
 
-    // PRINT IMAGE
-    printf("Prev Image:\n");
-    print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
+    // // PRINT IMAGE
+    // printf("Prev Image:\n");
+    // print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
 
 
-    printf("Curr Image:\n");
-    print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+    // printf("Curr Image:\n");
+    // print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
 
-    printf("G_tp:\n");
-    print_image_uint32(G_tp,CAM_WIDTH,CAM_HEIGHT);
+    // printf("G_tp:\n");
+    // print_image_uint32(G_tp,CAM_WIDTH,CAM_HEIGHT);
 
     
 
