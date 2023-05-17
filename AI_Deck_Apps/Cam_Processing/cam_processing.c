@@ -43,23 +43,17 @@ uint32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
 volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 
-typedef struct{
+typedef struct cluster_stuff{
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
-} cluster_stuff;
+} cluster_stuff_t;
 
 
 /* Task executed by cluster cores. */
 void cluster_processing(void *arg)
 {
     uint32_t core_id = pi_core_id();
-    cluster_stuff* test_struct = (cluster_stuff *)arg;
-
-    // if (core_id == 0)
-    // {
-    //     print_image_uint8(test_struct->Cur_img_buff,CAM_WIDTH,CAM_HEIGHT);
-    // }
-    
+    cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
 
     for (int i = 0; i < CAM_WIDTH; i++)
     {
@@ -67,21 +61,15 @@ void cluster_processing(void *arg)
     }
 
     pi_cl_team_barrier();
-    // printf("Val %d\n",test_struct->Cur_img_buff[CAM_WIDTH*1+1]);
 
 }
 
 /* Cluster main entry, executed by core 0. */
 void cluster_delegate(void *arg)
 {
-    cluster_stuff* test_struct = (cluster_stuff *)arg;
-    // print_image_uint8(test_struct->Cur_img_buff,CAM_WIDTH,CAM_HEIGHT);
-    uint32_t val = 6;
-
-    // printf("Val %d\n",test_struct->Cur_img_buff[CAM_WIDTH*1+1]);
+    cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
     pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_processing, arg);
 
-    // printf("Sending via UART\n");
 
 }
 
@@ -148,12 +136,11 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 {
 
-    struct pi_cluster_task cl_task;
-
-    cluster_stuff test_struct;
+    struct cluster_stuff test_struct;
     test_struct.Cur_img_buff = Cur_img_buff;
     test_struct.Prev_img_buff = Prev_img_buff;
 
+    struct pi_cluster_task cl_task;
     pi_cluster_task(&cl_task, cluster_delegate, &test_struct);
 
     uint32_t time_before = pi_time_get_us();
@@ -168,7 +155,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
 
 
-void test_camera_double_buffer(void)
+void Cam_Processing(void)
 {
     printf("-- Starting Camera Test --\n");
     
@@ -202,30 +189,35 @@ void test_camera_double_buffer(void)
     pi_camera_control(&camera, PI_CAMERA_CMD_STOP,0);
 
     // CAPTURE FIRST IMAGE (BUFFER 1)
-    for (int i = 0; i < CAM_HEIGHT; i++) {
-        for (int j = 0; j < CAM_WIDTH; j++) {
-            ImgBuff[0][i * CAM_WIDTH + j] = i;
+    for (int i = 0; i < CAM_HEIGHT; i++)
+    {
+       for (int j = 0; j < CAM_WIDTH; j++)
+        {
+            ImgBuff[0][j + CAM_WIDTH*i] = j;
         }
     }
 
     // CAPTURE NEXT IMAGE (BUFFER 2)
-    for (int i = 0; i < CAM_HEIGHT; i++) {
-        for (int j = 0; j < CAM_WIDTH; j++) {
-            ImgBuff[1][i * CAM_WIDTH + j] = i+1;
+    for (int i = 0; i < CAM_HEIGHT; i++)
+    {
+       for (int j = 0; j < CAM_WIDTH; j++)
+        {
+            ImgBuff[1][j + CAM_WIDTH*i] = j+1;
         }
     }
+    
 
     // PROCESS IMAGES
     process_images(ImgBuff[1],ImgBuff[0]);
 
 
-    // // PRINT IMAGE
-    // printf("Prev Image:\n");
-    // print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
+    // PRINT IMAGE
+    printf("Prev Image:\n");
+    print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
 
 
-    // printf("Curr Image:\n");
-    // print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+    printf("Curr Image:\n");
+    print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
 
     printf("G_tp:\n");
     print_image_uint32(G_tp,CAM_WIDTH,CAM_HEIGHT);
@@ -248,6 +240,6 @@ int main(void)
     pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);
     __pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200); // Not sure on why set voltage?
 
-    return pmsis_kickoff((void *)test_camera_double_buffer);
+    return pmsis_kickoff((void *)Cam_Processing);
 }
 
