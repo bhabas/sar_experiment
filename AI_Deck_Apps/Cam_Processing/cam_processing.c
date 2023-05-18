@@ -16,8 +16,8 @@
 
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 6
-#define CAM_HEIGHT 6
+#define CAM_WIDTH 162
+#define CAM_HEIGHT 122
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -127,7 +127,18 @@ void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow)
         for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
         {
             int32_t curPos = v_p* CAM_WIDTH + u_p;
-            result[curPos] = (2*(u_p - O_up) + 1)*G_up[curPos] + (2*(v_p - O_vp) + 1)*G_vp[curPos];
+            result[curPos] = (2*u_p - CAM_WIDTH + 1)*G_up[curPos] + (2*v_p - CAM_HEIGHT + 1)*G_vp[curPos];
+        }
+    }
+}
+
+void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow)
+{
+    for (int i = startRow; i < endRow; i++)
+    {
+        for (int j = 0; j < CAM_WIDTH; j++)
+        {
+            result[i*CAM_WIDTH + j] = Cur_img_buff[CAM_WIDTH + j] - Prev_img_buff[CAM_WIDTH + j];
         }
     }
 }
@@ -289,8 +300,6 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 }
 
 
-
-
 static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 {
 
@@ -299,13 +308,39 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     test_struct.Cur_img_buff = Cur_img_buff;
     test_struct.Prev_img_buff = Prev_img_buff;
 
-    struct pi_cluster_task cl_task;
-    pi_cluster_task(&cl_task, cluster_delegate, &test_struct);
+    int start_row = 1;
+    int end_row = 120;
 
+
+    printf("Start Processing... \n");   
     uint32_t time_before = pi_time_get_us();
-    pi_cluster_send_task(&cl_dev,&cl_task);
-    uint32_t time_after = pi_time_get_us();
 
+    convolve2D(test_struct.Cur_img_buff,G_up,Ku,start_row,end_row);
+    convolve2D(test_struct.Cur_img_buff,G_vp,Kv,start_row,end_row);
+
+    // convolve2DSeparable(test_struct.Cur_img_buff,G_up,Ku_v,Ku_h,start_row,end_row);
+    // convolve2DSeparable(test_struct.Cur_img_buff,G_vp,Kv_v,Kv_h,start_row,end_row);
+
+    radialGrad(test_struct.Cur_img_buff,G_rp,start_row,end_row);
+    temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,start_row,end_row);
+
+    int32_t G_vp_G_vp = dotProduct(G_vp,G_vp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_vp_G_up = dotProduct(G_vp,G_up,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_vp_G_rp = dotProduct(G_vp,G_rp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_up_G_vp = dotProduct(G_up,G_vp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_up_G_up = dotProduct(G_up,G_up,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_up_G_rp = dotProduct(G_up,G_rp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_rp_G_vp = dotProduct(G_rp,G_vp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_rp_G_up = dotProduct(G_rp,G_up,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_rp_G_rp = dotProduct(G_rp,G_rp,CAM_WIDTH*CAM_HEIGHT);
+
+    int32_t G_tp_G_vp = dotProduct(G_tp,G_vp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_tp_G_up = dotProduct(G_tp,G_up,CAM_WIDTH*CAM_HEIGHT);
+    int32_t G_tp_G_rp = dotProduct(G_tp,G_rp,CAM_WIDTH*CAM_HEIGHT);
+    int32_t delta_t = 500;
+
+    uint32_t time_after = pi_time_get_us();
+    printf("End Processing... \n");   
     printf("Calc Time: %d us\n",(time_after-time_before));   
     // Need ~30,000 us calc
 
@@ -367,7 +402,7 @@ void Cam_Processing(void)
     // print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
 
     printf("Curr Image:\n");
-    print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+    // print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
 
     // PROCESS IMAGES
     process_images(ImgBuff[1],ImgBuff[0]);
