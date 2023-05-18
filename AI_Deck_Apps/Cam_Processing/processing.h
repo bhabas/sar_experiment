@@ -12,6 +12,7 @@ void print_image_uint8(uint8_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height)
         }
         printf("\n");
     }
+    printf("\n");
 
 }
 
@@ -23,6 +24,7 @@ void print_image_uint32(uint32_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height
         }
         printf("\n");
     }
+    printf("\n");
 
 }
 
@@ -34,5 +36,6 @@ void print_image_int32(int32_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height)
         }
         printf("\n");
     }
+    printf("\n");
 
 }

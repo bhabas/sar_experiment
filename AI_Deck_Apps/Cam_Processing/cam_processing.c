@@ -16,8 +16,8 @@
 
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 10
-#define CAM_HEIGHT 8
+#define CAM_WIDTH 6
+#define CAM_HEIGHT 6
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -64,16 +64,19 @@ typedef struct cluster_stuff{
 int32_t Ku[9] = {-1, 0, 1,
                  -2, 0, 2,
                  -1, 0, 1};
+int32_t Ku_v[3] = { 1, 2, 1};
+int32_t Ku_h[3] = {-1, 0, 1};
 
-// int32_t Kv[9] = {-1,-2, 1,
-//                   0, 0, 0,
-//                   1, 2, 1};
-int32_t Kv[3] = {1, 2, 1};
-int32_t Kh[3] = {-1, 0, 1};
+int32_t Kv[9] = {-1,-2,-1,
+                  0, 0, 0,
+                  1, 2, 1};
 
-void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow, int stride);
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* vertical_kernel, int32_t* horizontal_kernel, int startRow, int endRow, int stride);
-void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow, int stride);
+int32_t Kv_v[3] = {-1, 0, 1};
+int32_t Kv_h[3] = { 1, 2, 1};
+
+void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow);
+void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow);
+void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow);
 int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size);
 
 
@@ -85,8 +88,8 @@ void cluster_processing(void *arg)
     int start_row = core_id * test_struct->rows_per_core + 1;
     int end_row = start_row + test_struct->rows_per_core - 1;
 
-    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row,1);
-    // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Kv, Kh, start_row, end_row, 1);
+    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Kv, Kh, start_row, end_row);
 
     // convolve2D(test_struct->Cur_img_buff,G_vp,Kv,start_row,end_row,1);
     // radialGrad(test_struct->Cur_img_buff,G_rp,start_row,end_row,1);
@@ -101,6 +104,12 @@ void cluster_processing(void *arg)
 
 }
 
+void printVal(int32_t val)
+{
+    printf("Val: %d\n",val);           
+
+}
+
 int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size)
 {
     int32_t result = 0;
@@ -111,7 +120,7 @@ int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size)
     return result;
 }
 
-void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow, int stride)
+void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow)
 {
     for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
@@ -123,18 +132,17 @@ void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow, int str
     }
 }
 
-void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow, int stride)
+void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow)
 {
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += stride)
+    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += stride)
-        {
+        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
+        {       
             int32_t sum = 0;
             for (int32_t i = 0; i <= 2; i++)
             {
                 for (int32_t j = 0; j <= 2; j++)
                 {
-
                     // Handle image boundaries
                     if (v_p + i-1 < 0 || v_p + i-1 >= CAM_HEIGHT)
                     {
@@ -149,18 +157,17 @@ void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, in
             result[v_p*CAM_WIDTH + u_p] = sum;
         }
     }
-
 }
 
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* vertical_kernel, int32_t* horizontal_kernel, int startRow, int endRow, int stride)
+void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow)
 {
     // Temporary result after vertical convolution
     int32_t temp_result[CAM_WIDTH*CAM_HEIGHT] = {0};
 
     // Vertical convolution
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += stride)
+    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += stride)
+        for (int32_t u_p = 0; u_p < CAM_WIDTH; u_p += 1)
         {
             int32_t sum = 0;
             for (int32_t i = 0; i <= 2; i++)
@@ -172,16 +179,16 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* vertical_kernel
                 }
 
                 int32_t curPos = (v_p + i-1) * CAM_WIDTH + u_p;
-                sum += img[curPos] * vertical_kernel[i];            
+                sum += img[curPos] * Kv[i]; 
             }
             temp_result[v_p*CAM_WIDTH + u_p] = sum;
         }
     }
 
     // Horizontal convolution
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += stride)
+    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += stride)
+        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
         {
             int32_t sum = 0;
             for (int32_t j = 0; j <= 2; j++)
@@ -193,12 +200,11 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* vertical_kernel
                 }
 
                 int32_t curPos = v_p * CAM_WIDTH + (u_p + j-1);
-                sum += temp_result[curPos] * horizontal_kernel[j];            
+                sum += temp_result[curPos] * Kh[j];            
             }
             result[v_p*CAM_WIDTH + u_p] = sum;
         }
     }
-
 }
 
 
@@ -209,10 +215,9 @@ void cluster_delegate(void *arg)
 
     // pi_cl_team_fork(pi_cl_cluster_nb_cores(), cluster_processing, arg);
 
-    // convolve2D(test_struct->Cur_img_buff,G_up,Ku,1,3,1);
-    convolve2DSeparable(test_struct->Cur_img_buff, G_up, Kv, Kh, 1, 3, 1);
-
-    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+    // convolve2D(test_struct->Cur_img_buff,G_up,Kv,1,4);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, 1, 4);
+  
 
 
 
@@ -357,18 +362,16 @@ void Cam_Processing(void)
         }
     }
     
-
-    // PROCESS IMAGES
-    process_images(ImgBuff[1],ImgBuff[0]);
-
-
     // PRINT IMAGE
     // printf("Prev Image:\n");
     // print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
 
+    printf("Curr Image:\n");
+    print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
 
-    // printf("Curr Image:\n");
-    // print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+    // PROCESS IMAGES
+    process_images(ImgBuff[1],ImgBuff[0]);
+
 
     // printf("G_tp:\n");
     // print_image_uint32(G_tp,CAM_WIDTH,CAM_HEIGHT);
