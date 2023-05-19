@@ -16,8 +16,8 @@
 
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162
-#define CAM_HEIGHT 122
+#define CAM_WIDTH 8
+#define CAM_HEIGHT 8
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -134,11 +134,11 @@ void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow)
 
 void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow)
 {
-    for (int i = startRow; i < endRow; i++)
+    for (int i = startRow; i <= endRow; i++)
     {
-        for (int j = 0; j < CAM_WIDTH; j++)
+        for (int j = 1; j < CAM_WIDTH-1; j++)
         {
-            result[i*CAM_WIDTH + j] = Cur_img_buff[CAM_WIDTH + j] - Prev_img_buff[CAM_WIDTH + j];
+            result[i*CAM_WIDTH + j] = Cur_img_buff[i*CAM_WIDTH + j] - Prev_img_buff[i*CAM_WIDTH + j];
         }
     }
 }
@@ -309,7 +309,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     test_struct.Prev_img_buff = Prev_img_buff;
 
     int start_row = 1;
-    int end_row = 120;
+    int end_row = (CAM_HEIGHT - 2);
 
 
     printf("Start Processing... \n");   
@@ -338,6 +338,23 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     int32_t G_tp_G_up = dotProduct(G_tp,G_up,CAM_WIDTH*CAM_HEIGHT);
     int32_t G_tp_G_rp = dotProduct(G_tp,G_rp,CAM_WIDTH*CAM_HEIGHT);
     int32_t delta_t = 500;
+
+    // print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
+
+    printVal(G_vp_G_vp);
+    printVal(G_vp_G_up);
+    printVal(G_vp_G_rp);
+    printVal(G_up_G_vp);
+    printVal(G_up_G_up);
+    printVal(G_up_G_rp);
+    printVal(G_rp_G_vp);
+    printVal(G_rp_G_up);
+    printVal(G_rp_G_rp);
+    printf("\n\n");
+    printVal(G_tp_G_vp);
+    printVal(G_tp_G_up);
+    printVal(G_tp_G_rp);
+
 
     uint32_t time_after = pi_time_get_us();
     printf("End Processing... \n");   
@@ -396,16 +413,38 @@ void Cam_Processing(void)
             ImgBuff[1][j + CAM_WIDTH*i] = j+1;
         }
     }
+
+    uint8_t img_cur[64] = {
+        5,8,4,6,1,8,7,0,
+        0,0,0,5,0,0,4,2,
+        2,4,8,8,3,1,0,1,
+        0,6,0,8,2,9,8,5,
+        7,1,9,6,1,5,5,3,
+        8,2,0,3,1,3,8,1,
+        3,0,8,8,0,7,6,1,
+        8,0,8,1,9,9,3,5,
+        };
+    
+    uint8_t img_prev[64] = {
+        9,2,2,2,9,7,6,8,
+        8,1,3,8,2,2,2,9,
+        2,6,4,4,1,5,8,9,
+        2,6,1,0,5,3,3,4,
+        8,5,4,2,9,3,9,8,
+        8,2,9,3,0,7,3,2,
+        0,4,3,3,8,0,4,6,
+        1,0,8,7,6,8,5,7,
+        };
     
     // PRINT IMAGE
-    // printf("Prev Image:\n");
-    // print_image_uint8(ImgBuff[0],CAM_WIDTH,CAM_HEIGHT);
+    printf("Prev Image:\n");
+    print_image_uint8(img_prev,CAM_WIDTH,CAM_HEIGHT);
 
     printf("Curr Image:\n");
-    // print_image_uint8(ImgBuff[1],CAM_WIDTH,CAM_HEIGHT);
+    print_image_uint8(img_cur,CAM_WIDTH,CAM_HEIGHT);
 
-    // PROCESS IMAGES
-    process_images(ImgBuff[1],ImgBuff[0]);
+    // // PROCESS IMAGES
+    process_images(img_cur,img_prev);
 
 
     // printf("G_tp:\n");
