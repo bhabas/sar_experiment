@@ -16,8 +16,8 @@
 
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162
-#define CAM_HEIGHT 122
+#define CAM_WIDTH 8
+#define CAM_HEIGHT 18
 #define CLOCK_FREQ 250*1000000 // [MHz]
 
 #define NUM_BUFFERS 2
@@ -56,11 +56,17 @@ volatile uint8_t buffer_index = 0;
 volatile uint8_t img_num_async = 0;
 
 typedef struct cluster_stuff{
+    uint8_t rows_per_core;
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
-    uint8_t rows_per_core;
-    int32_t G_vp_G_vp;
+    int32_t* Vec1;
+    int32_t* Vec2;
+    int32_t* target_sum;
+    int32_t temp_array[8];
 } cluster_stuff_t;
+
+int32_t G_up_G_up = 0;
+
 
 int32_t Ku[9] = {-1, 0, 1,
                  -2, 0, 2,
@@ -213,12 +219,58 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
     }
 }
 
-
 /* Cluster main entry, executed by core 0. */
 void delegate_GradCalcs(void *arg)
 {
     cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
     pi_cl_team_fork(pi_cl_cluster_nb_cores(), cl_GradCalcs, arg);
+}
+
+void cl_DotProducts(void *arg)
+{
+    uint32_t core_id = pi_core_id();
+    cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
+    int start_row = core_id * test_struct->rows_per_core + 1;
+    int end_row = start_row + test_struct->rows_per_core - 1;
+
+    int32_t sum = 0;
+    for (int i = start_row; i <= end_row; i++)
+    {
+        for (int j = 1; j < CAM_WIDTH-1; j++)
+        {
+            sum += test_struct->Vec1[CAM_WIDTH*i + j] * test_struct->Vec2[CAM_WIDTH*i + j];
+        }
+    }
+    
+    test_struct->temp_array[core_id] = sum;
+    pi_cl_team_barrier();
+
+    if (core_id == 0)
+    {
+        int32_t sum = 0;
+        for (int i = 0; i < pi_cl_cluster_nb_cores(); i++)
+        {
+            sum += test_struct->temp_array[i];
+        }
+        *(test_struct->target_sum) = sum;
+    }
+}
+
+    
+
+void delegate_DotProducs(void *arg)
+{
+    cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
+
+    
+    // dot(G_vp,G_vp)
+    test_struct->Vec1 = G_up;
+    test_struct->Vec2 = G_up;
+    test_struct->target_sum = &G_up_G_up;
+
+    pi_cl_team_fork(pi_cl_cluster_nb_cores(), cl_DotProducts, test_struct);
+
+    
 }
 
 static int32_t open_cluster(struct pi_device *device)
@@ -308,6 +360,12 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
     print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
     #endif
+    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+
+    pi_cluster_task(&cl_task, delegate_DotProducs, &test_struct);
+    pi_cluster_send_task(&cl_dev,&cl_task);
+    printVal(G_up_G_up);
+
 
     // int32_t G_vp_G_vp = dotProduct(G_vp,G_vp,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_vp_G_up = dotProduct(G_vp,G_up,CAM_WIDTH*CAM_HEIGHT);
