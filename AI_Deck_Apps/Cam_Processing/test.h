@@ -8,6 +8,8 @@
 #include "pmsis.h"
 
 void print_image_int32(int32_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height);
+void print_image_uint8(uint8_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height);
+
 
 
 void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow);
