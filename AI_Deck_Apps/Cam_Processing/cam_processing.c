@@ -76,10 +76,7 @@ int32_t Kv[9] = {-1,-2,-1,
 int32_t Kv_v[3] = {-1, 0, 1};
 int32_t Kv_h[3] = { 1, 2, 1};
 
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow);
-void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow);
-void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow);
-int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size);
+
 
 
 /* Task executed by cluster cores. */
@@ -105,86 +102,7 @@ void printVal(int32_t val)
 
 }
 
-int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size)
-{
-    int32_t result = 0;
-    for (int i = 0; i < size; i++)
-    {
-        result += Vec1[i] * Vec2[i];
-    }
-    return result;
-}
 
-void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow)
-{
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
-        {
-            int32_t curPos = v_p* CAM_WIDTH + u_p;
-            result[curPos] = (2*u_p - CAM_WIDTH + 1)*G_up[curPos] + (2*v_p - CAM_HEIGHT + 1)*G_vp[curPos];
-        }
-    }
-}
-
-void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow)
-{
-    for (int i = startRow; i <= endRow; i++)
-    {
-        for (int j = 1; j < CAM_WIDTH-1; j++)
-        {
-            result[i*CAM_WIDTH + j] = Cur_img_buff[i*CAM_WIDTH + j] - Prev_img_buff[i*CAM_WIDTH + j];
-        }
-    }
-}
-
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow)
-{
-    // Temporary result after vertical convolution
-    int32_t temp_result[CAM_WIDTH*CAM_HEIGHT] = {0};
-
-    // Vertical convolution
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    {
-        for (int32_t u_p = 0; u_p < CAM_WIDTH; u_p += 1)
-        {
-            int32_t sum = 0;
-            for (int32_t i = 0; i <= 2; i++)
-            {
-                // Handle image boundaries
-                if (v_p + i-1 < 0 || v_p + i-1 >= CAM_HEIGHT)
-                {
-                    continue;
-                }
-
-                int32_t curPos = (v_p + i-1) * CAM_WIDTH + u_p;
-                sum += img[curPos] * Kv[i]; 
-            }
-            temp_result[v_p*CAM_WIDTH + u_p] = sum;
-        }
-    }
-
-    // Horizontal convolution
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
-        {
-            int32_t sum = 0;
-            for (int32_t j = 0; j <= 2; j++)
-            {
-                // Handle image boundaries
-                if (u_p + j-1 < 0 || u_p + j-1 >= CAM_WIDTH)
-                {
-                    continue;
-                }
-
-                int32_t curPos = v_p * CAM_WIDTH + (u_p + j-1);
-                sum += temp_result[curPos] * Kh[j];            
-            }
-            result[v_p*CAM_WIDTH + u_p] = sum;
-        }
-    }
-}
 
 /* Cluster main entry, executed by core 0. */
 void delegate_GradCalcs(void *arg)
@@ -314,11 +232,11 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     time_before = pi_time_get_us();
     // pi_cluster_send_task(&cl_dev,&cl_task);
     // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
-    convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT);
+    convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2);
     
     // convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,CAM_HEIGHT-2);
     // convolve2DSeparable(test_struct.Cur_img_buff, G_vp, Kv_v, Kv_h, 1,CAM_HEIGHT-2);
-    // radialGrad(test_struct.Cur_img_buff,G_rp,1,CAM_HEIGHT-2);
+    radialGrad(test_struct.Cur_img_buff,G_rp,G_up,G_vp,1,CAM_HEIGHT-2);
     time_after = pi_time_get_us();
     printf("Calc Time: %d us\n",(time_after-time_before));   
 
@@ -477,7 +395,7 @@ void Cam_Processing(void)
 int main(void)
 {
     pi_bsp_init();
-    test_func();
+    
 
 
     // Increase the FC freq to 250 MHz
