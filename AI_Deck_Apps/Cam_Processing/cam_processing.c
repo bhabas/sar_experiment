@@ -5,7 +5,6 @@
 
 #include "test.h"
 #include "params.h"
-#include "processing.h"
 
 
 
@@ -325,7 +324,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
 
     // #ifdef DEBUG
-    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
     // print_image_int32(G_vp,CAM_WIDTH,CAM_HEIGHT);
     // print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
     // print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
