@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "test.h"
+#include "params.h"
+#include "processing.h"
 
 
 
@@ -15,17 +17,8 @@
 #include "bsp/bsp.h"
 #include "bsp/camera.h"
 
-#include "processing.h"
 
 
-#define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 8
-#define CAM_HEIGHT 18
-#define CLOCK_FREQ 250*1000000 // [MHz]
-
-#define NUM_BUFFERS 2
-#define RESOLUTION CAM_WIDTH*CAM_HEIGHT
-#define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 
 // CLUSTER SETUP
 struct pi_device cl_dev;
@@ -84,7 +77,6 @@ int32_t Kv[9] = {-1,-2,-1,
 int32_t Kv_v[3] = {-1, 0, 1};
 int32_t Kv_h[3] = { 1, 2, 1};
 
-void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow);
 void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow);
 void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow);
 void radialGrad(uint8_t* img, int32_t* result, int startRow, int endRow);
@@ -143,33 +135,6 @@ void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result
         for (int j = 1; j < CAM_WIDTH-1; j++)
         {
             result[i*CAM_WIDTH + j] = Cur_img_buff[i*CAM_WIDTH + j] - Prev_img_buff[i*CAM_WIDTH + j];
-        }
-    }
-}
-
-void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow)
-{
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
-        {       
-            int32_t sum = 0;
-            for (int32_t i = 0; i <= 2; i++)
-            {
-                for (int32_t j = 0; j <= 2; j++)
-                {
-                    // Handle image boundaries
-                    if (v_p + i-1 < 0 || v_p + i-1 >= CAM_HEIGHT)
-                    {
-                        continue;
-                    }
-
-                    int32_t curPos = (v_p + i-1) * CAM_WIDTH + (u_p + j-1);
-                    int32_t kerPos = i*3 + j;
-                    sum += img[curPos] * kernel[kerPos];            
-                }
-            }
-            result[v_p*CAM_WIDTH + u_p] = sum;
         }
     }
 }
@@ -344,30 +309,32 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
 
     struct pi_cluster_task cl_task;
-    pi_cluster_task(&cl_task, delegate_GradCalcs, &test_struct);
+    // pi_cluster_task(&cl_task, delegate_GradCalcs, &test_struct);
 
     printf("Start Processing... \n");   
     time_before = pi_time_get_us();
     // pi_cluster_send_task(&cl_dev,&cl_task);
-    temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
-    convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,CAM_HEIGHT-2);
-    convolve2DSeparable(test_struct.Cur_img_buff, G_vp, Kv_v, Kv_h, 1,CAM_HEIGHT-2);
-    radialGrad(test_struct.Cur_img_buff,G_rp,1,CAM_HEIGHT-2);
+    // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
+    convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT);
+    
+    // convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,CAM_HEIGHT-2);
+    // convolve2DSeparable(test_struct.Cur_img_buff, G_vp, Kv_v, Kv_h, 1,CAM_HEIGHT-2);
+    // radialGrad(test_struct.Cur_img_buff,G_rp,1,CAM_HEIGHT-2);
     time_after = pi_time_get_us();
     printf("Calc Time: %d us\n",(time_after-time_before));   
 
 
-    #ifdef DEBUG
-    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
-    print_image_int32(G_vp,CAM_WIDTH,CAM_HEIGHT);
-    print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
-    print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
-    #endif
-    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+    // #ifdef DEBUG
+    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+    // print_image_int32(G_vp,CAM_WIDTH,CAM_HEIGHT);
+    // print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
+    // print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
+    // #endif
+    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
 
-    pi_cluster_task(&cl_task, delegate_DotProducs, &test_struct);
-    pi_cluster_send_task(&cl_dev,&cl_task);
-    printVal(G_up_G_up);
+    // pi_cluster_task(&cl_task, delegate_DotProducs, &test_struct);
+    // pi_cluster_send_task(&cl_dev,&cl_task);
+    // printVal(G_up_G_up);
 
 
     // int32_t G_vp_G_vp = dotProduct(G_vp,G_vp,CAM_WIDTH*CAM_HEIGHT);
