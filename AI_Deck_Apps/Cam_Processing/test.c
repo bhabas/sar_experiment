@@ -89,7 +89,8 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
 {
 
     // Temporary result after vertical convolution
-    int32_t temp_result[CAM_WIDTH*16] = {0};
+    int32_t numRows = (endRow - startRow) + 1;
+    int32_t temp_result[CAM_WIDTH*numRows];
 
     for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
@@ -111,7 +112,6 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
             temp_result[(v_p-startRow)*CAM_WIDTH + u_p] = sum;
         }
     }
-    print_image_int32(temp_result,CAM_WIDTH,16);
 
     // Horizontal convolution
     for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
@@ -133,7 +133,5 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
             result[v_p*CAM_WIDTH + u_p] = sum;
         }
     }
-
-    print_image_int32(result,CAM_WIDTH,CAM_HEIGHT);
 
 }

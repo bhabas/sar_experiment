@@ -233,7 +233,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     // pi_cluster_send_task(&cl_dev,&cl_task);
     // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
     
-    convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,CAM_HEIGHT-2);
+    convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 3,14);
     // convolve2DSeparable(test_struct.Cur_img_buff, G_vp, Kv_v, Kv_h, 1,CAM_HEIGHT-2);
     // radialGrad(test_struct.Cur_img_buff,G_rp,G_up,G_vp,1,CAM_HEIGHT-2);
     time_after = pi_time_get_us();
