@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "test.h"
+
+
 
 
 /* PMSIS includes */
@@ -508,6 +511,8 @@ void Cam_Processing(void)
 int main(void)
 {
     pi_bsp_init();
+    test_func();
+
 
     // Increase the FC freq to 250 MHz
     pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);

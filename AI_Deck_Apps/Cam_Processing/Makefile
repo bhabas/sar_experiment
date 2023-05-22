@@ -5,10 +5,10 @@ platform = board
 
 APP              = test
 # App sources
-APP_SRCS         += cam_processing.c
+APP_SRCS         += cam_processing.c test.c
 
 # App includes
-APP_INC	         = 
+APP_INC	         = .
 
 # Compiler flags
 APP_CFLAGS       =
