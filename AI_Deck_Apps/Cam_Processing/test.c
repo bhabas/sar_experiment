@@ -85,12 +85,14 @@ void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result
     }
 }
 
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int startRow, int endRow)
+void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int32_t startRow, int32_t endRow)
 {
 
     // Temporary result after vertical convolution
     int32_t numRows = (endRow - startRow) + 1;
     int32_t temp_result[CAM_WIDTH*numRows];
+
+    printf("here\n");
 
     for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
     {
@@ -109,29 +111,33 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
                 sum += img[imgPos] * Kv[i]; 
             }
             // temp_result[v_p*CAM_WIDTH + u_p] = sum;
-            temp_result[(v_p-startRow)*CAM_WIDTH + u_p] = sum;
+            // temp_result[(v_p-startRow)*CAM_WIDTH + u_p] = 0;
+            temp_result[u_p] = 0;
         }
     }
+    printf("here\n");
+    return;
 
-    // Horizontal convolution
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
-        {
-            int32_t sum = 0;
-            for (int32_t j = 0; j <= 2; j++)
-            {
-                // Handle image boundaries
-                if (u_p + j-1 < 0 || u_p + j-1 >= CAM_WIDTH)
-                {
-                    continue;
-                }
+    // // Horizontal convolution
+    // for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
+    // {
+    //     for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
+    //     {
+    //         int32_t sum = 0;
+    //         for (int32_t j = 0; j <= 2; j++)
+    //         {
+    //             // Handle image boundaries
+    //             if (u_p + j-1 < 0 || u_p + j-1 >= CAM_WIDTH)
+    //             {
+    //                 continue;
+    //             }
 
-                int32_t curPos = (v_p - startRow) * CAM_WIDTH + (u_p + j-1);
-                sum += temp_result[curPos] * Kh[j];            
-            }
-            result[v_p*CAM_WIDTH + u_p] = sum;
-        }
-    }
+    //             int32_t curPos = (v_p - startRow) * CAM_WIDTH + (u_p + j-1);
+    //             sum += temp_result[curPos] * Kh[j];            
+    //         }
+    //         result[v_p*CAM_WIDTH + u_p] = sum;
+    //     }
+    // }
+
 
 }
