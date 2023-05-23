@@ -86,20 +86,18 @@ void cl_GradCalcs(void *arg)
     int start_row = core_id * test_struct->rows_per_core + 1;
     int end_row = start_row + test_struct->rows_per_core - 1;
 
-    if (core_id == 4)   
-    {
+    // if (core_id == 4)   
+    // {
     // printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
-    convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
     // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
 
+    // }
+    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
+    convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
+    temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
+    radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
 
-    }
-    // convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
-    // temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
-    // radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
-
-
-    // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
     pi_cl_team_barrier();
 
 }
@@ -181,6 +179,9 @@ static int32_t open_cluster(struct pi_device *device)
     pi_open_from_conf(&cl_dev, &cl_conf);
     if (pi_cluster_open(device))
         return -1;
+
+    pi_freq_set(PI_FREQ_DOMAIN_CL, CLOCK_FREQ_CL);
+
 
 
     return 0;
@@ -341,6 +342,7 @@ void Cam_Processing(void)
         printf("Failed to open cluster\n");
         pmsis_exit(-1);
     }
+
 
 
     // CAPTURE FIRST IMAGE (BUFFER 1)
