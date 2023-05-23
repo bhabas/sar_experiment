@@ -5,6 +5,7 @@
 #define CAM_HEIGHT 122
 #define CLOCK_FREQ 250*1000000 // [MHz]
 #define CLOCK_FREQ_CL 150*1000000
+#define NUM_CORES 8
 
 
 

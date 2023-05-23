@@ -56,11 +56,9 @@ typedef struct cluster_stuff{
     int32_t* Vec1;
     int32_t* Vec2;
     int32_t* target_sum;
-    int32_t temp_array[8];
+    int32_t temp_array[NUM_CORES];
     int32_t DP_Array[10];
 } cluster_stuff_t;
-
-int32_t G_up_G_up = 0;
 
 
 int32_t Ku[9] = {-1, 0, 1,
@@ -91,6 +89,8 @@ void cl_GradCalcs(void *arg)
     // {
     // printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
     // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
+
     // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
 
     // }
@@ -103,11 +103,7 @@ void cl_GradCalcs(void *arg)
 
 }
 
-void printVal(int32_t val)
-{
-    printf("Val: %d\n",val);           
 
-}
 
 
 
@@ -280,11 +276,11 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
 
     struct pi_cluster_task cl_task;
-    pi_cluster_task(&cl_task, delegate_GradCalcs, &test_struct);
 
     printf("Start Processing... \n");   
     time_before = pi_time_get_us();
-    // pi_cluster_send_task(&cl_dev,&cl_task);
+    pi_cluster_task(&cl_task, delegate_GradCalcs, &test_struct);
+    pi_cluster_send_task(&cl_dev,&cl_task);
 
     // convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2);
     // convolve2D(test_struct.Cur_img_buff,G_vp,Kv,1,CAM_HEIGHT-2);
@@ -304,44 +300,8 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     pi_cluster_send_task(&cl_dev,&cl_task);
     time_after = pi_time_get_us();
     print_image_int32(test_struct.DP_Array,9,1);
-    // printVal(test_struct.DP_Array[0]);
     printf("Calc Time: %d us\n",(time_after-time_before));   
     // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
-
-
-
-
-    // int32_t G_vp_G_vp = dotProduct(G_vp,G_vp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_vp_G_up = dotProduct(G_vp,G_up,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_vp_G_rp = dotProduct(G_vp,G_rp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_up_G_up = dotProduct(G_up,G_up,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_up_G_rp = dotProduct(G_up,G_rp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_rp_G_vp = dotProduct(G_rp,G_vp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_rp_G_rp = dotProduct(G_rp,G_rp,CAM_WIDTH*CAM_HEIGHT);
-
-    // int32_t G_tp_G_vp = dotProduct(G_tp,G_vp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_tp_G_up = dotProduct(G_tp,G_up,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_tp_G_rp = dotProduct(G_tp,G_rp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t delta_t = 500;
-
-
-
-    
-
-
-    // printVal(G_vp_G_vp);
-    // printVal(G_vp_G_up);
-    // printVal(G_vp_G_rp);
-    // printVal(G_up_G_vp);
-    // printVal(G_up_G_up);
-    // printVal(G_up_G_rp);
-    // printVal(G_rp_G_vp);
-    // printVal(G_rp_G_up);
-    // printVal(G_rp_G_rp);
-    // printf("\n\n");
-    // printVal(G_tp_G_vp);
-    // printVal(G_tp_G_up);
-    // printVal(G_tp_G_rp);
 
 
     // Need ~30,000 us calc

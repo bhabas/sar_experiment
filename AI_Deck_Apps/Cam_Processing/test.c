@@ -1,5 +1,10 @@
 #include "test.h"
 
+void printVal(int32_t val)
+{
+    printf("Val: %d\n",val);           
+
+}
 
 void print_image_int32(int32_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height)
 {
@@ -88,8 +93,9 @@ void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result
 void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int32_t startRow, int32_t numRows)
 {
 
-    int32_t* temp = (int32_t*) pi_l2_malloc(CAM_WIDTH * sizeof(int32_t));
+    // int32_t* temp = (int32_t*) pi_l2_malloc(CAM_WIDTH * sizeof(int32_t));
     // int32_t* temp = (int32_t*) pi_cl_l1_malloc(&cl_dev,CAM_WIDTH * sizeof(int32_t));
+    int32_t temp[CAM_WIDTH] = {0};
 
 
 
@@ -132,6 +138,6 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
     }
 
     // pi_cl_l1_free(&cl_dev,temp,CAM_WIDTH * sizeof(int32_t));
-    pi_l2_free(temp,CAM_WIDTH * sizeof(int32_t));
+    // pi_l2_free(temp,CAM_WIDTH * sizeof(int32_t));
 
 }
