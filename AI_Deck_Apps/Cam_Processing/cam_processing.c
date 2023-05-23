@@ -86,13 +86,14 @@ void cl_GradCalcs(void *arg)
     int start_row = core_id * test_struct->rows_per_core + 1;
     int end_row = start_row + test_struct->rows_per_core - 1;
 
+    if (core_id == 4)   
+    {
     // printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
-    // if (core_id == 7)   
-    // {
     convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
-
-    // }
     // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
+
+
+    }
     // convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
     // temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
     // radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
@@ -115,6 +116,8 @@ void printVal(int32_t val)
 void delegate_GradCalcs(void *arg)
 {
     cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
+    // int32_t* temp = (int32_t*) pi_cl_l1_malloc(&cl_dev,CAM_WIDTH * sizeof(int32_t));
+    
     pi_cl_team_fork(pi_cl_cluster_nb_cores(), cl_GradCalcs, arg);
 }
 
