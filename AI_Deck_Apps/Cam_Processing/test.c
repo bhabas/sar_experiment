@@ -88,7 +88,10 @@ void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result
 void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int32_t startRow, int32_t numRows)
 {
 
-    int32_t* temp = (int32_t*) pmsis_l2_malloc(CAM_WIDTH * sizeof(int32_t));
+    int32_t* temp = (int32_t*) pi_l2_malloc(CAM_WIDTH * sizeof(int32_t));
+    // int32_t* temp = (int32_t*) pi_cl_l1_malloc(&cl_dev,CAM_WIDTH * sizeof(int32_t));
+
+
 
 
     // Ensure we don't go beyond the image height
@@ -128,6 +131,7 @@ void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh
         }
     }
 
+    // pi_cl_l1_free(&cl_dev,temp,CAM_WIDTH * sizeof(int32_t));
     pi_l2_free(temp,CAM_WIDTH * sizeof(int32_t));
 
 }
