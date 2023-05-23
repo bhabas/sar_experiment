@@ -95,10 +95,10 @@ void cl_GradCalcs(void *arg)
 
 
     // }
-    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
-    convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
-    temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
-    radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
+    // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
+    // convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
+    // temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
+    // radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
 
 
     // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
@@ -241,9 +241,9 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
     printf("Start Processing... \n");   
     time_before = pi_time_get_us();
-    pi_cluster_send_task(&cl_dev,&cl_task);
+    // pi_cluster_send_task(&cl_dev,&cl_task);
     // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
-    // convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1, CAM_HEIGHT-2);
+    convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1, 3);
     
     // convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,3);
     // printf("asdfas\n");
@@ -259,13 +259,14 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     // print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
     // print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
     // #endif
-    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
 
     // pi_cluster_task(&cl_task, delegate_DotProducs, &test_struct);
     // pi_cluster_send_task(&cl_dev,&cl_task);
     // printVal(G_up_G_up);
     time_after = pi_time_get_us();
     printf("Calc Time: %d us\n",(time_after-time_before));   
+    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+
 
 
 
@@ -388,7 +389,7 @@ void Cam_Processing(void)
     // print_image_uint8(img_prev,CAM_WIDTH,CAM_HEIGHT);
 
     printf("Curr Image:\n");
-    // print_image_uint8(ImgBuff[1],CAM_WIDTH,6);
+    print_image_uint8(ImgBuff[1],CAM_WIDTH,6);
 
     // // PROCESS IMAGES
     process_images(ImgBuff[1],ImgBuff[0]);

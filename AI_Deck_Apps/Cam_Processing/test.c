@@ -85,59 +85,49 @@ void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result
     }
 }
 
-void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int32_t startRow, int32_t endRow)
+void convolve2DSeparable(uint8_t* img, int32_t* result, int32_t* Kv, int32_t* Kh, int32_t startRow, int32_t numRows)
 {
 
-    // Temporary result after vertical convolution
-    int32_t numRows = (endRow - startRow) + 1;
-    int32_t temp_result[CAM_WIDTH*numRows];
+    int32_t* temp = (int32_t*) pmsis_l2_malloc(CAM_WIDTH * sizeof(int32_t));
 
-    printf("here\n");
 
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
+    // Ensure we don't go beyond the image height
+    int32_t endRow = startRow + numRows;
+    if (endRow > CAM_HEIGHT) {
+        endRow = CAM_HEIGHT;
+    }
+
+
+
+    // Loop through the rows
+    for (int32_t r = startRow; r < endRow; ++r)
     {
-        for (int32_t u_p = 0; u_p < CAM_WIDTH; u_p += 1)
+        // Vertical convolution pass
+        for (int32_t c = 0; c < CAM_WIDTH - 0; ++c) // Skip the first and last column
         {
-            int32_t sum = 0;
-            for (int32_t i = 0; i <= 2; i++)
+            temp[c] = 0;
+            for (int32_t kr = -1; kr <= 1; ++kr)
             {
-                // Handle image boundaries
-                if (v_p + i-1 < 0 || v_p + i-1 >= CAM_HEIGHT)
-                {
-                    continue;
-                }
-
-                int32_t imgPos = (v_p + i-1) * CAM_WIDTH + u_p;
-                sum += img[imgPos] * Kv[i]; 
+                // Skip out of bounds
+                if (r+kr < 0 || r+kr >= CAM_HEIGHT) continue;
+                
+                // Apply vertical kernel
+                temp[c] += Kv[kr+1] * img[(r+kr)*CAM_WIDTH + c];
             }
-            // temp_result[v_p*CAM_WIDTH + u_p] = sum;
-            // temp_result[(v_p-startRow)*CAM_WIDTH + u_p] = 0;
-            temp_result[u_p] = 0;
+        }
+
+        // Horizontal convolution pass, ensuring we don't convolve the left and right borders
+        for (int32_t c = 1; c < CAM_WIDTH - 1; ++c) // Skip the first and last column
+        {
+            result[r*CAM_WIDTH + c] = 0;
+            for (int32_t kc = -1; kc <= 1; ++kc)
+            {
+                // Apply horizontal kernel
+                result[r*CAM_WIDTH + c] += Kh[kc+1] * temp[c+kc];
+            }
         }
     }
-    printf("here\n");
-    return;
 
-    // // Horizontal convolution
-    // for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
-    // {
-    //     for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
-    //     {
-    //         int32_t sum = 0;
-    //         for (int32_t j = 0; j <= 2; j++)
-    //         {
-    //             // Handle image boundaries
-    //             if (u_p + j-1 < 0 || u_p + j-1 >= CAM_WIDTH)
-    //             {
-    //                 continue;
-    //             }
-
-    //             int32_t curPos = (v_p - startRow) * CAM_WIDTH + (u_p + j-1);
-    //             sum += temp_result[curPos] * Kh[j];            
-    //         }
-    //         result[v_p*CAM_WIDTH + u_p] = sum;
-    //     }
-    // }
-
+    pi_l2_free(temp,CAM_WIDTH * sizeof(int32_t));
 
 }
