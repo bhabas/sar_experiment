@@ -20,7 +20,6 @@
 
 
 // CLUSTER SETUP
-struct pi_device cl_dev;
 // struct pi_cluster_task cl_task;
 uint32_t time_before = 0;
 uint32_t time_after = 0;
@@ -87,12 +86,10 @@ void cl_GradCalcs(void *arg)
     int start_row = core_id * test_struct->rows_per_core + 1;
     int end_row = start_row + test_struct->rows_per_core - 1;
 
+    // printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
     // if (core_id == 7)   
     // {
-    //     printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
-    //     // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, 1, CAM_HEIGHT-2);
-
-
+    convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
 
     // }
     // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
@@ -241,9 +238,8 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
     printf("Start Processing... \n");   
     time_before = pi_time_get_us();
-    // pi_cluster_send_task(&cl_dev,&cl_task);
+    pi_cluster_send_task(&cl_dev,&cl_task);
     // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
-    convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1, 3);
     
     // convolve2DSeparable(test_struct.Cur_img_buff, G_up, Ku_v, Ku_h, 1,3);
     // printf("asdfas\n");
@@ -265,7 +261,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     // printVal(G_up_G_up);
     time_after = pi_time_get_us();
     printf("Calc Time: %d us\n",(time_after-time_before));   
-    print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
+    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
 
 
 
@@ -389,7 +385,7 @@ void Cam_Processing(void)
     // print_image_uint8(img_prev,CAM_WIDTH,CAM_HEIGHT);
 
     printf("Curr Image:\n");
-    print_image_uint8(ImgBuff[1],CAM_WIDTH,6);
+    // print_image_uint8(ImgBuff[1],CAM_WIDTH,6);
 
     // // PROCESS IMAGES
     process_images(ImgBuff[1],ImgBuff[0]);
