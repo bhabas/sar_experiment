@@ -57,6 +57,7 @@ typedef struct cluster_stuff{
     int32_t* Vec2;
     int32_t* target_sum;
     int32_t temp_array[8];
+    int32_t DP_Array[10];
 } cluster_stuff_t;
 
 int32_t G_up_G_up = 0;
@@ -121,11 +122,14 @@ void delegate_GradCalcs(void *arg)
 
 void cl_DotProducts(void *arg)
 {
-    uint32_t core_id = pi_core_id();
+    // CALC LIMITS FOR CORE
     cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
+    uint32_t core_id = pi_core_id();
     int start_row = core_id * test_struct->rows_per_core + 1;
     int end_row = start_row + test_struct->rows_per_core - 1;
 
+
+    // CALC DOT PRODUCT INSIDE CORE LIMITS
     int32_t sum = 0;
     for (int i = start_row; i <= end_row; i++)
     {
@@ -134,10 +138,14 @@ void cl_DotProducts(void *arg)
             sum += test_struct->Vec1[CAM_WIDTH*i + j] * test_struct->Vec2[CAM_WIDTH*i + j];
         }
     }
-    
     test_struct->temp_array[core_id] = sum;
+
+
+    // WAIT FOR ALL CORES TO FINISH
     pi_cl_team_barrier();
 
+
+    // COMBINE TO SINGLE DOT PRODUCT VALUE
     if (core_id == 0)
     {
         int32_t sum = 0;
@@ -150,20 +158,55 @@ void cl_DotProducts(void *arg)
 }
 
     
-
+/**
+ * @brief Calc all the necessary dot products from image gradients
+ * | G_tp G_vp |   | G_vp G_vp  G_up G_vp G_rp G_vp | | Theta_x |
+ * | G_tp G_up | = | G_vp G_up  G_up G_up G_rp G_up | | Theta_y |
+ * | G_tp G_rp |   | G_vp G_rp  G_up G_rp G_rp G_rp | | Theta_z |
+ * 
+ * @param arg 
+ */
 void delegate_DotProducts(void *arg)
 {
     cluster_stuff_t* test_struct = (cluster_stuff_t *)arg;
 
-    for (int i = 0; i < 12; i++)
+    int32_t* arrays[4] = {G_vp, G_up, G_rp, G_tp};
+    int result_index = 0;
+    int array_len = 4;
+
+    for (int i = 0; i <= 3; i++)
     {
-        // dot(G_vp,G_vp)
-        test_struct->Vec1 = G_up;
-        test_struct->Vec2 = G_up;
-        test_struct->target_sum = &G_up_G_up;
-        pi_cl_team_fork(pi_cl_cluster_nb_cores(), cl_DotProducts, test_struct);
+        for (int j = i; j <= 3; j++)
+        {
+
+            // Ensure there is enough space in the results array
+            if (result_index > 9)
+            {
+                printf("Results array is full, cannot compute more dot products.\n");
+                return;
+            }
+
+            // Avoid duplicate pairings and exclude dot(G_tp, G_tp)
+            if ((i != j && i > j) || (i == j && i == 3))
+            {
+                continue;
+            }
+
+            test_struct->Vec1 = arrays[i];
+            test_struct->Vec2 = arrays[j];
+            test_struct->target_sum = &(test_struct->DP_Array[result_index]);
+            pi_cl_team_fork(pi_cl_cluster_nb_cores(), cl_DotProducts, test_struct);
+
+            // printf("Dot product of array %d and %d: %f\n", i, j, test_struct->DP_Array[result_index]);
+            result_index++;
+        }
+        
     }
+
+    // INCLUDE TIME BETWEEN IMAGES
+    test_struct->DP_Array[result_index] = 100; // Delta_t
     
+    // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
 }
 
 static int32_t open_cluster(struct pi_device *device)
@@ -241,7 +284,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
     printf("Start Processing... \n");   
     time_before = pi_time_get_us();
-    pi_cluster_send_task(&cl_dev,&cl_task);
+    // pi_cluster_send_task(&cl_dev,&cl_task);
 
     // convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2);
     // convolve2D(test_struct.Cur_img_buff,G_vp,Kv,1,CAM_HEIGHT-2);
@@ -259,8 +302,9 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
     pi_cluster_task(&cl_task, delegate_DotProducts, &test_struct);
     pi_cluster_send_task(&cl_dev,&cl_task);
-    // printVal(G_up_G_up);
     time_after = pi_time_get_us();
+    print_image_int32(test_struct.DP_Array,9,1);
+    // printVal(test_struct.DP_Array[0]);
     printf("Calc Time: %d us\n",(time_after-time_before));   
     // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
 
@@ -270,11 +314,9 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     // int32_t G_vp_G_vp = dotProduct(G_vp,G_vp,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_vp_G_up = dotProduct(G_vp,G_up,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_vp_G_rp = dotProduct(G_vp,G_rp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_up_G_vp = dotProduct(G_up,G_vp,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_up_G_up = dotProduct(G_up,G_up,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_up_G_rp = dotProduct(G_up,G_rp,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_rp_G_vp = dotProduct(G_rp,G_vp,CAM_WIDTH*CAM_HEIGHT);
-    // int32_t G_rp_G_up = dotProduct(G_rp,G_up,CAM_WIDTH*CAM_HEIGHT);
     // int32_t G_rp_G_rp = dotProduct(G_rp,G_rp,CAM_WIDTH*CAM_HEIGHT);
 
     // int32_t G_tp_G_vp = dotProduct(G_tp,G_vp,CAM_WIDTH*CAM_HEIGHT);
@@ -302,8 +344,6 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     // printVal(G_tp_G_rp);
 
 
-    printf("End Processing... \n");   
-    printf("Calc Time: %d us\n",(time_after-time_before));   
     // Need ~30,000 us calc
 
     // if (CAM_WIDTH < 30)
