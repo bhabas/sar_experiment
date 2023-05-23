@@ -30,11 +30,11 @@ void print_image_uint8(uint8_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height)
 }
 
 
-void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int startRow, int endRow)
+void convolve2D(uint8_t* img, int32_t* result, int32_t* kernel, int32_t startRow, int32_t endRow, int32_t stride)
 {
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
+    for (int32_t v_p = startRow; v_p <= endRow; v_p += stride)
     {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
+        for (int32_t u_p = 1; u_p < CAM_WIDTH - 1; u_p += stride)
         {       
             int32_t sum = 0;
             for (int32_t i = 0; i <= 2; i++)
@@ -67,23 +67,23 @@ int32_t dotProduct(int32_t* Vec1, int32_t* Vec2, int32_t size)
     return result;
 }
 
-void radialGrad(uint8_t* img, int32_t* result, int32_t* G_up, int32_t* G_vp, int startRow, int endRow)
+void radialGrad(uint8_t* img, int32_t* result, int32_t* G_up, int32_t* G_vp, int32_t startRow, int32_t endRow, int32_t stride)
 {
-    for (int32_t v_p = startRow; v_p <= endRow; v_p += 1)
+    for (int32_t v_p = startRow; v_p <= endRow; v_p += stride)
     {
-        for (int32_t u_p = 1; u_p < CAM_WIDTH -1; u_p += 1)
+        for (int32_t u_p = 1; u_p < CAM_WIDTH - 1; u_p += stride)
         {
-            int32_t curPos = v_p* CAM_WIDTH + u_p;
-            result[curPos] = (2*u_p - CAM_WIDTH + 1)*G_up[curPos] + (2*v_p - CAM_HEIGHT + 1)*G_vp[curPos];
+            int32_t curPos = v_p*CAM_WIDTH + u_p;
+            result[curPos] = (2*u_p - CAM_WIDTH + 1)*G_up[curPos];
         }
     }
 }
 
-void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int startRow, int endRow)
+void temporalGrad(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, int32_t* result, int32_t startRow, int32_t endRow, int32_t stride)
 {
-    for (int i = startRow; i <= endRow; i++)
+    for (int i = startRow; i <= endRow; i += stride)
     {
-        for (int j = 1; j < CAM_WIDTH-1; j++)
+        for (int j = 1; j < CAM_WIDTH-1; j += stride)
         {
             result[i*CAM_WIDTH + j] = Cur_img_buff[i*CAM_WIDTH + j] - Prev_img_buff[i*CAM_WIDTH + j];
         }

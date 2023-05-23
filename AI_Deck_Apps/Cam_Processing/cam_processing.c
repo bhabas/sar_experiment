@@ -88,16 +88,16 @@ void cl_GradCalcs(void *arg)
     // if (core_id == 4)   
     // {
     // printf("Core: %d \t Start_Row: %d \t End_Row: %d \t Num_Rows: %d\n",core_id,start_row,end_row,test_struct->rows_per_core);
-    // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
-    // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
 
     // convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
 
     // }
-    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row);
-    convolve2D(test_struct->Cur_img_buff,G_vp,Ku,start_row,end_row);
-    temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row);
-    radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
+    // convolve2DSeparable(test_struct->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
+    convolve2D(test_struct->Cur_img_buff,G_up,Ku,start_row,end_row,2);
+    convolve2D(test_struct->Cur_img_buff,G_vp,Kv,start_row,end_row,2);
+    radialGrad(test_struct->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,2);
+    temporalGrad(test_struct->Cur_img_buff,test_struct->Prev_img_buff,G_tp,start_row,end_row,2);
 
     pi_cl_team_barrier();
 
@@ -282,19 +282,11 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     pi_cluster_task(&cl_task, delegate_GradCalcs, &test_struct);
     pi_cluster_send_task(&cl_dev,&cl_task);
 
-    // convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2);
-    // convolve2D(test_struct.Cur_img_buff,G_vp,Kv,1,CAM_HEIGHT-2);
-    // radialGrad(test_struct.Cur_img_buff,G_rp,G_up,G_vp,1,CAM_HEIGHT-2);
-    // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2);
+    // convolve2D(test_struct.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2,2);
+    // convolve2D(test_struct.Cur_img_buff,G_vp,Kv,1,CAM_HEIGHT-2,2);
+    // radialGrad(test_struct.Cur_img_buff,G_rp,G_up,G_vp,1,CAM_HEIGHT-2,2);
+    // temporalGrad(test_struct.Cur_img_buff,test_struct.Prev_img_buff,G_tp,1,CAM_HEIGHT-2,2);
     
-
-
-    // #ifdef DEBUG
-    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
-    // print_image_int32(G_vp,CAM_WIDTH,CAM_HEIGHT);
-    // print_image_int32(G_rp,CAM_WIDTH,CAM_HEIGHT);
-    // print_image_int32(G_tp,CAM_WIDTH,CAM_HEIGHT);
-    // #endif
 
     pi_cluster_task(&cl_task, delegate_DotProducts, &test_struct);
     pi_cluster_send_task(&cl_dev,&cl_task);
