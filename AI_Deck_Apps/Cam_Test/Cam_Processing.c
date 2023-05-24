@@ -178,6 +178,13 @@ void System_Init(void)
         pmsis_exit(-1);
     }
 
+    // INITIALIZE UART
+    if (open_uart(&UART_device))
+    {
+        printf("Failed to open UART connection\n");
+        pmsis_exit(-1);
+    }
+
     // MAKE SURE CAMEAR IS NOT SENDING DATA
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
 

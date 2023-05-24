@@ -18,8 +18,9 @@
 
 
 // CAMERA BUFFERS AND TASKS
-struct pi_device Cam_device;
 struct pi_device CL_device;
+struct pi_device Cam_device;
+struct pi_device UART_device;
 static pi_task_t Cam_task;
 
 
@@ -90,7 +91,11 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     // OPEN CAMERA
     pi_open_from_conf(device, &cam_config);
     if (pi_camera_open(device))
+    {
+        printf("[Camera] open failed !\n");
         return -1;
+    }
+
 
     // ROTATE CAMERA IMAGE
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_START, 0);
@@ -104,7 +109,6 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 
     if (set_value != reg_value)
     {
-        printf("Failed to rotate Cam_device image\n");
         return -1;
     }
                 
@@ -127,9 +131,45 @@ static int32_t open_cluster(struct pi_device *device)
     // OPEN CLUSTER
     pi_open_from_conf(&CL_device, &CL_Config);
     if (pi_cluster_open(device))
+    {
         return -1;
+    }
+        
 
     pi_freq_set(PI_FREQ_DOMAIN_CL, CLOCK_FREQ_CL);
+
+    return 0;
+}
+
+static int32_t open_uart(struct pi_device *device)
+{
+    // SET UART CONFIGURATIONS
+    struct pi_uart_conf conf;
+    pi_uart_conf_init(&conf);
+
+    conf.baudrate_bps = 9600;   // Baud Rate - Must match receiver
+    conf.enable_tx = 1;         // Enable data transfer (TX)
+    conf.enable_rx = 0;         // Disable data reception (RX)
+
+    // OPEN UART CONNECTION
+    pi_open_from_conf(&UART_device, &conf);
+    if (pi_uart_open(&UART_device))
+    {
+        return -1;
+    }
+
+    float value_arr[3] = {1.0f,2.0f,3.0f};
+
+    while(1)
+    {
+        // WRITE VALUE ARRAY TO CF OVER UART1
+        value_arr[0] += 1; // Increment first value of array
+        pi_uart_write(&UART_device, &value_arr, sizeof(value_arr));
+
+        // WAIT
+        pi_time_wait_us(500000); // Wait 0.5s [500,000 us]
+    }
+
 
     return 0;
 }
