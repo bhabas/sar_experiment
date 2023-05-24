@@ -128,7 +128,7 @@ void CL_DotProduct(void *arg)
 
 
 
-static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
+void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 {
 
     struct ClusterImageData CL_ImageData;
@@ -164,9 +164,7 @@ static void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 
 }
 
-
-
-void Cam_Processing(void)
+void System_Init(void)
 {
     printf("-- Starting Camera Test --\n");
     
@@ -182,6 +180,13 @@ void Cam_Processing(void)
         
     }
 
+    // INITIALIZE CAMERA
+    if (open_pi_camera_himax(&Cam_device))
+    {
+        printf("Failed to open camera\n");
+        return;
+    }
+
     // INITIALIZE CLUSTER
     if (open_cluster(&CL_device))
     {
@@ -189,57 +194,83 @@ void Cam_Processing(void)
         pmsis_exit(-1);
     }
 
+    // MAKE SURE CAMEAR IS NOT SENDING DATA
+    pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
+
+    // CAPTURE FIRST IMAGE 
+    pi_task_block(&Cam_task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[process_index1],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
+    pi_task_wait_on(&Cam_task);
+    t_delta[process_index1] = pi_time_get_us();
 
 
-    // CAPTURE FIRST IMAGE (BUFFER 1)
-    for (int i = 0; i < CAM_HEIGHT; i++)
-    {
-       for (int j = 0; j < CAM_WIDTH; j++)
-        {
-            ImgBuff[0][j + CAM_WIDTH*i] = j;
-        }
-    }
+    // CAPTURE SECOND IMAGE
+    pi_task_block(&Cam_task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[process_index2],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    pi_task_wait_on(&Cam_task);
+    t_delta[process_index2] = pi_time_get_us() - t_delta[process_index1];
+}
 
-    // CAPTURE NEXT IMAGE (BUFFER 2)
-    for (int i = 0; i < CAM_HEIGHT; i++)
-    {
-       for (int j = 0; j < CAM_WIDTH; j++)
-        {
-            ImgBuff[1][j + CAM_WIDTH*i] = j+1;
-        }
-    }
 
-    // uint8_t img_cur[64] = {
-    //     5,8,4,6,1,8,7,0,
-    //     0,0,0,5,0,0,4,2,
-    //     2,4,8,8,3,1,0,1,
-    //     0,6,0,8,2,9,8,5,
-    //     7,1,9,6,1,5,5,3,
-    //     8,2,0,3,1,3,8,1,
-    //     3,0,8,8,0,7,6,1,
-    //     8,0,8,1,9,9,3,5,
-    //     };
+
+void Cam_Processing(void)
+{
+    System_Init();
+
+    // CAPTURE IMAGES
+    printf("Main Loop start\n");
+
     
-    // uint8_t img_prev[64] = {
-    //     9,2,2,2,9,7,6,8,
-    //     8,1,3,8,2,2,2,9,
-    //     2,6,4,4,1,5,8,9,
-    //     2,6,1,0,5,3,3,4,
-    //     8,5,4,2,9,3,9,8,
-    //     8,2,9,3,0,7,3,2,
-    //     0,4,3,3,8,0,4,6,
-    //     1,0,8,7,6,8,5,7,
-    //     };
+
+    for (int i = 0; i < 10; i++)
+    {
+        printf("Process idx1: %d \t Process idx2: %d \t Fill idx: %d \n",process_index1,process_index2,fill_index);
+        
+
+        // Advance the buffer indices
+        fill_index = (fill_index + 1) % NUM_BUFFERS;
+        process_index1 = (process_index1 + 1) % NUM_BUFFERS;
+        process_index2 = (process_index2 + 1) % NUM_BUFFERS;
+
+    }
     
-    // // PRINT IMAGE
-    // printf("Prev Image:\n");
-    // print_image_uint8(img_prev,CAM_WIDTH,CAM_HEIGHT);
 
-    printf("Curr Image:\n");
-    // print_image_uint8(ImgBuff[1],CAM_WIDTH,6);
+    // uint32_t time_before = pi_time_get_us();
+    // while (pi_time_get_us() - time_before < 1000000)
+    // {
 
-    // // PROCESS IMAGES
-    process_images(ImgBuff[1],ImgBuff[0]);
+
+        // // LAUNCH CAPTURE OF NEXT IMAGE
+        // pi_task_block(&Cam_task);
+        // pi_camera_capture_async(&Cam_device, ImgBuff[current_idx],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+
+        // // PROCESS THE CURRENT IMAGE
+        // process_images(ImgBuff[current_idx],ImgBuff[prev_idx]);
+        // pi_task_wait_on(&Cam_task);
+
+
+
+        // CAPTURE IMAGE AND FILL CUR BUFFER
+
+        // PROCESS CUR AND PREV IDX IMAGES
+
+        // UPDATE INDICES
+        // img_num_async++;
+        
+    // }
+    // uint32_t time_after = pi_time_get_us();
+    // float capture_time = (float)(time_after-time_before)/1000000;
+    // float FPS_async = (float)img_num_async/capture_time;
+    // printf("Capture FPS:        %.6f FPS\n",FPS_async);
+    // printf("Capture Duration:   %.3f us\n",capture_time/img_num_async*1000000);
+    // printf("Capture Count:      %d images\n",img_num_async);
+    // printf("Capture Time:       %.6f s\n",capture_time);
+    // printf("Exiting... \n");
+
+
+    // PROCESS IMAGES
+    // process_images(ImgBuff[1],ImgBuff[0]);
 
     pmsis_exit(0);
 

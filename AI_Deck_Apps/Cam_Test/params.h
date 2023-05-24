@@ -9,7 +9,7 @@
 
 
 
-#define NUM_BUFFERS 2
+#define NUM_BUFFERS 3
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
 #define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 

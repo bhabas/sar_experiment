@@ -20,24 +20,26 @@
 // CAMERA BUFFERS AND TASKS
 struct pi_device Cam_device;
 struct pi_device CL_device;
+static pi_task_t Cam_task;
 
-// CLUSTER SETUP
-
-uint32_t time_before = 0;
-uint32_t time_after = 0;
 
 
 uint8_t* ImgBuff[NUM_BUFFERS];
-
-volatile int current_idx = 0;
-volatile int next_idx = 0;
-
-
 int32_t G_up[CAM_WIDTH*CAM_HEIGHT];
 int32_t G_vp[CAM_WIDTH*CAM_HEIGHT];
 int32_t G_rp[CAM_WIDTH*CAM_HEIGHT];
 int32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
 
+uint8_t process_index1 = 0;
+uint8_t process_index2 = 1;
+uint8_t fill_index = 2;
+
+uint32_t t_delta[NUM_BUFFERS] = {0};
+uint32_t t = 0;
+
+
+uint32_t time_before = 0;
+uint32_t time_after = 0;
 
 // PERFORMANCE MEASURING VARIABLES
 volatile uint8_t buffer_index = 0;
