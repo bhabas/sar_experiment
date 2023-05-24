@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "params.h"
 #include "pmsis.h"
+
+#include "params.h"
 
 void printVal(int32_t val);
 void print_image_int32(int32_t* ImgBuff, uint8_t Cam_Width, uint8_t Cam_Height);

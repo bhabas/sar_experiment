@@ -13,6 +13,6 @@
 #define RESOLUTION CAM_WIDTH*CAM_HEIGHT
 #define BUFFER_SIZE CAM_WIDTH*CAM_HEIGHT*sizeof(uint8_t)
 
-struct pi_device cl_dev;
+
 
 
