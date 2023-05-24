@@ -1,7 +1,7 @@
 #pragma once
 
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162 
+#define CAM_WIDTH 162
 #define CAM_HEIGHT 122
 #define CLOCK_FREQ 250*1000000 // [MHz]
 #define CLOCK_FREQ_CL 150*1000000

@@ -25,10 +25,10 @@ static pi_task_t Cam_task;
 
 
 uint8_t* ImgBuff[NUM_BUFFERS];
-int32_t G_up[CAM_WIDTH*CAM_HEIGHT];
-int32_t G_vp[CAM_WIDTH*CAM_HEIGHT];
-int32_t G_rp[CAM_WIDTH*CAM_HEIGHT];
-int32_t G_tp[CAM_WIDTH*CAM_HEIGHT];
+int32_t G_up[CAM_WIDTH*CAM_HEIGHT] = {0};
+int32_t G_vp[CAM_WIDTH*CAM_HEIGHT] = {0};
+int32_t G_rp[CAM_WIDTH*CAM_HEIGHT] = {0};
+int32_t G_tp[CAM_WIDTH*CAM_HEIGHT] = {0};
 
 uint8_t process_index1 = 0;
 uint8_t process_index2 = 1;
@@ -50,6 +50,7 @@ typedef struct ClusterImageData{
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
     int32_t  UART_array[10];
+    int32_t  stride;
 
     int32_t* DP_Vec1;
     int32_t* DP_Vec2;

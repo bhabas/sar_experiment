@@ -19,16 +19,15 @@ void CL_GradCalcs(void *arg)
 {
     uint32_t core_id = pi_core_id();
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
-    int start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
-    int end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
+    int32_t start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
+    int32_t end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
+    int32_t stride = CL_ImageData->stride;
 
 
-    // convolve2DSeparable(CL_ImageData->Cur_img_buff, G_up, Ku_v, Ku_h, start_row, end_row);
-    // convolve2DSeparable(CL_ImageData->Cur_img_buff, G_vp, Kv_v, Kv_h, start_row, end_row);
-    convolve2D(CL_ImageData->Cur_img_buff,G_up,Ku,start_row,end_row,2);
-    convolve2D(CL_ImageData->Cur_img_buff,G_vp,Kv,start_row,end_row,2);
-    radialGrad(CL_ImageData->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,2);
-    temporalGrad(CL_ImageData->Cur_img_buff,CL_ImageData->Prev_img_buff,G_tp,start_row,end_row,2);
+    convolve2D(CL_ImageData->Cur_img_buff,G_up,Ku,start_row,end_row,stride);
+    convolve2D(CL_ImageData->Cur_img_buff,G_vp,Kv,start_row,end_row,stride);
+    radialGrad(CL_ImageData->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,stride);
+    temporalGrad(CL_ImageData->Cur_img_buff,CL_ImageData->Prev_img_buff,G_tp,start_row,end_row,stride);
 
     pi_cl_team_barrier();
 
@@ -135,32 +134,17 @@ void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     CL_ImageData.Rows_Per_Core = (CAM_HEIGHT - 2)/NUM_CORES;
     CL_ImageData.Cur_img_buff = Cur_img_buff;
     CL_ImageData.Prev_img_buff = Prev_img_buff;
+    CL_ImageData.stride = 2;
 
 
     struct pi_cluster_task CL_Grad_task;
-    struct pi_cluster_task CL_DotProducts_task;
-
-
-    printf("Start Processing... \n");   
-    time_before = pi_time_get_us();
     pi_cluster_task(&CL_Grad_task, delegate_GradCalcs, &CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_Grad_task);
 
-    // convolve2D(CL_ImageData.Cur_img_buff,G_up,Ku,1,CAM_HEIGHT-2,2);
-    // convolve2D(CL_ImageData.Cur_img_buff,G_vp,Kv,1,CAM_HEIGHT-2,2);
-    // radialGrad(CL_ImageData.Cur_img_buff,G_rp,G_up,G_vp,1,CAM_HEIGHT-2,2);
-    // temporalGrad(CL_ImageData.Cur_img_buff,CL_ImageData.Prev_img_buff,G_tp,1,CAM_HEIGHT-2,2);
-    
 
+    struct pi_cluster_task CL_DotProducts_task;
     pi_cluster_task(&CL_DotProducts_task, delegate_DotProducts, &CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
-    time_after = pi_time_get_us();
-    print_image_int32(CL_ImageData.UART_array,9,1);
-    printf("Calc Time: %d us\n",(time_after-time_before));   
-    // print_image_int32(G_up,CAM_WIDTH,CAM_HEIGHT);
-
-
-    // Need ~30,000 us calc
 
 }
 
@@ -217,56 +201,37 @@ void System_Init(void)
 void Cam_Processing(void)
 {
     System_Init();
-
-    // CAPTURE IMAGES
     printf("Main Loop start\n");
 
-    
-
-    for (int i = 0; i < 10; i++)
+    // CAPTURE IMAGES
+    uint32_t time_before = pi_time_get_us();
+    while (pi_time_get_us() - time_before < 1000000)
     {
-        printf("Process idx1: %d \t Process idx2: %d \t Fill idx: %d \n",process_index1,process_index2,fill_index);
-        
+        // LAUNCH CAPTURE OF NEXT IMAGE
+        pi_task_block(&Cam_task);
+        pi_camera_capture_async(&Cam_device, ImgBuff[fill_index],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
 
-        // Advance the buffer indices
+
+        // PROCESS THE CURRENT AND PREV IMAGES
+        process_images(ImgBuff[process_index2],ImgBuff[process_index1]);
+        pi_task_wait_on(&Cam_task);
+
+
+        // ADVANCE BUFFER INDICES
         fill_index = (fill_index + 1) % NUM_BUFFERS;
         process_index1 = (process_index1 + 1) % NUM_BUFFERS;
         process_index2 = (process_index2 + 1) % NUM_BUFFERS;
-
-    }
-    
-
-    // uint32_t time_before = pi_time_get_us();
-    // while (pi_time_get_us() - time_before < 1000000)
-    // {
-
-
-        // // LAUNCH CAPTURE OF NEXT IMAGE
-        // pi_task_block(&Cam_task);
-        // pi_camera_capture_async(&Cam_device, ImgBuff[current_idx],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
-
-        // // PROCESS THE CURRENT IMAGE
-        // process_images(ImgBuff[current_idx],ImgBuff[prev_idx]);
-        // pi_task_wait_on(&Cam_task);
-
-
-
-        // CAPTURE IMAGE AND FILL CUR BUFFER
-
-        // PROCESS CUR AND PREV IDX IMAGES
-
-        // UPDATE INDICES
-        // img_num_async++;
+        img_num_async++;
         
-    // }
-    // uint32_t time_after = pi_time_get_us();
-    // float capture_time = (float)(time_after-time_before)/1000000;
-    // float FPS_async = (float)img_num_async/capture_time;
-    // printf("Capture FPS:        %.6f FPS\n",FPS_async);
-    // printf("Capture Duration:   %.3f us\n",capture_time/img_num_async*1000000);
-    // printf("Capture Count:      %d images\n",img_num_async);
-    // printf("Capture Time:       %.6f s\n",capture_time);
-    // printf("Exiting... \n");
+    }
+    uint32_t time_after = pi_time_get_us();
+    float capture_time = (float)(time_after-time_before)/1000000;
+    float FPS_async = (float)img_num_async/capture_time;
+    printf("Capture FPS:        %.3f FPS\n",FPS_async);
+    printf("Capture Duration:   %.3f ms\n",capture_time/img_num_async*1000);
+    printf("Capture Count:      %d images\n",img_num_async);
+    printf("Capture Time:       %.6f s\n",capture_time);
+    printf("Exiting... \n");
 
 
     // PROCESS IMAGES
