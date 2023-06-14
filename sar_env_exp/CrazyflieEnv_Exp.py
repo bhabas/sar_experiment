@@ -42,6 +42,8 @@ class CrazyflieEnv_Exp(CrazyflieEnv_Base):
         self.modelName = f"crazyflie_{self.CF_Config}"
         self.setParams()
 
+        self.logDir = "/home/bhabas/catkin_ws/src/sar_experiment/"
+
         # ## PLANE PARAMETERS
         # self.Plane_Model = rospy.get_param('/PLANE_SETTINGS/Plane_Model')
         # self.Plane_Config = rospy.get_param('/PLANE_SETTINGS/Plane_Config')
@@ -76,23 +78,26 @@ class CrazyflieEnv_Exp(CrazyflieEnv_Base):
             "GTC_Params/P_kp_xy_p":     rospy.get_param(f"{temp_str}/P_kp_xy"),
             "GTC_Params/P_kd_xy_p":     rospy.get_param(f"{temp_str}/P_kd_xy"), 
             "GTC_Params/P_ki_xy_p":     rospy.get_param(f"{temp_str}/P_ki_xy"),
-            "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_xy"),
+            # "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_xy"),
 
             "GTC_Params/P_kp_z_p":      rospy.get_param(f"{temp_str}/P_kp_z"),        
             "GTC_Params/P_kd_z_p":      rospy.get_param(f"{temp_str}/P_kd_z"),
             "GTC_Params/P_ki_z_p":      rospy.get_param(f"{temp_str}/P_ki_z"),
-            "GTC_Params/i_range_z_p":   rospy.get_param(f"{temp_str}/i_range_z"),
+            # "GTC_Params/i_range_z_p":   rospy.get_param(f"{temp_str}/i_range_z"),
+        }
+        self.cf.setParams(GainsDict)
 
+        GainsDict = {
             "GTC_Params/R_kp_xy_p":     rospy.get_param(f"{temp_str}/R_kp_xy"),
             "GTC_Params/R_kd_xy_p":     rospy.get_param(f"{temp_str}/R_kd_xy"),
             "GTC_Params/R_ki_xy_p":     rospy.get_param(f"{temp_str}/R_ki_xy"),
-            "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_R_xy"),
+            # "GTC_Params/i_range_xy_p":  rospy.get_param(f"{temp_str}/i_range_R_xy"),
 
 
             "GTC_Params/R_kp_z_p":      rospy.get_param(f"{temp_str}/R_kp_z"),
             "GTC_Params/R_kd_z_p":      rospy.get_param(f"{temp_str}/R_kd_z"),
             "GTC_Params/R_ki_z_p":      rospy.get_param(f"{temp_str}/R_ki_z"),
-            "GTC_Params/i_range_R_z_p": rospy.get_param(f"{temp_str}/i_range_R_z"),
+            # "GTC_Params/i_range_R_z_p": rospy.get_param(f"{temp_str}/i_range_R_z"),
         }
         self.cf.setParams(GainsDict)
         
@@ -128,8 +133,7 @@ class CrazyflieEnv_Exp(CrazyflieEnv_Base):
 
 if __name__ == "__main__":
     env = CrazyflieEnv_Exp()
-
-    # rospy.spin()
+    env.SendCmd('Stop')
         
         
     
