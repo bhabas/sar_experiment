@@ -1,10 +1,5 @@
 #include "nml.h"
 
-double nml_rand_interval(double min, double max) {
-  double d;
-  d = (double) rand() / ((double) RAND_MAX + 1);
-  return (min + d * (max - min));
-}
 
 // Dynamically allocates a new matrix struct
 nml_mat *nml_mat_new(int num_rows, int num_cols) {
@@ -36,6 +31,8 @@ nml_mat *nml_mat_rnd(int num_rows, int num_cols, double min, double max) {
   }
   return r;
 }
+
+
 
 void nml_mat_print_CF(nml_mat *matrix) {
     consolePrintf("\n=========================\n\n");

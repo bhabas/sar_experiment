@@ -26,6 +26,7 @@ extern "C" {
 #include <time.h>
 
 #include "debug.h"
+#include "nml_util.h"
 
 #define NML_MIN_COEF 0.000000000000001
 
@@ -59,7 +60,6 @@ typedef struct nml_mat_qr_s {
 //
 // *****************************************************************************
 
-double nml_rand_interval(double min, double max);
 nml_mat *nml_mat_new(int num_rows, int num_cols);
 nml_mat *nml_mat_rnd(int num_rows, int num_cols, double min, double max);
 nml_mat *nml_mat_sqr(int size);
