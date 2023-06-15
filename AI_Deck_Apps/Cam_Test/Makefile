@@ -3,15 +3,15 @@
 PMSIS_OS = freertos
 platform = board
 
-APP              = uart_tx
+APP              = test
 # App sources
-APP_SRCS         += uart_tx.c
+APP_SRCS         += Cam_Processing.c CalcFuncs.c
 
 # App includes
 APP_INC	         = .
 
 # Compiler flags
-APP_CFLAGS       += -O3 -g -Werror
+APP_CFLAGS       =
 
 # Linker flags
 APP_LDFLAGS      =

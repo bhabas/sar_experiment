@@ -158,6 +158,7 @@ float thrust_override[4] = {0.0f,0.0f,0.0f,0.0f};   // Motor thrusts [g]
 float Tau = 0.0f;       // [s]
 float Theta_x = 0.0f;   // [rad/s] 
 float Theta_y = 0.0f;   // [rad/s]
+float Theta_z = 0.0f;   // [rad/s]
 float D_perp = 0.0f;    // [m]
 
 // ANALYTICAL OPTICAL FLOW STATES
@@ -236,6 +237,29 @@ float M_z_flip = 0.0f;      // [N*m]
 // POLICY TRIGGER/ACTION VALUES
 float Policy_Flip_tr = 0.0f;    
 float Policy_Action_tr = 0.0f;
+
+// =================================
+//    LANDING SURFACE PARAMETERS
+// =================================
+
+// LANDING SURFACE PARAMETERS
+float Plane_Angle = 180.0f;
+struct vec t_x = {1.0f,0.0f,0.0f};      // Plane Unit Tangent Vector
+struct vec t_y = {0.0f,1.0f,0.0f};      // Plane Unit Tangent Vector
+struct vec n_hat = {0.0f,0.0f,1.0f};    // Plane Unit Normal Vector
+
+struct vec r_PO = {0.0f,0.0f,2.0f};     // Plane Position Vector        [m]
+struct vec r_BO = {0.0f,0.0f,0.0f};     // Quad Position Vector         [m]
+struct vec r_PB = {0.0f,0.0f,0.0f};     // Quad-Plane Distance Vector   [m]
+struct vec V_BO = {0.0f,0.0f,0.0f};     // Quad Velocity Vector         [m/s]
+
+
+float V_perp = 0.0;                     // Velocity perp to plane [m/s]
+float V_tx = 0.0;                       // Tangent_x velocity [m/s]
+float V_ty = 0.0;                       // Tangent_y velocity [m/s]
+
+
+
 
 
 void GTC_Command(struct GTC_CmdPacket *GTC_Cmd)
@@ -336,6 +360,44 @@ void GTC_Command(struct GTC_CmdPacket *GTC_Cmd)
             break;
 
 
+        case 91: // Gazebo Velocity Trajectory (Instantaneous Acceleration)
+
+            Traj_Type = CONST_VEL_GZ;
+            axis = (axis_direction)GTC_Cmd->cmd_flag;
+
+            switch(axis){
+
+                case x_axis:
+
+                    s_0_t[0] = GTC_Cmd->cmd_val1;   // Starting position [m]
+                    v_t[0] = GTC_Cmd->cmd_val2;     // Desired velocity [m/s]
+                    a_t[0] = 0.0f;                  // Acceleration [m/s^2]
+
+                    t_traj[0] = 0.0f; // Reset timer
+                    break;
+
+                case y_axis:
+
+                    s_0_t[1] = GTC_Cmd->cmd_val1;
+                    v_t[1] = GTC_Cmd->cmd_val2;
+                    a_t[1] = 0.0f;
+
+                    t_traj[1] = 0.0f;
+                    break;
+
+                case z_axis:
+
+                    s_0_t[2] = GTC_Cmd->cmd_val1;
+                    v_t[2] = GTC_Cmd->cmd_val2;
+                    a_t[2] = 0.0f;
+
+                    t_traj[2] = 0.0f;
+                    break;
+                    
+            }
+
+            break;
+
         case 11: // Constant Velocity Trajectory
 
             Traj_Type = CONST_VEL;
@@ -397,6 +459,19 @@ void GTC_Command(struct GTC_CmdPacket *GTC_Cmd)
             PWM_override[2] = GTC_Cmd->cmd_val3;
             PWM_override[3] = GTC_Cmd->cmd_flag;
 
+            break;
+
+        
+
+        case 93: // UPDATE PLANE POSITION
+
+            r_PO.x = GTC_Cmd->cmd_val1;
+            r_PO.y = GTC_Cmd->cmd_val2;
+            r_PO.z = GTC_Cmd->cmd_val3;
+            Plane_Angle = GTC_Cmd->cmd_flag;
+
+            calcPlaneNormal(Plane_Angle);
+            
             break;
     }
 
@@ -558,6 +633,24 @@ uint16_t thrust2PWM(float f)
     }
 
     return PWM;
+}
+
+void calcPlaneNormal(float Plane_Angle)
+{
+    // UPDATE LANDING SURFACE PARAMETERS
+    n_hat.x = sinf(Plane_Angle*Deg2Rad);
+    n_hat.y = 0;
+    n_hat.z = -cosf(Plane_Angle*Deg2Rad);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_x.x = -cosf(Plane_Angle*Deg2Rad);
+    t_x.y = 0;
+    t_x.z = -sinf(Plane_Angle*Deg2Rad);
+
+    // DEFINE PLANE TANGENT UNIT-VECTOR
+    t_y.x = 0;
+    t_y.y = 1;
+    t_y.z = 0;
 }
 
 

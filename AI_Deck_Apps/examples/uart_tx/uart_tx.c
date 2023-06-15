@@ -7,7 +7,7 @@ over UART1 to the crazyflie STM micro-processor.
 #include "pmsis.h"
 
 // DEFINE DATA ARRAY
-uint8_t value_arr[] = {1,2,3};
+static PI_L2 float value_arr[] = {1.0f,2.0f,3.0f};
 
 static void UART_Task(void)
 {
@@ -30,13 +30,11 @@ static void UART_Task(void)
   }
   pi_uart_open(&device);
 
-  uint8_t val = 1;
-
   while(1)
   {
     // WRITE VALUE ARRAY TO CF OVER UART1
-    // value_arr[0] += 1; // Increment first value of array
-    pi_uart_write(&device, &val, sizeof(uint8_t));
+    value_arr[0] += 1; // Increment first value of array
+    pi_uart_write(&device, &value_arr, sizeof(value_arr));
 
     // WAIT
     pi_time_wait_us(500000); // Wait 0.5s [500,000 us]
