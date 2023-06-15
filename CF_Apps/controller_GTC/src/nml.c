@@ -1260,14 +1260,14 @@ double nml_mat_sum_elem(nml_mat *m)
 
 
 void nml_mat_print_CF(nml_mat *matrix) {
-    consolePrintf("\n=========================\n\n");
+    DEBUG_PRINT("\n=========================\n\n");
     for (int i = 0; i < matrix->num_rows; i++)
     {
         for (int j = 0; j < matrix->num_cols; j++)
         {
-            consolePrintf("%.5f ",(double)matrix->data[i][j]);
+            DEBUG_PRINT("%.5f ",(double)matrix->data[i][j]);
         }
-        consolePrintf("\n");
+        DEBUG_PRINT("\n");
     }
-    consolePrintf("\n=========================\n\n");
+    DEBUG_PRINT("\n=========================\n\n");
 }
