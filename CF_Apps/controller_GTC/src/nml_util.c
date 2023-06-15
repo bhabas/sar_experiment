@@ -10,3 +10,9 @@ void nml_log(const char* str)
 {
     DEBUG_PRINT("%s %s %s",YELLOW,str,RESET);
 }
+
+void NP_CHECK(void* ptr) {
+    if(ptr == NULL) {
+        DEBUG_PRINT("%s Pointer is NULL. %s\n",YELLOW,RESET);
+    } 
+}

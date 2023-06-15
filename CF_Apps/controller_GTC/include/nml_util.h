@@ -28,6 +28,9 @@ extern "C" {
 #include <debug.h>
 
 
+
+// -----------------------------------------------------------------------------
+
 // Enable this to allow debugging messages
 #define DEBUG_TRUE 1
 
@@ -42,11 +45,22 @@ extern "C" {
 #define RESET "\033[0m"
 
 double nml_rand_interval(double min, double max);
-
 void nml_log(const char* str);
+void NP_CHECK(void* ptr);
+
+
+#define NML_FLOG(fmt) nml_log(fmt)
+
+
+#define NML_FINFO(fmt) nml_log(fmt)
+
+
+#define NML_FERROR(fmt) nml_log(fmt)
 
 
 #define NML_ERROR(fmt) nml_log(fmt)
+
+
 
 
 #ifdef __cplusplus

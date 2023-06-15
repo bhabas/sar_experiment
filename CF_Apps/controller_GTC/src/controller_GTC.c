@@ -304,6 +304,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         compressFlipStates();
 
         #ifdef CONFIG_SAR_EXP
+        safeModeEnable = true;
         if(safeModeEnable)
         {
             motorsSetRatio(MOTOR_M1, 0);
