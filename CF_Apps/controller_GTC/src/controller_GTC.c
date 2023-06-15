@@ -37,6 +37,46 @@ bool controllerOutOfTreeTest() {
   return true;
 }
 
+typedef struct nml_mat_s {
+  int num_rows;
+  int num_cols;
+  double **data;
+  int is_square;
+} nml_mat;
+
+// Dynamically allocates a new matrix struct
+nml_mat *nml_mat_new(int num_rows, int num_cols) {
+
+  nml_mat *m = malloc(1*sizeof(*m));
+  m->num_rows = num_rows;
+  m->num_cols = num_cols;
+  m->is_square = (num_rows == num_cols) ? 1 : 0;
+  m->data = malloc(m->num_rows*sizeof(*m->data));
+  for(int i = 0; i < m->num_rows; ++i) {
+    m->data[i] = malloc(m->num_cols*sizeof(**m->data));
+  }
+
+  for(int i = 0; i < num_rows; i++) {
+    for(int j = 0; j < num_cols; j++) {
+      m->data[i][j] = 0;
+    }
+  }
+  return m;
+}
+
+void nml_mat_print_CF(nml_mat *matrix) {
+    consolePrintf("\n=========================\n\n");
+    for (int i = 0; i < matrix->num_rows; i++)
+    {
+        for (int j = 0; j < matrix->num_cols; j++)
+        {
+            consolePrintf("%.5f ",matrix->data[i][j]);
+        }
+        consolePrintf("\n");
+    }
+    consolePrintf("\n=========================\n\n");
+}
+
 
 void controllerOutOfTreeInit() {
 
@@ -49,7 +89,12 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeTest();
     J = mdiag(Ixx,Iyy,Izz);
 
+    nml_mat* X = nml_mat_new(3,1);
+    nml_mat_print_CF(X);
+
     consolePrintf("GTC Initiated\n");
+
+
 
 }
 
