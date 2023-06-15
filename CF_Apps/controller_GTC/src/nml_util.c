@@ -6,7 +6,7 @@ double nml_rand_interval(double min, double max) {
   return (min + d * (max - min));
 }
 
-void NML_ERROR()
+void nml_log(const char* str)
 {
-    DEBUG_PRINT("NML Error");
+    DEBUG_PRINT("%s %s %s",YELLOW,str,RESET);
 }

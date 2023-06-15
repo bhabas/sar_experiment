@@ -43,7 +43,11 @@ extern "C" {
 
 double nml_rand_interval(double min, double max);
 
-void NML_ERROR();
+void nml_log(const char* str);
+
+
+#define NML_ERROR(fmt) nml_log(fmt)
+
 
 #ifdef __cplusplus
 }
