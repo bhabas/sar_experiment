@@ -24,14 +24,9 @@ extern "C" {
 #include <stdarg.h>
 #include <time.h>
 
-// #define NP_CHECK(ptr) \
-//         if (!(ptr)) { \
-//             fprintf(stderr, "%s:%d NULL POINTER: %s n", \
-//                 __FILE__, __LINE__, (#ptr)); \
-//             exit(-1); \
-//         } \
+#define DEBUG_MODULE "NML"
+#include <debug.h>
 
-// -----------------------------------------------------------------------------
 
 // Enable this to allow debugging messages
 #define DEBUG_TRUE 1
@@ -48,32 +43,7 @@ extern "C" {
 
 double nml_rand_interval(double min, double max);
 
-// void nml_log(FILE *stream, const char *file_name,
-//   unsigned int line, const char *format, ...);
-
-// void nml_vlog(FILE* stream, const char *file_name,
-//   unsigned int line, const char *format, va_list argp);
-
-// #define NML_FLOG(stream, fmt, ...) \
-//       if (DEBUG_TRUE) { \
-//         nml_log(stream, __FILE__, __LINE__, fmt, __VA_ARGS__); \
-//       } \
-
-// #define NML_FINFO(fmt, ...) \
-//       if (DEBUG_TRUE) { \
-//           nml_log(stdout, __FILE__, __LINE__, fmt, __VA_ARGS__); \
-//       } \
-
-// #define NML_FERROR(fmt, ...) \
-//       if (DEBUG_TRUE) { \
-//           nml_log(stderr, __FILE__, __LINE__, RED fmt RESET, __VA_ARGS__); \
-//       } \
-
-// #define NML_ERROR(fmt) \
-//       if (DEBUG_TRUE) { \
-//         nml_log(stderr, __FILE__, __LINE__, RED fmt RESET); \
-//       } \
-
+void NML_ERROR();
 
 #ifdef __cplusplus
 }
