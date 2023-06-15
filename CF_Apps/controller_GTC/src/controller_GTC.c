@@ -52,9 +52,17 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeReset();
     controllerOutOfTreeTest();
     J = mdiag(Ixx,Iyy,Izz);
+    X = nml_mat_new(3,1);
 
-    nml_mat* X = nml_mat_rnd(3,1,0,1);
-    nml_mat_print_CF(X);
+    // INIT DEEP RL NN POLICY
+    DeepRL_Output = nml_mat_new(2,1);
+    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    consolePrintf("val: %c\n",NN_Params_DeepRL[0]);
+
+    // // INIT NN/OC_SVM POLICY
+    // NN_init(&NN_Policy_Action,NN_Params_Flip);
+    // OC_SVM_init(&SVM_Policy_Flip,SVM_Params);
+
 
     consolePrintf("GTC Initiated\n");
 
@@ -180,6 +188,10 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     // POLICY UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
+        X->data[0][0] = Tau;
+        X->data[1][0] = Theta_x;
+        X->data[2][0] = D_perp; 
+
         if(policy_armed_flag == true){
             
             switch (Policy)
@@ -214,6 +226,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         break;
 
                     break;
+
+                case DEEP_RL:
+                    // NN_predict_DeepRL(X,DeepRL_Output,&NN_DeepRL);
             
             default:
                 break;

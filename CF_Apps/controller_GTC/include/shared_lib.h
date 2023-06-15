@@ -9,10 +9,16 @@ extern "C" {
 #include "math3d.h"
 #include "pm.h"
 #include "quatcompress.h"
+#include "nml.h"
 
 #include "controller_GTC.h"
 #include "traj_funcs.h"
+#include "ML_funcs.h"
 #include "CompressStates.h"
+
+// #include "ML_Params/NN_Layers_NL_DR.h"
+// #include "ML_Params/SVM_Params_NL_DR.h"
+#include "ML_Params/NN_Layers_NL_DeepRL.h"
 
 
 #define PWM_MAX 60000
@@ -216,6 +222,20 @@ extern bool onceFlag;
 // POLICY TRIGGER/ACTION VALUES
 extern float Policy_Flip;  
 extern float Policy_Action;
+
+
+// ===============================
+//  DEEP RL POLICY INITIALIZATION
+// ===============================
+extern nml_mat* X;  // STATE MATRIX TO BE INPUT INTO NN
+extern NN NN_DeepRL;
+extern nml_mat* DeepRL_Output;
+
+// ===============================
+//  NN/SVM POLICY INITIALIZATION
+// ===============================
+extern SVM SVM_Policy_Flip;     
+extern NN NN_Policy_Action;
 
 
 
