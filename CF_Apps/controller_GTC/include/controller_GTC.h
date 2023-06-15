@@ -7,6 +7,7 @@ extern "C" {
 // STANDARD LIBRARIES
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
@@ -20,7 +21,6 @@ extern "C" {
 
 // CUSTOM LIBRARIES
 #include "shared_lib.h"
-
 
 #ifdef CONFIG_SAR_EXP
 #include "FreeRTOS.h"

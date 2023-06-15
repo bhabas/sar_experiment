@@ -35,37 +35,40 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "uart1.h"
-#include "log.h"
-// #include "example_task.h"
-
 
 #define DEBUG_MODULE "HELLOWORLD"
 #include "debug.h"
-#include "log.h"
-char c = 'A';
-int input = 0;
+#include <stdlib.h>
 
 
 void appMain() {
-  DEBUG_PRINT("Waiting for activation ...\n");
-  uart1Init(UART1_BAUDRATE);
+    DEBUG_PRINT("Waiting for activation ...\n");
+
+    // Allocate memory for an array of 10 integers.
+    int *arr = (int *)malloc(10 * sizeof(int));
+    if (arr == NULL) {
+        DEBUG_PRINT("Memory allocation failed.\n");
+    }
 
 
-  while(1) {
-    vTaskDelay(M2T(2000));
-    consolePrintf("Hello World!\n");
-    // exampleTaskEnqueueInput(input);
-    input++;
+    // Initialize the array with values.
+    for (int i = 0; i < 10; i++) {
+        arr[i] = i;
+    }
 
-    // uart1Getchar(&c);
-    // DEBUG_PRINT("Value: %d\n",(int)c);
+    // Print the array elements.
+    DEBUG_PRINT("Array elements are:\n");
+    for (int i = 0; i < 10; i++) {
+        DEBUG_PRINT("%d ", arr[i]);
+    }
 
+    DEBUG_PRINT("\n");
 
-  }
+    // // Free the memory.
+    free(arr);
+
+    while(1) {
+        vTaskDelay(M2T(2000));
+        DEBUG_PRINT("Hello World!\n");
+    }
 }
-
-
-LOG_GROUP_START(my_LOG)
-LOG_ADD(LOG_UINT8, my_char, &c)
-LOG_GROUP_STOP(my_LOG)

@@ -38,18 +38,27 @@ bool controllerOutOfTreeTest() {
 }
 
 
+typedef struct nml_mat_s {
+  int num_rows;
+  int num_cols;
+  double **data;
+  int is_square;
+} nml_mat;
+
+nml_mat *nml_mat_new(int num_rows, int num_cols) {
+
+    nml_mat *m = malloc(sizeof(*m));
+
+    return m;
+}
+
+nml_mat* X;
+
 void controllerOutOfTreeInit() {
 
-    #ifdef CONFIG_SAR_EXP
-    ledSet(LED_BLUE_L, 0);
-    ledSet(LED_BLUE_NRF, 0);
-    #endif
+    X = nml_mat_new(3,1);
 
-    controllerOutOfTreeReset();
-    controllerOutOfTreeTest();
-    J = mdiag(Ixx,Iyy,Izz);
-
-    consolePrintf("GTC Initiated\n");
+    // X = malloc(sizeof(*X));
 
 }
 
