@@ -241,7 +241,6 @@ nml_mat* nml_mat_fromstr(char* str)
     unsigned int num_rows = 0, num_cols = 0;
     char* value_token;
     char* save_ptrLoc;  
-    nml_mat* r;
 
     // INIT MATRIX
     value_token = strtok_r(str,",",&save_ptrLoc); 
@@ -250,7 +249,7 @@ nml_mat* nml_mat_fromstr(char* str)
     value_token = strtok_r(NULL,",",&save_ptrLoc);      // Pickup at last ptr location
     num_cols = atoi(value_token);
     
-    r = nml_mat_new(num_rows,num_cols);
+    nml_mat* r = nml_mat_new(num_rows,num_cols);
 
     // ITERATE THROUGH REMAINING LINES AND VALUES
     for (int i = 0; i < num_rows; i++)

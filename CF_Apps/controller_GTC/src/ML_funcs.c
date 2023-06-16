@@ -105,31 +105,16 @@ void NN_init(NN* NN, char str[])
     array_str = strtok_r(NULL,"*",&save_ptr);
     NN->scaler_std = nml_mat_fromstr(array_str);
 
-    array_str = strtok_r(NULL,"*",&save_ptr); // Load next array string
 
-    NN->W[0] = nml_mat_fromstr(array_str); // Weights
-    array_str = strtok_r(NULL,"*",&save_ptr);
+    // INITIALIZE NETWORK WEIGHTS AND BIASES FROM HEADER FILE VALUES
+    for (int i = 0; i < NN->num_layers; i++)
+    {
+        array_str = strtok_r(NULL,"*",&save_ptr);
+        NN->W[i] = nml_mat_fromstr(array_str); // Weights
 
-    NN->b[0] = nml_mat_fromstr(array_str); // Biases
-    array_str = strtok_r(NULL,"*",&save_ptr);
-
-
-
-    NN->W[1] = nml_mat_fromstr(array_str); // Weights // THIS MATRIX IS TOO BIG
-    // array_str = strtok_r(NULL,"*",&save_ptr);
-
-    // NN->b[1] = nml_mat_fromstr(array_str); // Biases
-    // array_str = strtok_r(NULL,"*",&save_ptr);
-
-    // // INITIALIZE NETWORK WEIGHTS AND BIASES FROM HEADER FILE VALUES
-    // for (int i = 0; i < NN->num_layers; i++)
-    // {
-    //     NN->W[i] = nml_mat_fromstr(array_str); // Weights
-    //     array_str = strtok_r(NULL,"*",&save_ptr);
-
-    //     NN->b[i] = nml_mat_fromstr(array_str); // Biases
-    //     array_str = strtok_r(NULL,"*",&save_ptr);
-    // }
+        array_str = strtok_r(NULL,"*",&save_ptr);
+        NN->b[i] = nml_mat_fromstr(array_str); // Biases
+    }
 
 }
 
