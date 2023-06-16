@@ -241,7 +241,7 @@ nml_mat* nml_mat_fromstr(char* str)
     unsigned int num_rows = 0, num_cols = 0;
     char* value_token;
     char* save_ptrLoc;  
-
+    nml_mat* r;
 
     // INIT MATRIX
     value_token = strtok_r(str,",",&save_ptrLoc); 
@@ -250,7 +250,7 @@ nml_mat* nml_mat_fromstr(char* str)
     value_token = strtok_r(NULL,",",&save_ptrLoc);      // Pickup at last ptr location
     num_cols = atoi(value_token);
     
-    nml_mat* r = nml_mat_new(num_rows,num_cols);
+    r = nml_mat_new(num_rows,num_cols);
 
     // ITERATE THROUGH REMAINING LINES AND VALUES
     for (int i = 0; i < num_rows; i++)
@@ -258,10 +258,10 @@ nml_mat* nml_mat_fromstr(char* str)
        for (int j = 0; j < num_cols; j++)
         {
             value_token = strtok_r(NULL,",",&save_ptrLoc);
-            r->data[i][j] = atof(value_token);
+            r->data[i][j] = str_to_double(value_token);
         }
     }
-  
+
     return r;
 }
 
@@ -1271,3 +1271,29 @@ void nml_mat_print_CF(nml_mat *matrix) {
     }
     DEBUG_PRINT("\n=========================\n\n");
 }
+
+
+double str_to_double(const char *str) {
+    double result = 0, factor = 1;
+
+    if (*str == '-') {
+        str++;
+        factor = -1;
+    }
+
+    for (int decimal_seen = 0; *str; str++) {
+        if (*str == '.') {
+            decimal_seen = 1; 
+            continue;
+        }
+
+        int digit = *str - '0';
+        if (digit >= 0 && digit <= 9) {
+            if (decimal_seen) factor /= 10.0;
+            result = result * 10.0 + (double)digit;
+        }
+    }
+
+    return result * factor;
+}
+

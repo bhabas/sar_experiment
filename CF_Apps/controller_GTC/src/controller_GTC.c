@@ -55,9 +55,8 @@ void controllerOutOfTreeInit() {
     X = nml_mat_new(3,1);
 
     // INIT DEEP RL NN POLICY
+    NN_init(&NN_DeepRL,NN_Params_DeepRL);
     DeepRL_Output = nml_mat_new(2,1);
-    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
-    consolePrintf("val: %c\n",NN_Params_DeepRL[0]);
 
     // // INIT NN/OC_SVM POLICY
     // NN_init(&NN_Policy_Action,NN_Params_Flip);

@@ -194,6 +194,7 @@ nml_mat *nml_mat_funcElement(nml_mat *m,float (*Function)(float x));
 double nml_mat_sum_elem(nml_mat *m);
 nml_mat* extend_row_vec(nml_mat* vec, int num_rows);
 void nml_mat_print_CF(nml_mat *matrix);
+double str_to_double(const char *str);
 
 
 #ifdef __cplusplus
