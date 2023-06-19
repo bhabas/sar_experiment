@@ -209,6 +209,17 @@ nml_mat *nml_mat_cp(nml_mat *m) {
   return r;
 }
 
+int nml_mat_cp_r(nml_mat *m, nml_mat *m_cp) {
+
+  int i,j;
+  for(i = 0; i < m->num_rows; i++) {
+    for(j = 0; j < m->num_cols; j++) {
+      m_cp->data[i][j] = m->data[i][j];
+    }
+  }
+  return 1;
+}
+
 nml_mat *nml_mat_fromfile(const char *file) {
   FILE *m_file = fopen(file, "r");
   if (NULL == m_file) {
@@ -1230,7 +1241,7 @@ nml_mat* extend_row_vec(nml_mat* vec, int num_rows)
   return m;
 }
 
-nml_mat *nml_mat_funcElement(nml_mat *m,float (*Function)(float x)) {
+nml_mat *nml_mat_funcElement(nml_mat *m, float (*Function)(float x)) {
   nml_mat *r = nml_mat_cp(m);
 
   int i, j;
@@ -1259,7 +1270,7 @@ double nml_mat_sum_elem(nml_mat *m)
 
 
 void nml_mat_print_CF(nml_mat *matrix) {
-    DEBUG_PRINT("\n=========================\n\n");
+    DEBUG_PRINT("=========================\n\n");
     for (int i = 0; i < matrix->num_rows; i++)
     {
         for (int j = 0; j < matrix->num_cols; j++)
@@ -1268,7 +1279,7 @@ void nml_mat_print_CF(nml_mat *matrix) {
         }
         DEBUG_PRINT("\n");
     }
-    DEBUG_PRINT("\n=========================\n\n");
+    DEBUG_PRINT("=========================\n\n");
 }
 
 

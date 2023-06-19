@@ -16,8 +16,6 @@ extern "C" {
 #include "ML_funcs.h"
 #include "CompressStates.h"
 
-// #include "ML_Params/NN_Layers_NL_DR.h"
-// #include "ML_Params/SVM_Params_NL_DR.h"
 #include "ML_Params/NN_Layers_NL_DeepRL.h"
 
 
@@ -214,6 +212,9 @@ typedef enum {
 }PolicyType;
 extern PolicyType Policy;
 
+extern nml_mat* X_input;    // STATE MATRIX TO BE INPUT INTO POLICY
+extern nml_mat* Y_output;   // POLICY OUTPUT MATRIX
+
 // POLICY FLAGS
 extern bool policy_armed_flag;
 extern bool flip_flag;
@@ -227,15 +228,8 @@ extern float Policy_Action;
 // ===============================
 //  DEEP RL POLICY INITIALIZATION
 // ===============================
-extern nml_mat* X;  // STATE MATRIX TO BE INPUT INTO NN
-extern NN NN_DeepRL;
-extern nml_mat* DeepRL_Output;
 
-// ===============================
-//  NN/SVM POLICY INITIALIZATION
-// ===============================
-extern SVM SVM_Policy_Flip;     
-extern NN NN_Policy_Action;
+extern NN NN_DeepRL;
 
 
 

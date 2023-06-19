@@ -52,15 +52,15 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeReset();
     controllerOutOfTreeTest();
     J = mdiag(Ixx,Iyy,Izz);
-    X = nml_mat_new(3,1);
+    X_input = nml_mat_new(3,1);
+    Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
-    DeepRL_Output = nml_mat_new(2,1);
+    NN_predict(X_input,Y_output,&NN_DeepRL);
 
-    // // INIT NN/OC_SVM POLICY
-    // NN_init(&NN_Policy_Action,NN_Params_Flip);
-    // OC_SVM_init(&SVM_Policy_Flip,SVM_Params);
+    nml_mat_print_CF(Y_output);
+
 
 
     consolePrintf("GTC Initiated\n");
@@ -187,9 +187,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     // POLICY UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
-        X->data[0][0] = Tau;
-        X->data[1][0] = Theta_x;
-        X->data[2][0] = D_perp; 
+        X_input->data[0][0] = Tau;
+        X_input->data[1][0] = Theta_x;
+        X_input->data[2][0] = D_perp; 
 
         if(policy_armed_flag == true){
             

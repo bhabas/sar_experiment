@@ -199,7 +199,8 @@ bool camera_sensor_active = false;
 
 // DEFINE POLICY TYPE ACTIVATED
 PolicyType Policy = PARAM_OPTIM;
-nml_mat* X;  // STATE MATRIX TO BE INPUT INTO POLICY
+nml_mat* X_input;    // STATE MATRIX TO BE INPUT INTO POLICY
+nml_mat* Y_output;  // POLICY OUTPUT MATRIX
 
 // POLICY FLAGS
 bool policy_armed_flag = false;
@@ -213,14 +214,8 @@ float Policy_Action = 0.0f;
 // ===============================
 //  DEEP RL POLICY INITIALIZATION
 // ===============================
-NN NN_DeepRL;
-nml_mat* DeepRL_Output;
 
-// ===============================
-//  NN/SVM POLICY INITIALIZATION
-// ===============================
-SVM SVM_Policy_Flip;     
-NN NN_Policy_Action;
+NN NN_DeepRL;
 
 
 // ======================================
