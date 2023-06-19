@@ -29,7 +29,7 @@ void NN_init(NN* NN, char str[])
 
 }
 
-void NN_predict(nml_mat* X_input, nml_mat* Y_output, NN* NN)
+void NN_forward(nml_mat* X_input, nml_mat* Y_output, NN* NN)
 {
     // SCALE INPUT DATA
     nml_mat* X_copy = nml_mat_cp(X_input);
@@ -71,25 +71,6 @@ void NN_predict(nml_mat* X_input, nml_mat* Y_output, NN* NN)
     nml_mat_free(a1);
     nml_mat_free(a2);
     nml_mat_free(a3);
-
-    // // SAMPLE ACTIONS FROM DISTRIBUTIONS
-    // float mu_1 = WX3->data[0][0];
-    // float mu_2 = WX3->data[1][0];
-    // float std_1 = exp(WX3->data[2][0]); // Convert log_std to normal std
-    // float std_2 = exp(WX3->data[3][0]);
-
-    // float action_1 = GaussianSample(mu_1,std_1);
-    // float action_2 = GaussianSample(mu_2,std_2);
-
-    // // SCALE ACTIONS
-    // action_1 = action_1;
-    // action_2 = scale_tanhAction(action_2,0.0f,8.0f);
-
-    // y_output->data[0][0] = action_1;
-    // y_output->data[1][0] = action_2;
-
-    
-
 
 }
 

@@ -17,4 +17,4 @@ math to maximize performance.
 
 - The WiFi module and the gap8 are a bit sensitive to voltage drops, so if your drone is very close to max weight and/or the battery is not the best anymore I would expect problems
 
-- Log variables are limited to a length up to 26 as total log variable length (group + name +1) 
+- Log variables are limited to a length up to 26 as total log variable length (group + name + 1) 

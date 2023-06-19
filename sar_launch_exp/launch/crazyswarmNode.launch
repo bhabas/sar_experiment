@@ -57,6 +57,7 @@
       "valsLog.Tumbled_Flag",
       "valsLog.Moment_Flag",
       "valsLog.Policy_Armed_Flag",
+      "valsLog.Policy_Trg_Act", "valsLog.Policy_Flip_Act"
       ]
 
       <!-- SIZE: (0/26) BYTES -->
