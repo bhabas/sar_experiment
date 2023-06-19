@@ -57,8 +57,7 @@ void controllerOutOfTreeInit() {
 
     // INIT DEEP RL NN POLICY
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
-    NN_forward(X_input,Y_output,&NN_DeepRL);
-    nml_mat_print_CF(Y_output);
+    
 
 
     consolePrintf("GTC Initiated\n");
@@ -185,14 +184,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         X_input->data[0][0] = Tau;
         X_input->data[1][0] = Theta_x;
         X_input->data[2][0] = D_perp; 
-
-        // SAMPLE ACTIONS FROM DISTRIBUTIONS
-        Policy_Trg_Action = GaussianSample(Y_output->data[0][0],exp(Y_output->data[2][0]));
-        Policy_Flip_Action = GaussianSample(Y_output->data[1][0],exp(Y_output->data[3][0]));
-
-
-        // SCALE BODY ROTATION ACTION
-        Policy_Flip_Action = scale_tanhAction(Policy_Flip_Action,ACTION_MIN,ACTION_MAX);
         
 
         if(policy_armed_flag == true){
@@ -200,11 +191,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             switch (Policy)
             {
                 case PARAM_OPTIM:
+
+                    // EXECUTE POLICY IF TRIGGERED
                     if(Tau <= Policy_Trg_Action && onceFlag == false && V_perp > 0.1f){
+
                         onceFlag = true;
-                        flip_flag = true;  
 
                         // UPDATE AND RECORD FLIP VALUES
+                        flip_flag = true;  
                         statePos_tr = statePos;
                         stateVel_tr = stateVel;
                         stateQuat_tr = stateQuat;
@@ -226,13 +220,50 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         M_z_flip = M_d.z*1e3f;
                         }
                         
-                        break;
-
                     break;
 
                 case DEEP_RL:
+
+                    // PASS OBSERVATION THROUGH POLICY NN
+                    NN_forward(X_input,Y_output,&NN_DeepRL);
+
+                    // SAMPLE POLICY TRIGGER ACTION
+                    Policy_Trg_Action = GaussianSample(Y_output->data[0][0],exp(Y_output->data[2][0]));
+
+                    // EXECUTE POLICY
+                    if(Policy_Trg_Action >= Policy_Flip_threshold && onceFlag == false && V_perp > 0.1f){
+
+                        onceFlag = true;
+
+                        // SAMPLE AND SCALE BODY FLIP ACTION
+                        Policy_Flip_Action = GaussianSample(Y_output->data[1][0],exp(Y_output->data[3][0]));
+                        Policy_Flip_Action = scale_tanhAction(Policy_Flip_Action,ACTION_MIN,ACTION_MAX);
+
+                        // UPDATE AND RECORD FLIP VALUES
+                        flip_flag = true;  
+                        statePos_tr = statePos;
+                        stateVel_tr = stateVel;
+                        stateQuat_tr = stateQuat;
+                        stateOmega_tr = stateOmega;
+
+                        Tau_tr = Tau;
+                        Theta_x_tr = Theta_x_tr;
+                        Theta_y_tr = Theta_y_tr;
+                        D_perp_tr = D_perp;
+
                     
-            
+                        M_d.x = 0.0f;
+                        M_d.y = -Policy_Flip_Action*1e-3f;
+                        M_d.z = 0.0f;
+
+                        F_thrust_flip = 0.0;
+                        M_x_flip = M_d.x*1e3f;
+                        M_y_flip = M_d.y*1e3f;
+                        M_z_flip = M_d.z*1e3f;
+                        }
+                        
+                    break;
+                    
             default:
                 break;
             }

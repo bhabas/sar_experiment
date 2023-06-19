@@ -191,11 +191,6 @@ extern bool safeModeEnable;
 extern bool customThrust_flag;
 extern bool customPWM_flag;
 
-// POLICY FLAGS
-extern bool policy_armed_flag;
-extern bool flip_flag;
-extern bool onceFlag;
-
 // SENSOR FLAGS
 extern bool camera_sensor_active;
 
@@ -233,6 +228,8 @@ extern float ACTION_MAX;
 // ===============================
 
 extern NN NN_DeepRL;
+extern float Policy_Flip_threshold;
+
 
 
 

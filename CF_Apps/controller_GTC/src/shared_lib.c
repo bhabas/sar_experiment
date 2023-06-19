@@ -219,6 +219,8 @@ float ACTION_MAX = 8.0f;
 // ===============================
 
 NN NN_DeepRL;
+float Policy_Flip_threshold = 1.50f;
+
 
 
 // ======================================
