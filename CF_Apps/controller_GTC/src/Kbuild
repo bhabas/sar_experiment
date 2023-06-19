@@ -1,9 +1,9 @@
-obj-y += controller_GTC.o
-obj-y += shared_lib.o
-obj-y += CompressStates.o
-obj-y += traj_funcs.o
+obj-y += Controller_GTC.o
+obj-y += Shared_Lib.o
+obj-y += Compress_States.o
+obj-y += Traj_Funcs.o
+obj-y += ML_Funcs.o
 obj-y += nml.o
 obj-y += nml_util.o
-obj-y += ML_funcs.o
 
 
