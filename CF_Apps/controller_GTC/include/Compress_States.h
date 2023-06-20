@@ -34,7 +34,7 @@ struct {
     int16_t wz;
 
     // Compressed actuation states
-    uint32_t Mxy;   // [N*um]
+    uint32_t Mxy;   // [N*um]Values
     uint32_t FMz;   // [mN | N*um]
 
     uint32_t MS_PWM12; 
@@ -50,7 +50,7 @@ struct {
 
     uint32_t NN_FP; // NN_flip,NN_policy
 
-} StatesZ_GTC;
+} StatesZ_CTRL;
 
 
 struct {
@@ -64,7 +64,7 @@ struct {
     uint32_t axy; // Compress accelerations [mm/s^2]
     int16_t az;
 
-} setpointZ_GTC;
+} setpointZ_CTRL;
 
 
 struct {
@@ -91,6 +91,6 @@ struct {
 
     uint32_t NN_FP; // NN_flip,NN_policy
 
-} FlipStatesZ_GTC;
+} FlipStatesZ_CTRL;
 
 

@@ -381,79 +381,79 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 
 #ifdef CONFIG_SAR_EXP
-LOG_GROUP_START(LogStates_GTC)
-LOG_ADD(LOG_UINT32, Z_xy,   &StatesZ_GTC.xy)
-LOG_ADD(LOG_INT16,  Z_z,    &StatesZ_GTC.z)
+LOG_GROUP_START(States_CTRL)
+LOG_ADD(LOG_UINT32, Z_xy,   &StatesZ_CTRL.xy)
+LOG_ADD(LOG_INT16,  Z_z,    &StatesZ_CTRL.z)
 
-LOG_ADD(LOG_UINT32, Z_vxy,  &StatesZ_GTC.vxy)
-LOG_ADD(LOG_INT16,  Z_vz,   &StatesZ_GTC.vz)
+LOG_ADD(LOG_UINT32, Z_vxy,  &StatesZ_CTRL.vxy)
+LOG_ADD(LOG_INT16,  Z_vz,   &StatesZ_CTRL.vz)
 
-LOG_ADD(LOG_UINT32, Z_quat, &StatesZ_GTC.quat)
+LOG_ADD(LOG_UINT32, Z_quat, &StatesZ_CTRL.quat)
 
-LOG_ADD(LOG_UINT32, Z_wxy,  &StatesZ_GTC.wxy)
-LOG_ADD(LOG_INT16,  Z_wz,   &StatesZ_GTC.wz)
+LOG_ADD(LOG_UINT32, Z_wxy,  &StatesZ_CTRL.wxy)
+LOG_ADD(LOG_INT16,  Z_wz,   &StatesZ_CTRL.wz)
 
-LOG_ADD(LOG_UINT32, Z_Thetaxy, &StatesZ_GTC.Theta_xy)
-LOG_ADD(LOG_INT16,  Z_Tau,  &StatesZ_GTC.Tau)
-LOG_ADD(LOG_INT16,  Z_D_perp, &StatesZ_GTC.D_perp)
+LOG_ADD(LOG_UINT32, Z_Thetaxy, &StatesZ_CTRL.Theta_xy)
+LOG_ADD(LOG_INT16,  Z_Tau,  &StatesZ_CTRL.Tau)
+LOG_ADD(LOG_INT16,  Z_D_perp, &StatesZ_CTRL.D_perp)
 
-LOG_ADD(LOG_UINT32, Z_FMz, &StatesZ_GTC.FMz)
-LOG_ADD(LOG_UINT32, Z_Mxy, &StatesZ_GTC.Mxy)
+LOG_ADD(LOG_UINT32, Z_FMz, &StatesZ_CTRL.FMz)
+LOG_ADD(LOG_UINT32, Z_Mxy, &StatesZ_CTRL.Mxy)
 
-LOG_ADD(LOG_UINT32, Z_f_12, &StatesZ_GTC.M_thrust12)
-LOG_ADD(LOG_UINT32, Z_f_34, &StatesZ_GTC.M_thrust34)
+LOG_ADD(LOG_UINT32, Z_f_12, &StatesZ_CTRL.M_thrust12)
+LOG_ADD(LOG_UINT32, Z_f_34, &StatesZ_CTRL.M_thrust34)
 
-LOG_ADD(LOG_UINT32, Z_PWM12, &StatesZ_GTC.MS_PWM12)
-LOG_ADD(LOG_UINT32, Z_PWM34, &StatesZ_GTC.MS_PWM34)
+LOG_ADD(LOG_UINT32, Z_PWM12, &StatesZ_CTRL.MS_PWM12)
+LOG_ADD(LOG_UINT32, Z_PWM34, &StatesZ_CTRL.MS_PWM34)
 
-LOG_ADD(LOG_UINT32, Z_NN_FP, &StatesZ_GTC.NN_FP)
+LOG_ADD(LOG_UINT32, Z_NN_FP, &StatesZ_CTRL.NN_FP)
 
 LOG_ADD(LOG_UINT8, Z_vbat, &value1)
-LOG_GROUP_STOP(LogStateData_GTC)
+LOG_GROUP_STOP(States_CTRL)
 
 
 
-LOG_GROUP_START(LogSetPoints_GTC)
-LOG_ADD(LOG_UINT32, Z_xy,   &setpointZ_GTC.xy)
-LOG_ADD(LOG_INT16,  Z_z,    &setpointZ_GTC.z)
+LOG_GROUP_START(SetPoints_CTRL)
+LOG_ADD(LOG_UINT32, Z_xy,   &setpointZ_CTRL.xy)
+LOG_ADD(LOG_INT16,  Z_z,    &setpointZ_CTRL.z)
 
-LOG_ADD(LOG_UINT32, Z_vxy,  &setpointZ_GTC.vxy)
-LOG_ADD(LOG_INT16,  Z_vz,   &setpointZ_GTC.vz)
+LOG_ADD(LOG_UINT32, Z_vxy,  &setpointZ_CTRL.vxy)
+LOG_ADD(LOG_INT16,  Z_vz,   &setpointZ_CTRL.vz)
 
-LOG_ADD(LOG_UINT32, Z_axy,  &setpointZ_GTC.axy)
-LOG_ADD(LOG_INT16,  Z_az,   &setpointZ_GTC.az)
-LOG_GROUP_STOP(LogSetPoints_GTC)
+LOG_ADD(LOG_UINT32, Z_axy,  &setpointZ_CTRL.axy)
+LOG_ADD(LOG_INT16,  Z_az,   &setpointZ_CTRL.az)
+LOG_GROUP_STOP(SetPoints_CTRL)
 
 
-LOG_GROUP_START(LogFlipData_GTC)
-LOG_ADD(LOG_UINT32, Z_xy,   &FlipStatesZ_GTC.xy)
-LOG_ADD(LOG_INT16,  Z_z,    &FlipStatesZ_GTC.z)
+LOG_GROUP_START(FlipData_CTRL)
+LOG_ADD(LOG_UINT32, Z_xy,   &FlipStatesZ_CTRL.xy)
+LOG_ADD(LOG_INT16,  Z_z,    &FlipStatesZ_CTRL.z)
 
-LOG_ADD(LOG_UINT32, Zf_vxy,  &FlipStatesZ_GTC.vxy)
-LOG_ADD(LOG_INT16,  Z_vz,   &FlipStatesZ_GTC.vz)
+LOG_ADD(LOG_UINT32, Zf_vxy,  &FlipStatesZ_CTRL.vxy)
+LOG_ADD(LOG_INT16,  Z_vz,   &FlipStatesZ_CTRL.vz)
 
-LOG_ADD(LOG_UINT32, Z_quat, &FlipStatesZ_GTC.quat)
+LOG_ADD(LOG_UINT32, Z_quat, &FlipStatesZ_CTRL.quat)
 
-LOG_ADD(LOG_UINT32, Z_wxy,  &FlipStatesZ_GTC.wxy)
-LOG_ADD(LOG_INT16,  Z_wz,   &FlipStatesZ_GTC.wz)
+LOG_ADD(LOG_UINT32, Z_wxy,  &FlipStatesZ_CTRL.wxy)
+LOG_ADD(LOG_INT16,  Z_wz,   &FlipStatesZ_CTRL.wz)
 
-LOG_ADD(LOG_UINT32, Z_Thetaxy, &FlipStatesZ_GTC.Theta_xy)
-LOG_ADD(LOG_INT16,  Z_Tau,  &FlipStatesZ_GTC.Tau)
-LOG_ADD(LOG_INT16,  Z_D_perp, &FlipStatesZ_GTC.D_perp)
+LOG_ADD(LOG_UINT32, Z_Thetaxy, &FlipStatesZ_CTRL.Theta_xy)
+LOG_ADD(LOG_INT16,  Z_Tau,  &FlipStatesZ_CTRL.Tau)
+LOG_ADD(LOG_INT16,  Z_D_perp, &FlipStatesZ_CTRL.D_perp)
 
 LOG_ADD(LOG_UINT8, Flip_Flag, &flip_flag)
-LOG_GROUP_STOP(LogFlipData_GTC)
+LOG_GROUP_STOP(FlipData_CTRL)
 
 
-LOG_GROUP_START(valsLog)
-LOG_ADD(LOG_FLOAT, Pos_Ctrl_Flag, &kp_xf)
-LOG_ADD(LOG_FLOAT, Vel_Ctrl_Flag, &kd_xf)
-LOG_ADD(LOG_UINT8, Motorstop_Flag, &motorstop_flag)
-LOG_ADD(LOG_UINT8, Tumbled_Flag, &tumbled)
+LOG_GROUP_START(CTRL_Flags)
+LOG_ADD(LOG_FLOAT, Pos_Ctrl, &kp_xf)
+LOG_ADD(LOG_FLOAT, Vel_Ctrl, &kd_xf)
+LOG_ADD(LOG_UINT8, Motorstop, &motorstop_flag)
+LOG_ADD(LOG_UINT8, Tumbled, &tumbled)
 LOG_ADD(LOG_UINT8, Tumble_Detect, &tumble_detection)
-LOG_ADD(LOG_UINT8, Moment_Flag, &moment_flag)
-LOG_ADD(LOG_UINT8, Policy_Armed_Flag, &policy_armed_flag)
-LOG_ADD(LOG_FLOAT, Policy_Trg_Act, &Policy_Trg_Action)
-LOG_ADD(LOG_FLOAT, Policy_Flip_Act, &Policy_Flip_Action)
-LOG_GROUP_STOP(valsLog)
+LOG_ADD(LOG_UINT8, Moment, &moment_flag)
+LOG_ADD(LOG_UINT8, Pol_Armed, &policy_armed_flag)
+LOG_ADD(LOG_FLOAT, Pol_Trg_Act, &Policy_Trg_Action)
+LOG_ADD(LOG_FLOAT, Pol_Flip_Act, &Policy_Flip_Action)
+LOG_GROUP_STOP(CTRL_Flags)
 #endif

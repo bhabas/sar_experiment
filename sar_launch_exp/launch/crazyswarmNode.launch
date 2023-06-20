@@ -15,49 +15,48 @@
 
       <!-- THIS IS MAXED OUT (26/26) BYTES -->
       genericLogTopic_log1_Variables: [
-      "LogStates_GTC.Z_xy",    "LogStates_GTC.Z_z",
-      "LogStates_GTC.Z_vxy",   "LogStates_GTC.Z_vz",
-      "LogStates_GTC.Z_quat",
-      "LogStates_GTC.Z_wxy",
-      "LogStates_GTC.Z_Thetaxy",  "LogStates_GTC.Z_Tau",
+      "States_CTRL.Z_xy",    "States_CTRL.Z_z",
+      "States_CTRL.Z_vxy",   "States_CTRL.Z_vz",
+      "States_CTRL.Z_quat",
+      "States_CTRL.Z_wxy",
+      "States_CTRL.Z_Thetaxy",  "States_CTRL.Z_Tau",
       ]
 
       <!-- THIS IS MAXED OUT (26/26) BYTES -->
       genericLogTopic_log2_Variables: [
-      "LogStates_GTC.Z_wz",
-      "LogStates_GTC.Z_D_perp",
-      "LogStates_GTC.Z_FMz",   "LogStates_GTC.Z_Mxy",
-      "LogStates_GTC.Z_PWM12", "LogStates_GTC.Z_PWM34",
-      "LogStates_GTC.Z_NN_FP",
-      "LogFlipData_GTC.Flip_Flag",
-      "LogStates_GTC.Z_vbat"
+      "States_CTRL.Z_wz",
+      "States_CTRL.Z_D_perp",
+      "States_CTRL.Z_FMz",   "States_CTRL.Z_Mxy",
+      "States_CTRL.Z_PWM12", "States_CTRL.Z_PWM34",
+      "States_CTRL.Z_NN_FP",
+      "FlipData_CTRL.Flip_Flag",
+      "States_CTRL.Z_vbat"
       ]
 
       <!-- SIZE: (26/26) BYTES -->
       genericLogTopic_log3_Variables: [
-      "LogSetPoints_GTC.Z_xy",   "LogSetPoints_GTC.Z_z",
-      "LogSetPoints_GTC.Z_vxy",  "LogSetPoints_GTC.Z_vz",
-      "LogSetPoints_GTC.Z_axy",  "LogSetPoints_GTC.Z_az",
-      "LogStates_GTC.Z_f_12",    "LogStates_GTC.Z_f_34",
+      "SetPoints_CTRL.Z_xy",   "SetPoints_CTRL.Z_z",
+      "SetPoints_CTRL.Z_vxy",  "SetPoints_CTRL.Z_vz",
+      "SetPoints_CTRL.Z_axy",  "SetPoints_CTRL.Z_az",
+      "States_CTRL.Z_f_12",    "States_CTRL.Z_f_34",
       ]
 
       <!-- SIZE: (24/26) BYTES -->
       genericLogTopic_log4_Variables: [
-      "LogFlipData_GTC.Z_z",    "LogFlipData_GTC.Z_D_perp",
-      "LogFlipData_GTC.Zf_vxy",  "LogFlipData_GTC.Z_vz",
-      "LogFlipData_GTC.Z_quat",
-      "LogFlipData_GTC.Z_wxy",
-      "LogFlipData_GTC.Z_Thetaxy", "LogFlipData_GTC.Z_Tau",
+      "FlipData_CTRL.Z_z",    "FlipData_CTRL.Z_D_perp",
+      "FlipData_CTRL.Zf_vxy",  "FlipData_CTRL.Z_vz",
+      "FlipData_CTRL.Z_quat",
+      "FlipData_CTRL.Z_wxy",
+      "FlipData_CTRL.Z_Thetaxy", "FlipData_CTRL.Z_Tau",
       ]
 
       <!-- SIZE: (0/26) BYTES -->
       genericLogTopic_log5_Variables: [
-      "valsLog.Motorstop_Flag", "valsLog.Pos_Ctrl_Flag",
-      "valsLog.Vel_Ctrl_Flag",  "valsLog.Pos_Ctrl_Flag",
-      "valsLog.Tumbled_Flag",
-      "valsLog.Moment_Flag",
-      "valsLog.Policy_Armed_Flag",
-      "valsLog.Policy_Trg_Act", "valsLog.Policy_Flip_Act"
+      "CTRL_Flags.Pos_Ctrl",  "CTRL_Flags.Vel_Ctrl",
+      "CTRL_Flags.Motorstop", "CTRL_Flags.Moment",
+      "CTRL_Flags.Tumbled","CTRL_Flags.Tumble_Detect",
+      "CTRL_Flags.Pol_Armed",
+      "CTRL_Flags.Pol_Trg_Act", "CTRL_Flags.Pol_Flip_Act"
       ]
 
       <!-- SIZE: (0/26) BYTES -->
