@@ -1,71 +1,60 @@
-/**
- * ,---------,       ____  _ __
- * |  ,-^-,  |      / __ )(_) /_______________ _____  ___
- * | (  O  ) |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
- * | / ,--´  |    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
- *    +------`   /_____/_/\__/\___/_/   \__,_/ /___/\___/
- *
- * Crazyflie control firmware
- *
- * Copyright (C) 2019 Bitcraze AB
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, in version 3.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- *
- * hello_world.c - App layer application of a simple hello world debug print every
- *   2 seconds.
- */
-
-
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "app.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "FreeRTOS.h"
+#include "app.h"
 #include "task.h"
-#include "uart1.h"
-#include "log.h"
-// #include "example_task.h"
-
 
 #define DEBUG_MODULE "HELLOWORLD"
 #include "debug.h"
-#include "log.h"
-char c = 'A';
-int input = 0;
 
+double str_to_double(const char *str) {
+    double result = 0, factor = 1;
 
-void appMain() {
-  DEBUG_PRINT("Waiting for activation ...\n");
-  uart1Init(UART1_BAUDRATE);
+    if (*str == '-') {
+        str++;
+        factor = -1;
+    }
 
+    for (int decimal_seen = 0; *str; str++) {
+        if (*str == '.') {
+            decimal_seen = 1; 
+            continue;
+        }
 
-  while(1) {
-    vTaskDelay(M2T(2000));
-    consolePrintf("Hello World!\n");
-    // exampleTaskEnqueueInput(input);
-    input++;
+        int digit = *str - '0';
+        if (digit >= 0 && digit <= 9) {
+            if (decimal_seen) factor /= 10.0;
+            result = result * 10.0 + (double)digit;
+        }
+    }
 
-    // uart1Getchar(&c);
-    // DEBUG_PRINT("Value: %d\n",(int)c);
-
-
-  }
+    return result * factor;
 }
 
+void appMain() 
+{
+    DEBUG_PRINT("Waiting for activation ...\n");
+    
+    // CONVERSION TO INT WORKS
+    char int_string[] = "4";
+    consolePrintf("Int Str: %s\n",int_string);
+    int int_val = atoi(int_string);
+    consolePrintf("Int Val: %d\n",int_val);
 
-LOG_GROUP_START(my_LOG)
-LOG_ADD(LOG_UINT8, my_char, &c)
-LOG_GROUP_STOP(my_LOG)
+    // CONVERSION TO FLOAT DOESN'T WORK
+    char float_string[] = "-7.124";
+    consolePrintf("Float Str: %s\n",float_string);
+    double float_val = str_to_double(float_string);
+    consolePrintf("Float Val: %f\n",float_val);
+
+
+
+    while(1) {
+        vTaskDelay(M2T(2000));
+        DEBUG_PRINT("Hello World!\n");
+    }
+}

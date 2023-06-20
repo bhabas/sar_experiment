@@ -45,10 +45,10 @@
 #define ARRAY_LENGTH 3
 
 
-float myArray[3] = {0.0f,0.0f,0.0f}; // array to store the 3 float values
-uint8_t tempArray[sizeof(float) * 3]; // temporary array of char to store the received data
+uint8_t myArray[3] = {0,0,0}; // array to store the 3 float values
+uint8_t tempArray[sizeof(uint8_t) * 3]; // temporary array of char to store the received data
 
-
+uint8_t val = 0;
 
 void appMain() {
   DEBUG_PRINT("Waiting for activation ...\n");
@@ -58,13 +58,16 @@ void appMain() {
   while(1) {
     vTaskDelay(M2T(500));
 
-    uart1GetBytesWithDefaultTimeout(sizeof(tempArray),tempArray);
+    uart1GetDataWithDefaultTimeout(&val);
+    // uart1GetBytesWithDefaultTimeout(sizeof(tempArray),tempArray);
 
-    for (int i = 0; i < 3; i++) {
-      memcpy(&myArray[i], &tempArray[i * sizeof(float)], sizeof(float));
-    }
+    // for (int i = 0; i < 3; i++) {
+    //   memcpy(&myArray[i], &tempArray[i * sizeof(uint8_t)], sizeof(uint8_t));
+    // }
 
-    consolePrintf("Value1: %f \t Value2: %f \t Value3: %f\n",(double)myArray[0],(double)myArray[1],(double)myArray[2]);
+    consolePrintf("Value: %d\n",val);
+
+    // consolePrintf("Value1: %f \t Value2: %f \t Value3: %f\n",(double)myArray[0],(double)myArray[1],(double)myArray[2]);
   }
 }
 
