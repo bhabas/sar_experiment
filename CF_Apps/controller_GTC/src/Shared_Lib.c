@@ -199,7 +199,7 @@ bool camera_sensor_active = false;
 
 // DEFINE POLICY TYPE ACTIVATED
 PolicyType Policy = PARAM_OPTIM;
-nml_mat* X_input;    // STATE MATRIX TO BE INPUT INTO POLICY
+nml_mat* X_input;   // STATE MATRIX TO BE INPUT INTO POLICY
 nml_mat* Y_output;  // POLICY OUTPUT MATRIX
 
 // POLICY FLAGS

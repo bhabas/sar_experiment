@@ -30,7 +30,6 @@
       "States_CTRL.Z_PWM12", "States_CTRL.Z_PWM34",
       "States_CTRL.Z_NN_FP",
       "FlipData_CTRL.Flip_Flag",
-      "States_CTRL.Z_vbat"
       ]
 
       <!-- SIZE: (26/26) BYTES -->

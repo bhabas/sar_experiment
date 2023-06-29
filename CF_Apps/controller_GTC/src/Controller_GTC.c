@@ -1,7 +1,6 @@
 #include "Controller_GTC.h"
 
 
-uint8_t value1 = 5;
 void appMain() {
 
     while (1)
@@ -38,10 +37,6 @@ bool controllerOutOfTreeTest() {
 }
 
 
-
-
-
-
 void controllerOutOfTreeInit() {
 
     #ifdef CONFIG_SAR_EXP
@@ -51,7 +46,8 @@ void controllerOutOfTreeInit() {
 
     controllerOutOfTreeReset();
     controllerOutOfTreeTest();
-    J = mdiag(Ixx,Iyy,Izz);
+
+    // INIT DEEP RL NN POLICY
     X_input = nml_mat_new(3,1);
     Y_output = nml_mat_new(4,1);
 
@@ -68,6 +64,7 @@ void controllerOutOfTreeReset() {
 
     consolePrintf("GTC Controller Reset\n");
     consolePrintf("Policy_Type: %d\n",Policy);
+    J = mdiag(Ixx,Iyy,Izz);
 
     // RESET INTEGRATION ERRORS
     e_PI = vzero();
@@ -126,7 +123,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 {
 
     // OPTICAL FLOW UPDATES
-    if (RATE_DO_EXECUTE(100, tick)) {
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
         // UPDATE POS AND VEL
         r_BO = mkvec(state->position.x, state->position.y, state->position.z);
@@ -446,7 +443,6 @@ LOG_ADD(LOG_UINT32, Z_PWM34, &StatesZ_CTRL.MS_PWM34)
 
 LOG_ADD(LOG_UINT32, Z_NN_FP, &StatesZ_CTRL.NN_FP)
 
-LOG_ADD(LOG_UINT8, Z_vbat, &value1)
 LOG_GROUP_STOP(States_CTRL)
 
 
