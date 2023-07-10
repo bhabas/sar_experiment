@@ -42,36 +42,28 @@
 #define DEBUG_MODULE "HELLOWORLD"
 #include "debug.h"
 #include "log.h"
-#define ARRAY_LENGTH 3
 
 
-uint8_t myArray[3] = {0,0,0}; // array to store the 3 float values
-uint8_t tempArray[sizeof(uint8_t) * 3]; // temporary array of char to store the received data
-
-uint8_t val = 0;
+char my_char = 'C';
 
 void appMain() {
-  DEBUG_PRINT("Waiting for activation ...\n");
-  uart1Init(UART1_BAUDRATE);
+    DEBUG_PRINT("Waiting for activation ...\n");
+    uart1Init(115200);
+    consolePrintf("Value: %c\n",my_char);
 
 
-  while(1) {
-    vTaskDelay(M2T(500));
 
-    uart1GetDataWithDefaultTimeout(&val);
-    // uart1GetBytesWithDefaultTimeout(sizeof(tempArray),tempArray);
+    while(1) {
+        vTaskDelay(M2T(500));
 
-    // for (int i = 0; i < 3; i++) {
-    //   memcpy(&myArray[i], &tempArray[i * sizeof(uint8_t)], sizeof(uint8_t));
-    // }
+        // uart1GetDataWithDefaultTimeout(&my_char);
+        uart1Getchar(&my_char);
 
-    consolePrintf("Value: %d\n",val);
-
-    // consolePrintf("Value1: %f \t Value2: %f \t Value3: %f\n",(double)myArray[0],(double)myArray[1],(double)myArray[2]);
+        consolePrintf("Value: %c\n",my_char);
   }
 }
 
 
-// LOG_GROUP_START(my_LOG)
-// LOG_ADD(LOG_UINT8, my_char, &c)
-// LOG_GROUP_STOP(my_LOG)
+LOG_GROUP_START(my_LOG)
+LOG_ADD(LOG_UINT8, my_char, &my_char)
+LOG_GROUP_STOP(my_LOG)

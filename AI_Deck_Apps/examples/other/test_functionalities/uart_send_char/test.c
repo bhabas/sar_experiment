@@ -21,7 +21,7 @@
 
 
 static PI_L2 uint8_t command;
-static PI_L2 uint32_t value;
+static PI_L2 uint8_t value;
 
 static pi_task_t led_task;
 static int led_val = 0;
@@ -46,7 +46,7 @@ static void test_gap8(void)
   struct pi_uart_conf conf;
   struct pi_device device;
   pi_uart_conf_init(&conf);
-  conf.baudrate_bps =9600;
+  conf.baudrate_bps =115200;
   conf.enable_tx = 1;
   conf.enable_rx = 0;
 
@@ -63,20 +63,20 @@ static void test_gap8(void)
   }
 
   pi_uart_open(&device);
-  value = 34;
+  value = 0x54;
 
   while(1)
   {
-    // toggle LED when sending information
-    pi_gpio_pin_write(&gpio_device, 2, led_val);
-    led_val ^= 1;
-    pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);  
-
-    value++;
+    // // toggle LED when sending information
+    // pi_gpio_pin_write(&gpio_device, 2, led_val);
+    // led_val ^= 1;
+    // pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);  
   
-    // Write the value to uart
-    pi_uart_write(&device, &value, 1);
-
+  // Write the value to uart
+    // pi_uart_write(&device, &value, 1);
+    int err = pi_uart_write_byte(&device, &value);
+    printf("Error: %d\n",err);
+    pi_time_wait_us(500000);
   }
 
   pmsis_exit(0);

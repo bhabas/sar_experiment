@@ -1,45 +1,81 @@
 /*
-This is an example script that sends an array of float values 
-over UART1 to the crazyflie STM micro-processor.
-*/
+ * Copyright (C) 2018 GreenWaves Technologies
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-#include "stdio.h"
+
 #include "pmsis.h"
+#include "stdio.h"
 
-// DEFINE DATA ARRAY
-uint8_t value_arr[] = {1,2,3};
 
-static void UART_Task(void)
+static PI_L2 uint8_t command;
+static PI_L2 uint8_t value;
+
+static pi_task_t led_task;
+static int led_val = 0;
+
+static struct pi_device gpio_device;
+
+
+static void led_handle(void *arg)
 {
-  // SET UART CONFIGURATIONS
+  pi_gpio_pin_write(&gpio_device, 2, led_val);
+  led_val ^= 1;
+  pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);
+}
+
+
+
+static void test_gap8(void)
+{
+  printf("Entering main controller...\n");
+
+  // set configurations in uart
   struct pi_uart_conf conf;
   struct pi_device device;
   pi_uart_conf_init(&conf);
+  conf.baudrate_bps = 115200;
+  conf.enable_tx = 1;
+  conf.enable_rx = 0;
 
-  conf.baudrate_bps = 9600;   // Baud Rate - Must match receiver
-  conf.enable_tx = 1;         // Enable data transfer (TX)
-  conf.enable_rx = 0;         // Disable data reception (RX)
+  // configure LED
+  pi_gpio_pin_configure(&gpio_device, 2, PI_GPIO_OUTPUT);
 
-  // OPEN UART CONNECTION
+  // Open uart
   pi_open_from_conf(&device, &conf);
-  printf("[UART] Open\n"); // Print doesn't work here
+  printf("[UART] Open\n");
   if (pi_uart_open(&device))
   {
     printf("[UART] open failed !\n");
     pmsis_exit(-1);
   }
-  pi_uart_open(&device);
 
-  uint8_t val = 1;
+  pi_uart_open(&device);
+  value = 0x55;
 
   while(1)
   {
-    // WRITE VALUE ARRAY TO CF OVER UART1
-    // value_arr[0] += 1; // Increment first value of array
-    pi_uart_write(&device, &val, sizeof(uint8_t));
-
-    // WAIT
-    pi_time_wait_us(500000); // Wait 0.5s [500,000 us]
+    // // toggle LED when sending information
+    // pi_gpio_pin_write(&gpio_device, 2, led_val);
+    // led_val ^= 1;
+    // pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);  
+  
+  // Write the value to uart
+    // pi_uart_write(&device, &value, 1);
+    int err = pi_uart_write_byte(&device, &value);
+    printf("Error: %d\n",err);
+    pi_time_wait_us(500000);
   }
 
   pmsis_exit(0);
@@ -47,5 +83,5 @@ static void UART_Task(void)
 
 int main(void)
 {
-    return pmsis_kickoff((void *)UART_Task);
+    return pmsis_kickoff((void *)test_gap8);
 }
