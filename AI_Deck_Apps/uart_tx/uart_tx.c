@@ -21,6 +21,8 @@
 
 static PI_L2 uint8_t command;
 static PI_L2 uint8_t value;
+static PI_L2 uint8_t value_arr[2] = {'Q','R'};
+
 
 static pi_task_t led_task;
 static int led_val = 0;
@@ -62,7 +64,7 @@ static void test_gap8(void)
   }
 
   pi_uart_open(&device);
-  value = 0x55;
+  value = 'B';
 
   while(1)
   {
@@ -72,8 +74,9 @@ static void test_gap8(void)
     // pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);  
   
   // Write the value to uart
-    // pi_uart_write(&device, &value, 1);
-    int err = pi_uart_write_byte(&device, &value);
+    int err = 1;
+    pi_uart_write(&device, &value_arr, 2);
+    // int err = pi_uart_write_byte(&device, &value);
     printf("Error: %d\n",err);
     pi_time_wait_us(500000);
   }
