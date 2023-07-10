@@ -17,12 +17,14 @@
 
 #include "pmsis.h"
 #include "stdio.h"
+#define reverse_bytes_32(num) ( ((num & 0xFF000000) >> 24) | ((num & 0x00FF0000) >> 8) | ((num & 0x0000FF00) << 8) | ((num & 0x000000FF) << 24) )
 
 
 static PI_L2 uint8_t command;
-static PI_L2 uint8_t value;
-static PI_L2 uint8_t value_arr[2] = {'Q','R'};
 
+static PI_L2 int32_t  valueToSend = 1234;
+static PI_L2 uint8_t buffer[sizeof(int32_t) + 1];
+int result;
 
 static pi_task_t led_task;
 static int led_val = 0;
@@ -30,58 +32,55 @@ static int led_val = 0;
 static struct pi_device gpio_device;
 
 
-static void led_handle(void *arg)
-{
-  pi_gpio_pin_write(&gpio_device, 2, led_val);
-  led_val ^= 1;
-  pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);
-}
-
-
 
 static void test_gap8(void)
 {
-  printf("Entering main controller...\n");
+    printf("Entering main controller...\n");
 
-  // set configurations in uart
-  struct pi_uart_conf conf;
-  struct pi_device device;
-  pi_uart_conf_init(&conf);
-  conf.baudrate_bps = 115200;
-  conf.enable_tx = 1;
-  conf.enable_rx = 0;
+    // set configurations in uart
+    struct pi_uart_conf conf;
+    struct pi_device device;
+    pi_uart_conf_init(&conf);
+    conf.baudrate_bps = 115200;
+    conf.enable_tx = 1;
+    conf.enable_rx = 0;
 
-  // configure LED
-  pi_gpio_pin_configure(&gpio_device, 2, PI_GPIO_OUTPUT);
+    // configure LED
+    pi_gpio_pin_configure(&gpio_device, 2, PI_GPIO_OUTPUT);
 
-  // Open uart
-  pi_open_from_conf(&device, &conf);
-  printf("[UART] Open\n");
-  if (pi_uart_open(&device))
-  {
-    printf("[UART] open failed !\n");
-    pmsis_exit(-1);
-  }
+    // Open uart
+    pi_open_from_conf(&device, &conf);
+    printf("[UART] Open\n");
+    if (pi_uart_open(&device))
+    {
+        printf("[UART] open failed !\n");
+        pmsis_exit(-1);
+    }
 
-  pi_uart_open(&device);
-  value = 'B';
+    pi_uart_open(&device);
+    valueToSend = reverse_bytes_32(valueToSend);
+    
+    memcpy(buffer, &valueToSend, sizeof(int32_t));
+    buffer[sizeof(int32_t)] = '\0';  // Append the delimiter
 
-  while(1)
-  {
-    // // toggle LED when sending information
-    // pi_gpio_pin_write(&gpio_device, 2, led_val);
-    // led_val ^= 1;
-    // pi_task_push_delayed_us(pi_task_callback(&led_task, led_handle, NULL), 500000);  
-  
-  // Write the value to uart
-    int err = 1;
-    pi_uart_write(&device, &value_arr, 2);
-    // int err = pi_uart_write_byte(&device, &value);
-    printf("Error: %d\n",err);
-    pi_time_wait_us(500000);
-  }
+    while(1)
+    {
 
-  pmsis_exit(0);
+        // Send the value
+        result = pi_uart_write(&device, buffer, sizeof(buffer));
+
+        if (result == 0) {
+            printf("Value successfully sent!\n");
+        } else {
+            printf("Failed to send value, error code: %d\n", result);
+        }
+
+
+
+        pi_time_wait_us(500000);
+    }
+
+    pmsis_exit(0);
 }
 
 int main(void)

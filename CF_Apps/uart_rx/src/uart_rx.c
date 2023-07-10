@@ -44,28 +44,23 @@
 #include "log.h"
 
 
-char my_char = 'C';
+
+uint8_t receivedBytes[10];
+
 
 void appMain() {
     DEBUG_PRINT("Waiting for activation ...\n");
     uart1Init(115200);
-    consolePrintf("Value: %c\n",my_char);
 
-    char char_arr[2] = {'A','B'};
 
     while(1) {
         vTaskDelay(M2T(500));
 
-        // uart1GetDataWithDefaultTimeout(&my_char);
-        // uart1GetDataWithTimeout(&my_char,portMAX_DELAY);
-        uart1GetBytesWithDefaultTimeout(2,char_arr);
-        // uart1Getchar(&my_char);
-
-        consolePrintf("Value: %c \t Value: %c\n",char_arr[0],char_arr[1]);
-  }
+        uart1GetBytesWithDefaultTimeout(10,receivedBytes);
+        consolePrintf("Received Bytes: ");
+        for (int i = 0; i < 10; i++) {
+            consolePrintf("%02X ", receivedBytes[i]);  // Print each byte in hexadecimal
+        }
+        consolePrintf("\n");
+        }
 }
-
-
-LOG_GROUP_START(my_LOG)
-LOG_ADD(LOG_UINT8, my_char, &my_char)
-LOG_GROUP_STOP(my_LOG)
