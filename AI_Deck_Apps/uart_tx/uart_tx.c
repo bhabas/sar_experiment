@@ -15,22 +15,19 @@
  */
 
 
-#include "pmsis.h"
+#include "stdlib.h"
 #include "stdio.h"
+#include "pmsis.h"
 #define reverse_bytes_32(num) ( ((num & 0xFF000000) >> 24) | ((num & 0x00FF0000) >> 8) | ((num & 0x0000FF00) << 8) | ((num & 0x000000FF) << 24) )
 
 
-static PI_L2 uint8_t command;
+int32_t valueToSend = 1234;
+uint8_t delimiter = '\1';
+uint8_t escape = '\2';
 
-static PI_L2 int32_t  valueToSend = 1234;
-static PI_L2 uint8_t buffer[sizeof(int32_t) + 1];
+
+
 int result;
-
-static pi_task_t led_task;
-static int led_val = 0;
-
-static struct pi_device gpio_device;
-
 
 
 static void test_gap8(void)
@@ -45,9 +42,6 @@ static void test_gap8(void)
     conf.enable_tx = 1;
     conf.enable_rx = 0;
 
-    // configure LED
-    pi_gpio_pin_configure(&gpio_device, 2, PI_GPIO_OUTPUT);
-
     // Open uart
     pi_open_from_conf(&device, &conf);
     printf("[UART] Open\n");
@@ -58,16 +52,32 @@ static void test_gap8(void)
     }
 
     pi_uart_open(&device);
-    valueToSend = reverse_bytes_32(valueToSend);
+
+    uint8_t *buffer = pmsis_l2_malloc(6 * sizeof(uint8_t));  // Maximum possible size (each byte could be escaped and then the delimiter)
+    int bufferSize = 0;
+
+
+    // valueToSend = reverse_bytes_32(valueToSend);
+    uint8_t *valueBytes = (uint8_t *)&valueToSend;
     
-    memcpy(buffer, &valueToSend, sizeof(int32_t));
-    buffer[sizeof(int32_t)] = '\0';  // Append the delimiter
+    for (size_t i = 0; i < sizeof(int32_t); i++) {
+        if (valueBytes[i] == delimiter || valueBytes[i] == escape) {
+            buffer[bufferSize++] = escape;
+            buffer[bufferSize++] = valueBytes[i] + '\2';
+        } else {
+            buffer[bufferSize++] = valueBytes[i];
+        }
+    }
+
+
+    buffer[bufferSize++] = delimiter;
+
 
     while(1)
     {
 
         // Send the value
-        result = pi_uart_write(&device, buffer, sizeof(buffer));
+        result = pi_uart_write(&device, buffer, bufferSize);
 
         if (result == 0) {
             printf("Value successfully sent!\n");

@@ -45,7 +45,14 @@
 
 
 
-uint8_t receivedBytes[10];
+uint8_t delimiter = '\1';
+uint8_t escape = '\2';
+
+uint8_t receivedBytes[6];  // Maximum possible size
+int byteIndex = 0;
+bool lastByteWasEscape = false;
+int32_t value = 0;
+
 
 
 void appMain() {
@@ -56,11 +63,26 @@ void appMain() {
     while(1) {
         vTaskDelay(M2T(500));
 
-        uart1GetBytesWithDefaultTimeout(10,receivedBytes);
-        consolePrintf("Received Bytes: ");
-        for (int i = 0; i < 10; i++) {
-            consolePrintf("%02X ", receivedBytes[i]);  // Print each byte in hexadecimal
+        uint8_t byte;
+        uart1GetBytesWithDefaultTimeout(1, &byte);
+
+        consolePrintf("Received Byte: %02X\n", byte);  // Print each byte in hexadecimal
+
+
+        if (lastByteWasEscape) {
+            receivedBytes[byteIndex++] = byte - '\2';
+            lastByteWasEscape = false;
+        } else if (byte == escape) {
+            lastByteWasEscape = true;
+        } else if (byte == delimiter) {
+            memcpy(&value, receivedBytes, sizeof(int32_t));
+            consolePrintf("Received Value: %ld\n", value);
+            byteIndex = 0;
+        } else {
+            receivedBytes[byteIndex++] = byte;
         }
-        consolePrintf("\n");
-        }
+
+
+
+    }
 }
