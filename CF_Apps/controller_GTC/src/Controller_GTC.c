@@ -1,6 +1,7 @@
 #include "Controller_GTC.h"
 
-int32_t temp_arr[10] = {0};
+bool isOFUpdated = false;
+
 
 void appMain() {
 
@@ -54,8 +55,11 @@ void controllerOutOfTreeInit() {
 
     // INIT DEEP RL NN POLICY
     // NN_init(&NN_DeepRL,NN_Params_DeepRL);
-    
 
+    // INIT OPTICAL FLOW ESTIMATION MATRICES
+    A_mat = nml_mat_new(3,3);
+    b_vec = nml_mat_new(3,1);
+    OF_vec = nml_mat_new(3,1);
 
     consolePrintf("GTC Controller Initiated\n");
 }
@@ -116,7 +120,6 @@ void controllerOutOfTreeReset() {
 
 }
 
-bool printArr = false;
 
 void controllerOutOfTree(control_t *control,const setpoint_t *setpoint, 
                                             const sensorData_t *sensors, 
@@ -127,35 +130,52 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     // OPTICAL FLOW UPDATES
     if (RATE_DO_EXECUTE(2, tick)) {
         
-        // READING ARRAY
-        if(xSemaphoreTake(xMutex,(TickType_t)10) == pdTRUE)
-        {
-            if(isArrUpdated)
-            {
-                for (int i = 0; i < NUM_VALUES; i++) {
-                    temp_arr[i] = valArr[i];
-                }
-                isArrUpdated = false;
-                printArr = true;
-            }
-            xSemaphoreGive(xMutex);
+        // // READ ARRAY
+        // if(xSemaphoreTake(xMutex,(TickType_t)10) == pdTRUE)
+        // {
+        //     if(isArrUpdated)
+        //     {
+        //         for (int i = 0; i < NUM_VALUES; i++) {
+        //             UART_arr[i] = valArr[i];
+        //         }
+        //         isArrUpdated = false;
+        //         isOFUpdated = true;
+        //     }
+        //     xSemaphoreGive(xMutex);
             
-        }
+        // }
 
-        if (printArr == true)
-        {
-            // for (int i = 0; i < NUM_VALUES; i++) {
-            //     consolePrintf("%ld ",temp_arr[i]);
-            // }
-            consolePrintf("new val\n");
-            printArr = false;
-        }
-        
+        // if (isOFUpdated == true)
+        // {
+        //     isOFUpdated = false;
+        // }
 
-        
-        
-        
-        
+
+        double temp_Grad_vec[3] = {
+             9,
+            -3,
+             7,
+        };
+
+        double spatial_Grad_mat[9] = {
+            3, 1,-1,
+            2,-2, 1,
+            1, 1, 1,
+        };
+
+        nml_mat_fill_fromarr(b_vec,3,1,3,temp_Grad_vec);
+        nml_mat_fill_fromarr(A_mat,3,3,9,spatial_Grad_mat);
+
+
+        nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
+
+        OF_vec = nml_ls_solve(LUP,b_vec);
+        nml_mat_lup_free(LUP);
+
+        nml_mat_print_CF(OF_vec);
+
+
+
 
         // // UPDATE POS AND VEL
         // r_BO = mkvec(state->position.x, state->position.y, state->position.z);

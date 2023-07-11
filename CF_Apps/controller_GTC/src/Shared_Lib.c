@@ -151,7 +151,7 @@ float thrust_override[4] = {0.0f,0.0f,0.0f,0.0f};   // Motor thrusts [g]
 
 
 // =================================
-//          SENSORY VALUES
+//     OPTICAL FLOW ESTIMATION
 // =================================
 
 // OPTICAL FLOW STATES
@@ -171,6 +171,14 @@ float Tau_est = 0.0f;       // [s]
 float Theta_x_est = 0.0f;   // [rad/s]
 float Theta_y_est = 0.0f;   // [rad/s]
 float D_perp_est = 0.0f;    // [m]
+
+nml_mat* A_mat;
+nml_mat* b_vec;
+nml_mat* OF_vec;
+
+
+int32_t UART_arr[10];
+
 
 
 
