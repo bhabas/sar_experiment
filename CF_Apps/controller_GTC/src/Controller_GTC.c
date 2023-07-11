@@ -1,5 +1,6 @@
 #include "Controller_GTC.h"
 
+int32_t temp_arr[10] = {0};
 
 void appMain() {
 
@@ -52,7 +53,7 @@ void controllerOutOfTreeInit() {
     Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
-    NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
     
 
 
@@ -115,6 +116,7 @@ void controllerOutOfTreeReset() {
 
 }
 
+bool printArr = false;
 
 void controllerOutOfTree(control_t *control,const setpoint_t *setpoint, 
                                             const sensorData_t *sensors, 
@@ -123,32 +125,62 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 {
 
     // OPTICAL FLOW UPDATES
-    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
-
-        // UPDATE POS AND VEL
-        r_BO = mkvec(state->position.x, state->position.y, state->position.z);
-        V_BO = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);
-
-        // CALC DISPLACEMENT FROM PLANE CENTER
-        r_PB = vsub(r_PO,r_BO); 
-
-        // CALC RELATIVE DISTANCE AND VEL
-        D_perp = vdot(r_PB,n_hat) + 1e-6f;
-
-        V_perp = vdot(V_BO,n_hat);
-        V_tx = vdot(V_BO,t_x);
-        V_ty = vdot(V_BO,t_y);
-
-        if (fabsf(D_perp) < 0.02f)
+    if (RATE_DO_EXECUTE(2, tick)) {
+        
+        // READING ARRAY
+        if(xSemaphoreTake(xMutex,(TickType_t)10) == pdTRUE)
         {
-            D_perp = 0.0f;
+            if(isArrUpdated)
+            {
+                for (int i = 0; i < NUM_VALUES; i++) {
+                    temp_arr[i] = valArr[i];
+                }
+                isArrUpdated = false;
+                printArr = true;
+            }
+            xSemaphoreGive(xMutex);
+            
         }
 
-        // CALC OPTICAL FLOW VALUES
-        Theta_x = clamp(V_tx/D_perp,-20.0f,20.0f);
-        Theta_y = clamp(V_ty/D_perp,-20.0f,20.0f);
-        Theta_z = clamp(V_perp/D_perp,-20.0f,20.0f);
-        Tau = clamp(1/Theta_z,0.0f,5.0f);
+        if (printArr == true)
+        {
+            // for (int i = 0; i < NUM_VALUES; i++) {
+            //     consolePrintf("%ld ",temp_arr[i]);
+            // }
+            consolePrintf("new val\n");
+            printArr = false;
+        }
+        
+
+        
+        
+        
+        
+
+        // // UPDATE POS AND VEL
+        // r_BO = mkvec(state->position.x, state->position.y, state->position.z);
+        // V_BO = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);
+
+        // // CALC DISPLACEMENT FROM PLANE CENTER
+        // r_PB = vsub(r_PO,r_BO); 
+
+        // // CALC RELATIVE DISTANCE AND VEL
+        // D_perp = vdot(r_PB,n_hat) + 1e-6f;
+
+        // V_perp = vdot(V_BO,n_hat);
+        // V_tx = vdot(V_BO,t_x);
+        // V_ty = vdot(V_BO,t_y);
+
+        // if (fabsf(D_perp) < 0.02f)
+        // {
+        //     D_perp = 0.0f;
+        // }
+
+        // // CALC OPTICAL FLOW VALUES
+        // Theta_x = clamp(V_tx/D_perp,-20.0f,20.0f);
+        // Theta_y = clamp(V_ty/D_perp,-20.0f,20.0f);
+        // Theta_z = clamp(V_perp/D_perp,-20.0f,20.0f);
+        // Tau = clamp(1/Theta_z,0.0f,5.0f);
 
     }
 
