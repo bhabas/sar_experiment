@@ -50,8 +50,8 @@ static void test_gap8(void)
         buffer[bufferSize++] = delimiter;
     }
 
-    // while(1)
-    // {
+    while(1)
+    {
         int result = pi_uart_write(&device, buffer, bufferSize);
 
         if (result == 0) {
@@ -61,7 +61,7 @@ static void test_gap8(void)
         }
 
         pi_time_wait_us(500000);
-    // }
+    }
 
     pmsis_exit(0);
 }
