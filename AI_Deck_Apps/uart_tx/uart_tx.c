@@ -1,11 +1,15 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "pmsis.h"
-#define reverse_bytes_32(num) ( ((num & 0xFF000000) >> 24) | ((num & 0x00FF0000) >> 8) | ((num & 0x0000FF00) << 8) | ((num & 0x000000FF) << 24) )
+#define NUM_VAL 10
 
 uint8_t delimiter = '\1';
 uint8_t escape = '\2';
-int32_t valuesToSend[10] = {1234, 2345, 3456, 4567, 5678, 6789, 7890, 8901, 9012, 10123}; 
+uint8_t startMarker = '\3';
+uint8_t endMarker = '\4';
+
+int32_t values[NUM_VAL] = {1234, 2345, 3456, 4567, 5678, 6789, 7890, 8901, 9012, 10123}; 
+uint8_t *buffer;
 
 static void test_gap8(void)
 {
@@ -28,21 +32,30 @@ static void test_gap8(void)
         pmsis_exit(-1);
     }
 
-    pi_uart_open(&device);
-
     // Make sure to allocate enough space
-    uint8_t *buffer = pmsis_l2_malloc(10 * 6 * sizeof(uint8_t));  
+    buffer = pmsis_l2_malloc(NUM_VAL * 6 * sizeof(uint8_t));  
     int bufferSize = 0;
 
-    for (size_t valueIndex = 0; valueIndex < 10; ++valueIndex) {
-        int32_t valueToSend = valuesToSend[valueIndex];
+    // Begin transmission with start marker
+    buffer[bufferSize++] = startMarker;
+
+    for (size_t valueIndex = 0; valueIndex < NUM_VAL; valueIndex++) 
+    {
+        int32_t valueToSend = values[valueIndex];
+
+
+        // CAST VALUE TO SEND TO BYTE STRING
         uint8_t *valueBytes = (uint8_t *)&valueToSend;
 
-        for (size_t i = 0; i < sizeof(int32_t); i++) {
-            if (valueBytes[i] == delimiter || valueBytes[i] == escape) {
+        for (size_t i = 0; i < sizeof(int32_t); i++) 
+        {
+            if (valueBytes[i] == delimiter || valueBytes[i] == escape || valueBytes[i] == startMarker || valueBytes[i] == endMarker) 
+            {
                 buffer[bufferSize++] = escape;
-                buffer[bufferSize++] = valueBytes[i] + '\2';
-            } else {
+                buffer[bufferSize++] = valueBytes[i] + escape;
+            } 
+            else 
+            {
                 buffer[bufferSize++] = valueBytes[i];
             }
         }
@@ -50,17 +63,14 @@ static void test_gap8(void)
         buffer[bufferSize++] = delimiter;
     }
 
+    // Add end marker after transmitting all values
+    buffer[bufferSize++] = endMarker;
+
     while(1)
     {
         int result = pi_uart_write(&device, buffer, bufferSize);
 
-        if (result == 0) {
-            printf("Values successfully sent!\n");
-        } else {
-            printf("Failed to send values, error code: %d\n", result);
-        }
-
-        pi_time_wait_us(500000);
+        pi_time_wait_us(5000000);
     }
 
     pmsis_exit(0);

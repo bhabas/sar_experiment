@@ -20,3 +20,9 @@ math to maximize performance.
 - Log variables are limited to a length up to 26 as total log variable length (group + name + 1) 
 
 - If you make changes in the crazyswarm package, make sure you compile with catkin_make inside ros_ws and not just in catkin_ws. They are seperate things and both need to be compiled seperately.
+
+
+AI-Deck
+=======================
+- 'make all' will upload script that stays on deck and will run from start up.
+- 'make run' will upload script that goes away after reboot.
