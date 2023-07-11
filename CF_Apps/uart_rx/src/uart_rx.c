@@ -7,10 +7,11 @@
 #include "task.h"
 #include "uart1.h"
 #include "log.h"
+#include "debug.h"
 
 #define DEBUG_MODULE "UART"
-#include "debug.h"
-#include "log.h"
+#define NUM_VALUES 10  // The number of values expected
+
 
 uint8_t delimiter = '\1';
 uint8_t escape = '\2';
@@ -22,11 +23,11 @@ int byteIndex = 0;
 bool lastByteWasEscape = false;
 bool startMarkerReceived = false;
 
-int32_t value = 0;
 
-#define NUM_VALUES 10  // The number of values expected
-int32_t receivedValues[NUM_VALUES];  // Array to store received values
-int receivedValuesIndex = 0;  // Counter for number of received values
+int32_t value = 0;
+int32_t val_arr[NUM_VALUES];  // Array to store received values
+int valIndex = 0;  // Counter for number of received values
+bool arr_full = false;
 
 void appMain() {
     DEBUG_PRINT("Waiting for activation ...\n");
@@ -37,14 +38,11 @@ void appMain() {
         uint8_t byte;
         uart1GetBytesWithDefaultTimeout(1, &byte);
 
-        // Debug print
-        // consolePrintf("Received Byte: %02X\n", byte);  // Print each byte in hexadecimal
-
         // HANDLE START MARKER
         if (byte == startMarker) {
             startMarkerReceived = true;
             byteIndex = 0;  // Reset byte index
-            consolePrintf("Received start marker\n");  // Debug print
+            arr_full = false;
             continue;
         }
 
@@ -54,12 +52,10 @@ void appMain() {
 
         // HANDLE END MARKER
         if (byte == endMarker) {
-            startMarkerReceived = false; // ready to receive a new array
-            receivedValuesIndex = 0;  // reset the array index
-            consolePrintf("Received end marker\n");  // Debug print
+            startMarkerReceived = false;    // Ready to receive a new array
+            valIndex = 0;                   // Reset the array index
             continue;
         }
-
 
         // HANDLE ESCAPE SEQUENCE
         if (lastByteWasEscape) {
@@ -71,18 +67,28 @@ void appMain() {
         } 
         else if (byte == delimiter) {
             memcpy(&value, receivedBytes, sizeof(int32_t));
-            receivedValues[receivedValuesIndex++] = value;  // Store received value
-            consolePrintf("Received Value: %ld \t Index: %d\n", value, receivedValuesIndex);
+            val_arr[valIndex++] = value;  // Store received value
             byteIndex = 0;  
 
             // Reset counter if we received the expected number of values
-            if (receivedValuesIndex >= NUM_VALUES) {
-                receivedValuesIndex = 0;
-                consolePrintf("End\n");
+            if (valIndex >= NUM_VALUES) {
+                valIndex = 0;
+                arr_full = true;
+
             }
         } 
         else {
             receivedBytes[byteIndex++] = byte;
         }
+
+        if (arr_full == true)
+        {
+            for (int i = 0; i < NUM_VALUES; i++) {
+                consolePrintf("%ld ", val_arr[i]);
+            }
+            consolePrintf("\n");
+        }
+        
+        
     }
 }
