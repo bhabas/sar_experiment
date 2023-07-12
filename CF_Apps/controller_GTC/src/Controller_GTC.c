@@ -1,6 +1,6 @@
 #include "Controller_GTC.h"
 
-bool isOFUpdated = false;
+
 
 
 void appMain() {
@@ -128,56 +128,16 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 {
 
     // OPTICAL FLOW UPDATES
-    if (RATE_DO_EXECUTE(2, tick)) {
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
         
-        // // READ ARRAY
-        // if(xSemaphoreTake(xMutex,(TickType_t)10) == pdTRUE)
-        // {
-        //     if(isArrUpdated)
-        //     {
-        //         for (int i = 0; i < NUM_VALUES; i++) {
-        //             UART_arr[i] = valArr[i];
-        //         }
-        //         isArrUpdated = false;
-        //         isOFUpdated = true;
-        //     }
-        //     xSemaphoreGive(xMutex);
-            
-        // }
-
-        // if (isOFUpdated == true)
-        // {
-        //     isOFUpdated = false;
-        // }
-
-
-        // double temp_Grad_vec[3] = {
-        //      9,
-        //     -3,
-        //      7,
-        // };
-
-        // double spatial_Grad_mat[9] = {
-        //     3, 1,-1,
-        //     2,-2, 1,
-        //     1, 1, 1,
-        // };
-
-        // nml_mat_fill_fromarr(b_vec,3,1,3,temp_Grad_vec);
-        // nml_mat_fill_fromarr(A_mat,3,3,9,spatial_Grad_mat);
-
-
-        // nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
-
-        // OF_vec = nml_ls_solve(LUP,b_vec);
-        // nml_mat_lup_free(LUP);
-
-        // nml_mat_print_CF(OF_vec);
-
-
-
-
-        
+        if (isCamActive == true)
+        {
+            updateOpticalFlowEst();
+        }
+        else
+        {
+            updateOpticalFlowAnalytic(state,sensors);
+        }
 
     }
 
@@ -205,28 +165,17 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     }
 
     // POLICY UPDATES
-    if (RATE_DO_EXECUTE(2, tick)) {
+    if (isOFUpdated == true) {
 
-
-        // UPDATE POLICY VECTOR
-
-        if (isCamActive == true)
-        {
-            updateOpticalFlowEst();
-        }
-        else
-        {
-            updateOpticalFlowAnalytic();
-        }
-        
-        
-
-        X_input->data[0][0] = Tau;
-        X_input->data[1][0] = Theta_x;
-        X_input->data[2][0] = D_perp; 
-        
+        isOFUpdated = false;
 
         if(policy_armed_flag == true){
+
+            // UPDATE POLICY VECTOR
+            X_input->data[0][0] = Tau;
+            X_input->data[1][0] = Theta_x;
+            X_input->data[2][0] = D_perp; 
+        
             
             switch (Policy)
             {

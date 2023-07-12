@@ -294,7 +294,6 @@ void nml_mat_fill_fromarr(nml_mat *m,int num_rows, int num_cols, int n_vals, dou
         m->data[i][j] = (v_idx < n_vals) ? vals[v_idx] : 0.0;
         }
     }
-    return m;
 
 }
 
@@ -1288,9 +1287,9 @@ void nml_mat_print_CF(nml_mat *matrix) {
     {
         for (int j = 0; j < matrix->num_cols; j++)
         {
-            consolePrintf("%.5f ",(double)matrix->data[i][j]);
+            DEBUG_PRINT("%.5f ",(double)matrix->data[i][j]);
         }
-        consolePrintf("\n");
+        DEBUG_PRINT("\n");
     }
     DEBUG_PRINT("=========================\n\n");
 }

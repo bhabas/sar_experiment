@@ -181,7 +181,7 @@ extern nml_mat* b_vec;
 extern nml_mat* OF_vec;
 
 extern int32_t UART_arr[10];
-
+extern bool isOFUpdated;
 
 // =================================
 //  FLAGS AND SYSTEM INITIALIZATION
@@ -307,7 +307,7 @@ void controlOutput(const state_t *state, const sensorData_t *sensors);
 uint16_t thrust2PWM(float f);
 void updatePlaneNormal(float Plane_Angle);
 void updateOpticalFlowEst();
-void updateOpticalFlowAnalytic();
+void updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 
 
 
