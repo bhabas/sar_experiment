@@ -126,21 +126,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                                             const state_t *state, 
                                             const uint32_t tick) 
 {
-
-    // OPTICAL FLOW UPDATES
-    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
-        
-        if (isCamActive == true)
-        {
-            updateOpticalFlowEst();
-        }
-        else
-        {
-            updateOpticalFlowAnalytic(state,sensors);
-        }
-
-    }
-
     // TRAJECTORY UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
@@ -164,10 +149,29 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         }
     }
 
+    // OPTICAL FLOW UPDATES
+    if (RATE_DO_EXECUTE(5, tick)) {
+        
+        if (isCamActive == true)
+        {
+            isOFUpdated = updateOpticalFlowEst();
+            consolePrintf("Estimate\n");
+
+        }
+        else
+        {
+            isOFUpdated = updateOpticalFlowAnalytic(state,sensors);
+            consolePrintf("Analytic\n");
+        }
+
+    }
+
     // POLICY UPDATES
     if (isOFUpdated == true) {
 
         isOFUpdated = false;
+        consolePrintf("Updated\n");
+
 
         if(policy_armed_flag == true){
 

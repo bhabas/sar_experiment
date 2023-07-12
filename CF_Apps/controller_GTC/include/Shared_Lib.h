@@ -306,8 +306,8 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd);
 void controlOutput(const state_t *state, const sensorData_t *sensors);
 uint16_t thrust2PWM(float f);
 void updatePlaneNormal(float Plane_Angle);
-void updateOpticalFlowEst();
-void updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
+bool updateOpticalFlowEst();
+bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 
 
 
