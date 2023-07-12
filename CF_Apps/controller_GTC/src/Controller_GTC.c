@@ -56,11 +56,6 @@ void controllerOutOfTreeInit() {
     // INIT DEEP RL NN POLICY
     // NN_init(&NN_DeepRL,NN_Params_DeepRL);
 
-    // INIT OPTICAL FLOW ESTIMATION MATRICES
-    A_mat = nml_mat_new(3,3);
-    b_vec = nml_mat_new(3,1);
-    OF_vec = nml_mat_new(3,1);
-
     consolePrintf("GTC Controller Initiated\n");
 }
 
@@ -150,37 +145,42 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     }
 
     // OPTICAL FLOW UPDATES
-    if (RATE_DO_EXECUTE(5, tick)) {
-        
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick))
+    {
+        // UPDATE GROUND TRUTH OPTICAL FLOW
+        updateOpticalFlowAnalytic(state,sensors);
+
+        // POLICY VECTOR UPDATE
         if (isCamActive == true)
         {
+            // ONLY UPDATE WITH NEW OPTICAL FLOW DATA
             isOFUpdated = updateOpticalFlowEst();
-            consolePrintf("Estimate\n");
+
+            // UPDATE POLICY VECTOR
+            X_input->data[0][0] = Tau_est;
+            X_input->data[1][0] = Theta_x_est;
+            X_input->data[2][0] = D_perp; 
 
         }
         else
         {
-            isOFUpdated = updateOpticalFlowAnalytic(state,sensors);
-            consolePrintf("Analytic\n");
+            // UPDATE AT THE ABOVE FREQUENCY
+            isOFUpdated = true;
+
+            // // UPDATE POLICY VECTOR
+            // X_input->data[0][0] = Tau;
+            // X_input->data[1][0] = Theta_x;
+            // X_input->data[2][0] = D_perp; 
         }
-
     }
-
+    
     // POLICY UPDATES
     if (isOFUpdated == true) {
 
         isOFUpdated = false;
-        consolePrintf("Updated\n");
-
 
         if(policy_armed_flag == true){
 
-            // UPDATE POLICY VECTOR
-            X_input->data[0][0] = Tau;
-            X_input->data[1][0] = Theta_x;
-            X_input->data[2][0] = D_perp; 
-        
-            
             switch (Policy)
             {
                 case PARAM_OPTIM:

@@ -156,27 +156,17 @@ float thrust_override[4] = {0.0f,0.0f,0.0f,0.0f};   // Motor thrusts [g]
 //     OPTICAL FLOW ESTIMATION
 // =================================
 
-// OPTICAL FLOW STATES
+// OPTICAL FLOW STATES (GROUND TRUTH)
 float Tau = 0.0f;       // [s]
 float Theta_x = 0.0f;   // [rad/s] 
 float Theta_y = 0.0f;   // [rad/s]
-float Theta_z = 0.0f;   // [rad/s]
 
-// ANALYTICAL OPTICAL FLOW STATES
-float Tau_calc = 0.0f;       // [s]
-float Theta_x_calc = 0.0f;   // [rad/s] 
-float Theta_y_calc = 0.0f;   // [rad/s]
-float D_perp_calc = 0.0f;    // [m]
-
-// ESTIMATED OPTICAL FLOW STATES
+// OPTICAL FLOW STATES (CAMERA ESTIMATE)
 float Tau_est = 0.0f;       // [s]
 float Theta_x_est = 0.0f;   // [rad/s]
 float Theta_y_est = 0.0f;   // [rad/s]
-float D_perp_est = 0.0f;    // [m]
 
-nml_mat* A_mat;
-nml_mat* b_vec;
-nml_mat* OF_vec;
+
 
 
 int32_t UART_arr[10];
@@ -201,7 +191,7 @@ bool customPWM_flag = false;
 
 
 // SENSOR FLAGS
-bool isCamActive = true;
+bool isCamActive = false;
 
 
 // =================================
@@ -681,21 +671,27 @@ bool updateOpticalFlowEst()
     bool UpdateOpticalFlow = true;
 
     #ifdef CONFIG_SAR_EXP
-    // READ ARRAY
+    // REQUEST ACCESS TO UART ARRAY
     if(xSemaphoreTake(xMutex,(TickType_t)10) == pdTRUE)
     {
+        // CHECK FOR UPDATE TO ARRAY AND RETURN ACCESS
         if(isArrUpdated)
         {
-            for (int i = 0; i < NUM_VALUES; i++) {
+            // COPY ARRAY CONTENTS
+            for (int i = 0; i < NUM_VALUES; i++) 
+            {
                 UART_arr[i] = valArr[i];
             }
             isArrUpdated = false;
             UpdateOpticalFlow = true;
         }
+        
+        // RETURN ACCESS
         xSemaphoreGive(xMutex);
     }
     #endif
 
+    // CALC OPTICAL FLOW VALUES
     if (UpdateOpticalFlow)
     {
         // UPDATE Ax=b MATRICES FROM UART ARRAY
@@ -710,19 +706,24 @@ bool updateOpticalFlowEst()
             2,-2, 1,
             1, 1, 1,
         };
-        nml_mat_fill_fromarr(b_vec,3,1,3,temp_Grad_vec);
-        nml_mat_fill_fromarr(A_mat,3,3,9,spatial_Grad_mat);
 
         // SOLVE Ax=b EQUATION FOR OPTICAL FLOW VECTOR
+        nml_mat* A_mat = nml_mat_from(3,3,9,spatial_Grad_mat);
+        nml_mat* b_vec = nml_mat_from(3,1,3,temp_Grad_vec);
         nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
-        OF_vec = nml_ls_solve(LUP,b_vec);
-        nml_mat_lup_free(LUP);
+        nml_mat* OF_vec = nml_ls_solve(LUP,b_vec);
 
         // CLAMP OPTICAL FLOW VALUES
-        Theta_x = clamp(OF_vec->data[0][0],-20.0f,20.0f);
-        Theta_y = clamp(OF_vec->data[1][0],-20.0f,20.0f);
-        Theta_z = clamp(OF_vec->data[2][0],-20.0f,20.0f);
-        Tau = clamp(1/(OF_vec->data[0][0] + 1.0e-6),0.0f,5.0f);
+        Theta_x_est = clamp(OF_vec->data[0][0],-20.0f,20.0f);
+        Theta_y_est = clamp(OF_vec->data[1][0],-20.0f,20.0f);
+        Tau_est = clamp(1/(OF_vec->data[2][0] + 1.0e-6),0.0f,5.0f);
+
+
+        nml_mat_lup_free(LUP);
+        nml_mat_free(A_mat);
+        nml_mat_free(b_vec);
+        nml_mat_free(OF_vec);
+
 
         return true;
     }
@@ -757,8 +758,7 @@ bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors
     // CALC OPTICAL FLOW VALUES
     Theta_x = clamp(V_tx/D_perp,-20.0f,20.0f);
     Theta_y = clamp(V_ty/D_perp,-20.0f,20.0f);
-    Theta_z = clamp(V_perp/D_perp,-20.0f,20.0f);
-    Tau = clamp(1/Theta_z,0.0f,5.0f);
+    Tau = clamp(D_perp/(V_perp + 1e-6f),0.0f,5.0f);
 
     return true;
 }
