@@ -668,7 +668,7 @@ void updatePlaneNormal(float Plane_Angle)
 
 bool updateOpticalFlowEst()
 {
-    bool UpdateOpticalFlow = true;
+    bool UpdateOpticalFlow = false;
 
     #ifdef CONFIG_SAR_EXP
     // REQUEST ACCESS TO UART ARRAY

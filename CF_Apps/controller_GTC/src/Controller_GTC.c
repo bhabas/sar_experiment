@@ -167,10 +167,10 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             // UPDATE AT THE ABOVE FREQUENCY
             isOFUpdated = true;
 
-            // // UPDATE POLICY VECTOR
-            // X_input->data[0][0] = Tau;
-            // X_input->data[1][0] = Theta_x;
-            // X_input->data[2][0] = D_perp; 
+            // UPDATE POLICY VECTOR
+            X_input->data[0][0] = Tau;
+            X_input->data[1][0] = Theta_x;
+            X_input->data[2][0] = D_perp; 
         }
     }
     
