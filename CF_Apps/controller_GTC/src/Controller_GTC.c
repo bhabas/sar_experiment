@@ -116,7 +116,7 @@ void controllerOutOfTreeReset() {
     Policy_Action_tr = 0.0f;
 
 
-    calcPlaneNormal(Plane_Angle);
+    updatePlaneNormal(Plane_Angle);
 
 }
 
@@ -151,56 +151,33 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         // }
 
 
-        double temp_Grad_vec[3] = {
-             9,
-            -3,
-             7,
-        };
+        // double temp_Grad_vec[3] = {
+        //      9,
+        //     -3,
+        //      7,
+        // };
 
-        double spatial_Grad_mat[9] = {
-            3, 1,-1,
-            2,-2, 1,
-            1, 1, 1,
-        };
+        // double spatial_Grad_mat[9] = {
+        //     3, 1,-1,
+        //     2,-2, 1,
+        //     1, 1, 1,
+        // };
 
-        nml_mat_fill_fromarr(b_vec,3,1,3,temp_Grad_vec);
-        nml_mat_fill_fromarr(A_mat,3,3,9,spatial_Grad_mat);
-
-
-        nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
-
-        OF_vec = nml_ls_solve(LUP,b_vec);
-        nml_mat_lup_free(LUP);
-
-        nml_mat_print_CF(OF_vec);
+        // nml_mat_fill_fromarr(b_vec,3,1,3,temp_Grad_vec);
+        // nml_mat_fill_fromarr(A_mat,3,3,9,spatial_Grad_mat);
 
 
+        // nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
+
+        // OF_vec = nml_ls_solve(LUP,b_vec);
+        // nml_mat_lup_free(LUP);
+
+        // nml_mat_print_CF(OF_vec);
 
 
-        // // UPDATE POS AND VEL
-        // r_BO = mkvec(state->position.x, state->position.y, state->position.z);
-        // V_BO = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);
 
-        // // CALC DISPLACEMENT FROM PLANE CENTER
-        // r_PB = vsub(r_PO,r_BO); 
 
-        // // CALC RELATIVE DISTANCE AND VEL
-        // D_perp = vdot(r_PB,n_hat) + 1e-6f;
-
-        // V_perp = vdot(V_BO,n_hat);
-        // V_tx = vdot(V_BO,t_x);
-        // V_ty = vdot(V_BO,t_y);
-
-        // if (fabsf(D_perp) < 0.02f)
-        // {
-        //     D_perp = 0.0f;
-        // }
-
-        // // CALC OPTICAL FLOW VALUES
-        // Theta_x = clamp(V_tx/D_perp,-20.0f,20.0f);
-        // Theta_y = clamp(V_ty/D_perp,-20.0f,20.0f);
-        // Theta_z = clamp(V_perp/D_perp,-20.0f,20.0f);
-        // Tau = clamp(1/Theta_z,0.0f,5.0f);
+        
 
     }
 
@@ -228,7 +205,21 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     }
 
     // POLICY UPDATES
-    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
+    if (RATE_DO_EXECUTE(2, tick)) {
+
+
+        // UPDATE POLICY VECTOR
+
+        if (isCamActive == true)
+        {
+            updateOpticalFlowEst();
+        }
+        else
+        {
+            updateOpticalFlowAnalytic();
+        }
+        
+        
 
         X_input->data[0][0] = Tau;
         X_input->data[1][0] = Theta_x;
@@ -446,6 +437,7 @@ PARAM_ADD(PARAM_FLOAT, f_max, &f_max)
 
 PARAM_ADD(PARAM_UINT8, SafeMode, &safeModeEnable)
 PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
+PARAM_ADD(PARAM_UINT8, isCamActive, &isCamActive)
 
 PARAM_ADD(PARAM_FLOAT, P_kp_xy, &P_kp_xy)
 PARAM_ADD(PARAM_FLOAT, P_kd_xy, &P_kd_xy) 

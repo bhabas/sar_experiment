@@ -49,6 +49,12 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         os.system("roslaunch sar_launch_exp params.launch")
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
 
+        ## SET EXP SETTINGS
+        if rospy.get_param("/SAR_SETTINGS/CamActive") == True:
+            self.cf.setParam("CTRL_Params/isCamActive",1)
+        else:
+            self.cf.setParam("CTRL_Params/isCamActive",0)
+
 
         ## SET EXP SETTINGS
         if rospy.get_param("/SAR_SETTINGS/Policy_Type") == "PARAM_OPTIM":
@@ -112,6 +118,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
         self.SendCmd("Load_Params")
 
+
     def safeMode(self,status):
         
         if status == True:
@@ -122,7 +129,8 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
 if __name__ == "__main__":
     env = SAR_Exp_Interface()
-    env.SendCmd('Stop')
+    rospy.spin()
+    # env.SendCmd('Stop')
         
         
     

@@ -16,7 +16,7 @@ extern "C" {
 #include "ML_Funcs.h"
 #include "Compress_States.h"
 
-#include "ML_Params/NN_Layers_NL_DeepRL.h"
+// #include "ML_Params/NN_Layers_NL_DeepRL.h"
 
 
 #define PWM_MAX 60000
@@ -198,7 +198,7 @@ extern bool customThrust_flag;
 extern bool customPWM_flag;
 
 // SENSOR FLAGS
-extern bool camera_sensor_active;
+extern bool isCamActive;
 
 // =================================
 //       POLICY INITIALIZATION
@@ -279,7 +279,7 @@ extern struct vec r_BO;         // Quad Position Vector         [m]
 extern struct vec r_PB;         // Quad-Plane Distance Vector   [m]
 extern struct vec V_BO;         // Quad Velocity Vector         [m/s]
 
-// DECLARE RELATIVE STATES
+// RELATIVE STATES
 extern float D_perp;            // Distance perp to plane [m]
 extern float V_perp;            // Velocity perp to plane [m/s]
 extern float V_tx;              // Tangent_x velocity [m/s]
@@ -305,7 +305,9 @@ extern struct CTRL_CmdPacket CTRL_Cmd;
 void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd);
 void controlOutput(const state_t *state, const sensorData_t *sensors);
 uint16_t thrust2PWM(float f);
-void calcPlaneNormal(float Plane_Angle);
+void updatePlaneNormal(float Plane_Angle);
+void updateOpticalFlowEst();
+void updateOpticalFlowAnalytic();
 
 
 
@@ -313,7 +315,7 @@ void calcPlaneNormal(float Plane_Angle);
 
 
 // =================================
-//    ADDITIONAL MATH FUNCTIONS
+//    ADDITIONAL MATH3D FUNCTIONS
 // =================================
 
 // Construct a matrix A from vector v such that Ax = cross(v, x)
