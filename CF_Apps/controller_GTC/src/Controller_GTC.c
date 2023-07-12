@@ -345,9 +345,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             M4_pwm = (int32_t)thrust2PWM(M4_thrust);
         }
 
-        compressStates();
-        compressSetpoints();
-        compressFlipStates();
+        // compressStates();
+        // compressSetpoints();
+        // compressFlipStates();
 
         #ifdef CONFIG_SAR_EXP
         if(safeModeEnable)
@@ -437,10 +437,14 @@ LOG_ADD(LOG_UINT32, Z_f_34, &StatesZ_CTRL.M_thrust34)
 
 LOG_ADD(LOG_UINT32, Z_PWM12, &StatesZ_CTRL.MS_PWM12)
 LOG_ADD(LOG_UINT32, Z_PWM34, &StatesZ_CTRL.MS_PWM34)
-
-LOG_ADD(LOG_UINT32, Z_NN_FP, &StatesZ_CTRL.NN_FP)
-
 LOG_GROUP_STOP(States_CTRL)
+
+LOG_GROUP_START(Policy_CTRL)
+LOG_ADD(LOG_UINT32, Z_Thetaxy_est, &StatesZ_CTRL.Theta_xy_est)
+LOG_ADD(LOG_INT16,  Z_Tau_est,  &StatesZ_CTRL.Tau_est)
+LOG_ADD(LOG_INT16,  Z_PolAct_Trig,  &StatesZ_CTRL.Policy_Trg_Action)
+LOG_ADD(LOG_INT16,  Z_PolAct_Flip,  &StatesZ_CTRL.Policy_Flip_Action)
+LOG_GROUP_STOP(Policy_CTRL)
 
 
 

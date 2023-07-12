@@ -48,7 +48,13 @@ struct {
     uint32_t Theta_xy; // [milli-rad/s]
     int16_t D_perp; // [mm]
 
-    uint32_t NN_FP; // NN_flip,NN_policy
+
+    // Compressed Optical Flow Estimates
+    int16_t Tau_est;   // [milli-rad/s]
+    uint32_t Theta_xy_est; // [milli-rad/s]
+
+    int16_t Policy_Trg_Action;
+    int16_t Policy_Flip_Action;
 
 } StatesZ_CTRL;
 

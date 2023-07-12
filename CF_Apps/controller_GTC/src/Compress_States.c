@@ -37,7 +37,8 @@ void compressStates(){
     StatesZ_CTRL.MS_PWM12 = compressXY(M1_pwm*0.5e-3f,M2_pwm*0.5e-3f);
     StatesZ_CTRL.MS_PWM34 = compressXY(M3_pwm*0.5e-3f,M4_pwm*0.5e-3f);
 
-    StatesZ_CTRL.NN_FP = compressXY(3.14f,0.0); // Flip value (OC_SVM) and Flip action (NN)
+    StatesZ_CTRL.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
+    StatesZ_CTRL.Policy_Flip_Action = (int16_t)(Policy_Flip_Action * 1000.0f);
 
 }
 
