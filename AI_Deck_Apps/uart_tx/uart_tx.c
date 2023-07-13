@@ -1,26 +1,26 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "pmsis.h"
-#define NUM_VAL 10
+#define NUM_VAL 4
 
-uint8_t delimiter = '\1';
-uint8_t escape = '\2';
-uint8_t startMarker = '\3';
-uint8_t endMarker = '\4';
+// Define your markers
+uint8_t START_MARKER[] = {0xAA, 0xBB};
+uint8_t END_MARKER[] = {0xBB, 0xAA};
 
-int32_t val_arr[NUM_VAL] = {1234, 2345, 3456, 4567, 5678, 6789, 7890, 8901, 9012, 10123}; 
-uint8_t *buffer;
+
+// Initialize your data array
+int32_t data[NUM_VAL] = {0, 1, 3456, 4567}; // Fill your data here
+
+
 
 static int32_t open_uart(struct pi_device *device)
 {
-    // UART CONFIG
     struct pi_uart_conf UART_config;
     pi_uart_conf_init(&UART_config);
     UART_config.baudrate_bps = 115200;
     UART_config.enable_tx = 1;
     UART_config.enable_rx = 0;
 
-    // OPEN UART
     pi_open_from_conf(device, &UART_config);
     printf("[UART] Open\n");
     if (pi_uart_open(device))
@@ -32,12 +32,18 @@ static int32_t open_uart(struct pi_device *device)
     return 0;
 }
 
+uint8_t* int32_to_bytes(int32_t value) {
+    static uint8_t bytes[4];
+    for(int i=0; i<4; i++) {
+        bytes[i] = (value >> (i*8)) & 0xFF;
+    }
+    return bytes;
+}
+
 static void test_gap8(void)
 {
     printf("Entering main controller...\n");
 
-
-    // INITIALIZE UART
     struct pi_device UART_device;
     if (open_uart(&UART_device))
     {
@@ -45,49 +51,40 @@ static void test_gap8(void)
         pmsis_exit(-1);
     }
     
+    // Send START_MARKER
+    for(size_t i=0; i < sizeof(START_MARKER); i++) 
+    {
+        pi_uart_write_byte(&UART_device,&START_MARKER[i]);
+        printf("%02X ",START_MARKER[i]);
+    }
+    printf("  ");
+    
+    // Send each int32_t value as 4-byte sequence
+    for(int i=0; i < NUM_VAL; i++) {
+
+        uint8_t *byte_array = int32_to_bytes(data[i]);
+
+        for(int j=0; j<4; j++) {
+            pi_uart_write_byte(&UART_device,&byte_array[j]);
+            printf("%02X ",byte_array[j]);
+        }
+        printf("  ");
+    }
+    printf(" ");
+
+    // Send END_MARKER
+    for(size_t i=0; i < sizeof(END_MARKER); i++) 
+    {
+        pi_uart_write_byte(&UART_device,&START_MARKER[i]);
+        printf("%02X ",END_MARKER[i]);
+    }
     
 
-    // ALLOCATE SPACE FOR ARRAY (ARRAY LEN * 6*1 BYTES INCLUDING ESCAPE/DELIM)
-    buffer = pmsis_l2_malloc(NUM_VAL * 6 * sizeof(uint8_t));  
-
-    // BEGIN TRANSMISSION WITH START MARKER
-    int bufferSize = 0;
-    buffer[bufferSize++] = startMarker;
-
-    for (size_t valueIndex = 0; valueIndex < NUM_VAL; valueIndex++) 
-    {
-        int32_t valueToSend = val_arr[valueIndex];
-
-        // CAST VALUE TO SEND TO BYTE STRING
-        uint8_t *valueBytes = (uint8_t *)&valueToSend;
-
-        // SOME TRICKY STUFF I DONT UNDERSTAND
-        for (size_t i = 0; i < sizeof(int32_t); i++) 
-        {
-            if (valueBytes[i] == delimiter || valueBytes[i] == escape || valueBytes[i] == startMarker || valueBytes[i] == endMarker) 
-            {
-                buffer[bufferSize++] = escape;
-                buffer[bufferSize++] = valueBytes[i] + escape;
-            } 
-            else 
-            {
-                buffer[bufferSize++] = valueBytes[i];
-            }
-        }
-
-        // CAP VALUE WITH DELIMITER
-        buffer[bufferSize++] = delimiter;
-    }
-
-    // ADD END MARKER AFTER ADDING ALL VALUES TO BUFFER
-    buffer[bufferSize++] = endMarker;
-
-    // TRANSMIT ARRAY OVER UART
-    while(1)
-    {
-        int result = pi_uart_write(&UART_device, buffer, bufferSize);
-        pi_time_wait_us(1*1000000);
-    }
+    // while(1)
+    // {
+    //     int result = pi_uart_write(&UART_device, buffer, bufferSize);
+    //     pi_time_wait_us(1*1000000);
+    // }
 
     pmsis_exit(0);
 }

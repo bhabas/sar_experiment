@@ -191,7 +191,7 @@ bool customPWM_flag = false;
 
 
 // SENSOR FLAGS
-bool isCamActive = false;
+bool isCamActive = true;
 
 
 // =================================
@@ -722,6 +722,7 @@ bool updateOpticalFlowEst()
         Theta_x_est = clamp(OF_vec->data[0][0],-20.0f,20.0f);
         Theta_y_est = clamp(OF_vec->data[1][0],-20.0f,20.0f);
         Tau_est = clamp(1/(OF_vec->data[2][0] + 1.0e-6),0.0f,5.0f);
+        Tau_est = (float)UART_arr[0];
 
 
         nml_mat_lup_free(LUP);
