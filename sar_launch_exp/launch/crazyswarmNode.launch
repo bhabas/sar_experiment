@@ -14,20 +14,21 @@
       genericLogTopicFrequencies: [20,20,100,100,100,200,200]
 
 
-      <!-- SIZE: (21/26) BYTES -->
+      <!-- SIZE: (20/26) BYTES -->
       genericLogTopic_FullState_Variables: [
       "Z_States.xy",    "Z_States.z",
       "Z_States.vxy",   "Z_States.vz",
-      "Z_States.quat",  "Z_States.wxy",
-      "Z_TrgStates.Flip_Flag"
+      "Z_States.quat",  
+      "Z_States.wxy",   "Z_States.wz",
       ]
 
-      <!-- SIZE: (18/26) BYTES -->
+      <!-- SIZE: (19/26) BYTES -->
       genericLogTopic_PolicyState_Variables: [
       "Z_States.D_perp",
       "Z_States.Thetaxy",      "Z_States.Tau",
       "Z_Policy.Thetaxy_est",  "Z_Policy.Tau_est",
       "Z_Policy.PolAct_Trig",  "Z_Policy.PolAct_Flip",
+      "Z_TrgStates.Flip_Flag"
       ]
 
       <!-- SIZE: (24/26) BYTES -->

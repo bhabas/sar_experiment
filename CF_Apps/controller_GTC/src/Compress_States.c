@@ -39,8 +39,8 @@ void compressStates(){
     StatesZ_CTRL.Tau = (int16_t)(Tau * 1000.0f); 
 
     // COMPRESS OPTICAL FLOW ESTIMATES
-    StatesZ_CTRL.Theta_xy = compressXY(Theta_x_est,Theta_y_est);
-    StatesZ_CTRL.Tau = (int16_t)(Tau_est * 1000.0f); 
+    StatesZ_CTRL.Theta_xy_est = compressXY(Theta_x_est,Theta_y_est);
+    StatesZ_CTRL.Tau_est = (int16_t)(Tau_est * 1000.0f); 
 
     // COMPRESS POLICY ACTIONS
     StatesZ_CTRL.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
