@@ -14,7 +14,7 @@
 
 void compressStates();
 void compressSetpoints();
-void compressFlipStates();
+void compressTrgStates();
 uint32_t compressXY(float x, float y); // Compresses values in range (-32.767 - 32.767)
 
 struct {
@@ -58,7 +58,7 @@ struct {
     int16_t Policy_Trg_Action;
     int16_t Policy_Flip_Action;
 
-} StatesZ_CTRL;
+} States_Z;
 
 
 struct {
@@ -72,7 +72,7 @@ struct {
     uint32_t axy; // Compress accelerations [mm/s^2]
     int16_t az;
 
-} setpointZ_CTRL;
+} SetPoints_Z;
 
 
 struct {
@@ -108,6 +108,6 @@ struct {
     int16_t Policy_Flip_Action;
 
 
-} FlipStatesZ_CTRL;
+} TrgStates_Z;
 
 

@@ -347,7 +347,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         compressStates();
         compressSetpoints();
-        // compressFlipStates();
+        compressTrgStates();
 
         #ifdef CONFIG_SAR_EXP
         if(safeModeEnable)
@@ -416,76 +416,76 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 
 LOG_GROUP_START(Z_States)
-LOG_ADD(LOG_UINT32, xy,         &StatesZ_CTRL.xy)
-LOG_ADD(LOG_INT16,  z,          &StatesZ_CTRL.z)
+LOG_ADD(LOG_UINT32, xy,         &States_Z.xy)
+LOG_ADD(LOG_INT16,  z,          &States_Z.z)
 
-LOG_ADD(LOG_UINT32, vxy,        &StatesZ_CTRL.vxy)
-LOG_ADD(LOG_INT16,  vz,         &StatesZ_CTRL.vz)
+LOG_ADD(LOG_UINT32, vxy,        &States_Z.vxy)
+LOG_ADD(LOG_INT16,  vz,         &States_Z.vz)
 
-LOG_ADD(LOG_UINT32, quat,       &StatesZ_CTRL.quat)
+LOG_ADD(LOG_UINT32, quat,       &States_Z.quat)
 
-LOG_ADD(LOG_UINT32, wxy,        &StatesZ_CTRL.wxy)
-LOG_ADD(LOG_INT16,  wz,         &StatesZ_CTRL.wz)
+LOG_ADD(LOG_UINT32, wxy,        &States_Z.wxy)
+LOG_ADD(LOG_INT16,  wz,         &States_Z.wz)
 
-LOG_ADD(LOG_UINT32, Thetaxy,    &StatesZ_CTRL.Theta_xy)
-LOG_ADD(LOG_INT16,  Tau,        &StatesZ_CTRL.Tau)
-LOG_ADD(LOG_INT16,  D_perp,     &StatesZ_CTRL.D_perp)
+LOG_ADD(LOG_UINT32, Thetaxy,    &States_Z.Theta_xy)
+LOG_ADD(LOG_INT16,  Tau,        &States_Z.Tau)
+LOG_ADD(LOG_INT16,  D_perp,     &States_Z.D_perp)
 
-LOG_ADD(LOG_UINT32, FMz,        &StatesZ_CTRL.FMz)
-LOG_ADD(LOG_UINT32, Mxy,        &StatesZ_CTRL.Mxy)
+LOG_ADD(LOG_UINT32, FMz,        &States_Z.FMz)
+LOG_ADD(LOG_UINT32, Mxy,        &States_Z.Mxy)
 
-LOG_ADD(LOG_UINT32, f_12,       &StatesZ_CTRL.M_thrust12)
-LOG_ADD(LOG_UINT32, f_34,       &StatesZ_CTRL.M_thrust34)
+LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
+LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
 
-LOG_ADD(LOG_UINT32, PWM12,      &StatesZ_CTRL.MS_PWM12)
-LOG_ADD(LOG_UINT32, PWM34,      &StatesZ_CTRL.MS_PWM34)
+LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
+LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
 LOG_GROUP_STOP(Z_States)
 
 
 
 LOG_GROUP_START(Z_Policy)
-LOG_ADD(LOG_UINT32, Thetaxy_est,  &StatesZ_CTRL.Theta_xy_est)
-LOG_ADD(LOG_INT16,  Tau_est,      &StatesZ_CTRL.Tau_est)
-LOG_ADD(LOG_INT16,  PolAct_Trig,  &StatesZ_CTRL.Policy_Trg_Action)
-LOG_ADD(LOG_INT16,  PolAct_Flip,  &StatesZ_CTRL.Policy_Flip_Action)
+LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
+LOG_ADD(LOG_INT16,  Tau_est,        &States_Z.Tau_est)
+LOG_ADD(LOG_INT16,  PolAct_Trig,    &States_Z.Policy_Trg_Action)
+LOG_ADD(LOG_INT16,  PolAct_Flip,    &States_Z.Policy_Flip_Action)
 LOG_GROUP_STOP(Z_Policy)
 
 
 
 LOG_GROUP_START(Z_SetPoints)
-LOG_ADD(LOG_UINT32, xy,   &setpointZ_CTRL.xy)
-LOG_ADD(LOG_INT16,  z,    &setpointZ_CTRL.z)
+LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
+LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
 
-LOG_ADD(LOG_UINT32, vxy,  &setpointZ_CTRL.vxy)
-LOG_ADD(LOG_INT16,  vz,   &setpointZ_CTRL.vz)
+LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
+LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
 
-LOG_ADD(LOG_UINT32, axy,  &setpointZ_CTRL.axy)
-LOG_ADD(LOG_INT16,  az,   &setpointZ_CTRL.az)
+LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
+LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
 LOG_GROUP_STOP(Z_SetPoints)
 
 
 
 LOG_GROUP_START(Z_TrgStates)
-LOG_ADD(LOG_UINT32, xy,         &FlipStatesZ_CTRL.xy)
-LOG_ADD(LOG_INT16,  z,          &FlipStatesZ_CTRL.z)
+LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
+LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
 
-LOG_ADD(LOG_UINT32, vxy,        &FlipStatesZ_CTRL.vxy)
-LOG_ADD(LOG_INT16,  vz,         &FlipStatesZ_CTRL.vz)
+LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
+LOG_ADD(LOG_INT16,  vz,             &TrgStates_Z.vz)
 
-LOG_ADD(LOG_UINT32, quat,       &FlipStatesZ_CTRL.quat)
+LOG_ADD(LOG_UINT32, quat,           &TrgStates_Z.quat)
 
-LOG_ADD(LOG_UINT32, wxy,        &FlipStatesZ_CTRL.wxy)
-LOG_ADD(LOG_INT16,  wz,         &FlipStatesZ_CTRL.wz)
+LOG_ADD(LOG_UINT32, wxy,            &TrgStates_Z.wxy)
+LOG_ADD(LOG_INT16,  wz,             &TrgStates_Z.wz)
 
-LOG_ADD(LOG_UINT32, Thetaxy,    &FlipStatesZ_CTRL.Theta_xy)
-LOG_ADD(LOG_INT16,  Tau,        &FlipStatesZ_CTRL.Tau)
-LOG_ADD(LOG_INT16,  D_perp,     &FlipStatesZ_CTRL.D_perp)
+LOG_ADD(LOG_UINT32, Thetaxy,        &TrgStates_Z.Theta_xy)
+LOG_ADD(LOG_INT16,  Tau,            &TrgStates_Z.Tau)
+LOG_ADD(LOG_INT16,  D_perp,         &TrgStates_Z.D_perp)
 
-LOG_ADD(LOG_UINT32, Thetaxy_est,  &FlipStatesZ_CTRL.Theta_xy_est)
-LOG_ADD(LOG_INT16,  Tau_est,      &FlipStatesZ_CTRL.Tau_est)
+LOG_ADD(LOG_UINT32, Thetaxy_est,    &TrgStates_Z.Theta_xy_est)
+LOG_ADD(LOG_INT16,  Tau_est,        &TrgStates_Z.Tau_est)
 
-LOG_ADD(LOG_INT16,  PolAct_Trig,  &FlipStatesZ_CTRL.Policy_Trg_Action)
-LOG_ADD(LOG_INT16,  PolAct_Flip,  &FlipStatesZ_CTRL.Policy_Flip_Action)
+LOG_ADD(LOG_INT16,  PolAct_Trig,    &TrgStates_Z.Policy_Trg_Action)
+LOG_ADD(LOG_INT16,  PolAct_Flip,    &TrgStates_Z.Policy_Flip_Action)
 
 LOG_ADD(LOG_UINT8, Flip_Flag, &flip_flag)
 LOG_GROUP_STOP(Z_TrgStates)
