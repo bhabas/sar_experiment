@@ -22,6 +22,9 @@ struct {
     uint32_t xy; 
     int16_t z;
 
+    // Compressed Distance to Surface [mm]
+    int16_t D_perp;
+
     // Compressed velocities [mm/s]
     uint32_t vxy; 
     int16_t vz;
@@ -40,19 +43,18 @@ struct {
     uint32_t MS_PWM12; 
     uint32_t MS_PWM34;
 
-    uint32_t M_thrust12;
-    uint32_t M_thrust34;
+    uint32_t M_thrust12;    // [mg]
+    uint32_t M_thrust34;    // [mg]
 
     // Compressed Optical Flow Values
-    int16_t Tau;   // [milli-rad/s]
-    uint32_t Theta_xy; // [milli-rad/s]
-    int16_t D_perp; // [mm]
-
+    int16_t Tau;        // [ms]
+    uint32_t Theta_xy;  // [milli-rad/s]
 
     // Compressed Optical Flow Estimates
-    int16_t Tau_est;   // [milli-rad/s]
-    uint32_t Theta_xy_est; // [milli-rad/s]
+    int16_t Tau_est;        // [ms]
+    uint32_t Theta_xy_est;  // [milli-rad/s]
 
+    // Compressed Policy Actions
     int16_t Policy_Trg_Action;
     int16_t Policy_Flip_Action;
 
@@ -79,6 +81,9 @@ struct {
     uint32_t xy; 
     int16_t z;
 
+    // Compressed Distance to Surface [mm]
+    int16_t D_perp;
+
     // Compressed velocities [mm/s]
     uint32_t vxy; 
     int16_t vz;
@@ -91,11 +96,17 @@ struct {
     int16_t wz;
 
     // Compressed Optical Flow Values
-    int16_t Tau;   // [milli-rad/s]
-    uint32_t Theta_xy; // [milli-rad/s]
-    int16_t D_perp; // [m]
+    int16_t Tau;            // [ms]
+    uint32_t Theta_xy;      // [milli-rad/s]
 
-    uint32_t NN_FP; // NN_flip,NN_policy
+    // Compressed Optical Flow Estimates
+    int16_t Tau_est;        // [ms]
+    uint32_t Theta_xy_est;  // [milli-rad/s]
+
+    // Compressed Policy Actions
+    int16_t Policy_Trg_Action;
+    int16_t Policy_Flip_Action;
+
 
 } FlipStatesZ_CTRL;
 

@@ -2,8 +2,12 @@
 
 
 void compressStates(){
+
+    // COMPRESS FULL STATE VALUES
     StatesZ_CTRL.xy = compressXY(statePos.x,statePos.y);
     StatesZ_CTRL.z = (int16_t)(statePos.z * 1000.0f);
+
+    StatesZ_CTRL.D_perp = (int16_t)(D_perp * 1000.0f);
 
     StatesZ_CTRL.vxy = compressXY(stateVel.x, stateVel.y);
     StatesZ_CTRL.vz = (int16_t)(stateVel.z * 1000.0f);
@@ -11,18 +15,12 @@ void compressStates(){
     StatesZ_CTRL.wxy = compressXY(stateOmega.x/10,stateOmega.y/10);
     StatesZ_CTRL.wz = (int16_t)(stateOmega.z * 1000.0f);
 
-
     float const q[4] = {
         stateQuat.x,
         stateQuat.y,
         stateQuat.z,
         stateQuat.w};
     StatesZ_CTRL.quat = quatcompress(q);
-
-    // COMPRESS SENSORY VALUES
-    StatesZ_CTRL.Theta_xy = compressXY(Theta_x,Theta_y);
-    StatesZ_CTRL.Tau = (int16_t)(Tau * 1000.0f); 
-    StatesZ_CTRL.D_perp = (int16_t)(D_perp * 1000.0f);
 
     // COMPRESS THRUST/MOMENT VALUES
     StatesZ_CTRL.FMz = compressXY(F_thrust,M.z*1000.0f);
@@ -32,11 +30,19 @@ void compressStates(){
     StatesZ_CTRL.M_thrust12 = compressXY(M1_thrust,M2_thrust);
     StatesZ_CTRL.M_thrust34 = compressXY(M3_thrust,M4_thrust);
 
-    
     // COMPRESS PWM VALUES
     StatesZ_CTRL.MS_PWM12 = compressXY(M1_pwm*0.5e-3f,M2_pwm*0.5e-3f);
     StatesZ_CTRL.MS_PWM34 = compressXY(M3_pwm*0.5e-3f,M4_pwm*0.5e-3f);
 
+    // COMPRESS OPTICAL FLOW VALUES
+    StatesZ_CTRL.Theta_xy = compressXY(Theta_x,Theta_y);
+    StatesZ_CTRL.Tau = (int16_t)(Tau * 1000.0f); 
+
+    // COMPRESS OPTICAL FLOW ESTIMATES
+    StatesZ_CTRL.Theta_xy = compressXY(Theta_x_est,Theta_y_est);
+    StatesZ_CTRL.Tau = (int16_t)(Tau_est * 1000.0f); 
+
+    // COMPRESS POLICY ACTIONS
     StatesZ_CTRL.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
     StatesZ_CTRL.Policy_Flip_Action = (int16_t)(Policy_Flip_Action * 1000.0f);
 
@@ -54,15 +60,18 @@ void compressSetpoints(){
 }
 
 void compressFlipStates(){
+
+    // COMPRESS FULL STATE VALUES
     FlipStatesZ_CTRL.xy = compressXY(statePos_tr.x,statePos_tr.y);
     FlipStatesZ_CTRL.z = (int16_t)(statePos_tr.z * 1000.0f);
+
+    FlipStatesZ_CTRL.D_perp = (int16_t)(D_perp_tr * 1000.0f);
 
     FlipStatesZ_CTRL.vxy = compressXY(stateVel_tr.x, stateVel_tr.y);
     FlipStatesZ_CTRL.vz = (int16_t)(stateVel_tr.z * 1000.0f);
 
     FlipStatesZ_CTRL.wxy = compressXY(stateOmega_tr.x,stateOmega_tr.y);
     FlipStatesZ_CTRL.wz = (int16_t)(stateOmega_tr.z * 1000.0f);
-
 
     float const q[4] = {
         stateQuat_tr.x,
@@ -71,13 +80,17 @@ void compressFlipStates(){
         stateQuat_tr.w};
     FlipStatesZ_CTRL.quat = quatcompress(q);
 
-   FlipStatesZ_CTRL.Theta_xy = compressXY(Theta_x_tr,Theta_y_tr);
-   FlipStatesZ_CTRL.Tau = (int16_t)(Tau_tr * 1000.0f); 
-   FlipStatesZ_CTRL.D_perp = (int16_t)(D_perp_tr * 1000.0f);
+    // COMPRESS OPTICAL FLOW VALUES
+    FlipStatesZ_CTRL.Theta_xy = compressXY(Theta_x_tr,Theta_y_tr);
+    FlipStatesZ_CTRL.Tau = (int16_t)(Tau_tr * 1000.0f); 
 
-   FlipStatesZ_CTRL.NN_FP = compressXY(Policy_Flip_tr,Policy_Action_tr); // Flip value (OC_SVM) and Flip action (NN)
+    // COMPRESS OPTICAL FLOW ESTIMATES
+    FlipStatesZ_CTRL.Theta_xy = compressXY(Theta_x_est_tr,Theta_y_est_tr);
+    FlipStatesZ_CTRL.Tau = (int16_t)(Tau_est_tr * 1000.0f); 
 
-
+    // COMPRESS POLICY ACTIONS
+    FlipStatesZ_CTRL.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
+    FlipStatesZ_CTRL.Policy_Flip_Action = (int16_t)(Policy_Flip_Action * 1000.0f);
 }
 
 
