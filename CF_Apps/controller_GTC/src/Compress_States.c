@@ -49,16 +49,16 @@ void compressStates(){
 void compressTrgStates(){
 
     // COMPRESS FULL STATE VALUES
-    TrgStates_Z.xy = compressXY(statePos_tr.x,statePos_tr.y);
-    TrgStates_Z.z = (int16_t)(statePos_tr.z * 1000.0f);
+    TrgStates_Z.xy = compressXY(1,2);
+    TrgStates_Z.z = (int16_t)(3);
 
-    TrgStates_Z.D_perp = (int16_t)(D_perp_tr * 1000.0f);
+    TrgStates_Z.D_perp = (int16_t)(4);
 
-    TrgStates_Z.vxy = compressXY(stateVel_tr.x, stateVel_tr.y);
-    TrgStates_Z.vz = (int16_t)(stateVel_tr.z * 1000.0f);
+    TrgStates_Z.vxy = compressXY(5,6);
+    TrgStates_Z.vz = (int16_t)(7);
 
-    TrgStates_Z.wxy = compressXY(stateOmega_tr.x,stateOmega_tr.y);
-    TrgStates_Z.wz = (int16_t)(stateOmega_tr.z * 1000.0f);
+    TrgStates_Z.wxy = compressXY(8,9);
+    TrgStates_Z.wz = (int16_t)(10);
 
     float const q[4] = {
         stateQuat_tr.x,
@@ -68,15 +68,15 @@ void compressTrgStates(){
     TrgStates_Z.quat = quatcompress(q);
 
     // COMPRESS OPTICAL FLOW VALUES
-    TrgStates_Z.Theta_xy = compressXY(Theta_x_tr,Theta_y_tr);
-    TrgStates_Z.Tau = (int16_t)(Tau_tr * 1000.0f); 
+    TrgStates_Z.Theta_xy = compressXY(11,12);
+    TrgStates_Z.Tau = (int16_t)(13); 
 
     // COMPRESS OPTICAL FLOW ESTIMATES
-    TrgStates_Z.Theta_xy_est = compressXY(Theta_x_est_tr,Theta_y_est_tr);
-    TrgStates_Z.Tau_est = (int16_t)(Tau_est_tr * 1000.0f); 
+    TrgStates_Z.Theta_xy_est = compressXY(14,15);
+    TrgStates_Z.Tau_est = (int16_t)(16); 
 
     // COMPRESS POLICY ACTIONS
-    TrgStates_Z.Policy_Actions = compressXY(Policy_Trg_Action_tr,Policy_Flip_Action_tr);
+    TrgStates_Z.Policy_Actions = compressXY(18,19);
 
 }
 

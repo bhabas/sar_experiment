@@ -32,7 +32,7 @@
       ]
 
       <!-- SIZE: (24/26) BYTES -->
-      genericLogTopic_GTC_Output_Variables: [
+      genericLogTopic_CTRL_Output_Variables: [
       "Z_States.Mxy",      "Z_States.FMz",
       "Z_States.f_12",     "Z_States.f_34",
       "Z_States.PWM12",    "Z_States.PWM34",
@@ -55,7 +55,7 @@
       ]
 
       <!-- SIZE: (14/26) BYTES -->
-      genericLogTopic_Flag_Variables: [
+      genericLogTopic_Flags_Variables: [
       "CTRL_Flags.Pos_Ctrl",        "CTRL_Flags.Vel_Ctrl",
       "CTRL_Flags.Motorstop",       "CTRL_Flags.Moment_Flag",
       "CTRL_Flags.Tumbled",         "CTRL_Flags.Tumble_Detect",
