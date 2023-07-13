@@ -107,8 +107,8 @@ void controllerOutOfTreeReset() {
     Theta_y_tr = 0.0f;
     D_perp_tr = 0.0f;
 
-    Policy_Flip_tr = 0.0f;
-    Policy_Action_tr = 0.0f;
+    Policy_Trg_Action_tr = 0.0f;
+    Policy_Flip_Action_tr = 0.0f;
 
 
     updatePlaneNormal(Plane_Angle);
@@ -345,6 +345,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             M4_pwm = (int32_t)thrust2PWM(M4_thrust);
         }
 
+        // COMPRESS STATES
         compressStates();
         compressSetpoints();
         compressTrgStates();
@@ -446,8 +447,7 @@ LOG_GROUP_STOP(Z_States)
 LOG_GROUP_START(Z_Policy)
 LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
 LOG_ADD(LOG_INT16,  Tau_est,        &States_Z.Tau_est)
-LOG_ADD(LOG_INT16,  PolAct_Trig,    &States_Z.Policy_Trg_Action)
-LOG_ADD(LOG_INT16,  PolAct_Flip,    &States_Z.Policy_Flip_Action)
+LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
 LOG_GROUP_STOP(Z_Policy)
 
 
@@ -468,7 +468,6 @@ LOG_GROUP_STOP(Z_SetPoints)
 LOG_GROUP_START(Z_TrgStates)
 LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
 LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
-
 LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
 LOG_ADD(LOG_INT16,  vz,             &TrgStates_Z.vz)
 
@@ -484,8 +483,7 @@ LOG_ADD(LOG_INT16,  D_perp,         &TrgStates_Z.D_perp)
 LOG_ADD(LOG_UINT32, Thetaxy_est,    &TrgStates_Z.Theta_xy_est)
 LOG_ADD(LOG_INT16,  Tau_est,        &TrgStates_Z.Tau_est)
 
-LOG_ADD(LOG_INT16,  PolAct_Trig,    &TrgStates_Z.Policy_Trg_Action)
-LOG_ADD(LOG_INT16,  PolAct_Flip,    &TrgStates_Z.Policy_Flip_Action)
+LOG_ADD(LOG_UINT32, Pol_Actions,    &TrgStates_Z.Policy_Actions)
 
 LOG_ADD(LOG_UINT8, Flip_Flag, &flip_flag)
 LOG_GROUP_STOP(Z_TrgStates)

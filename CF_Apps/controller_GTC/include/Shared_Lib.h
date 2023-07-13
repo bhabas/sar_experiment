@@ -254,8 +254,8 @@ extern float M_y_flip;              // [N*m]
 extern float M_z_flip;              // [N*m]
 
 // POLICY TRIGGER/ACTION VALUES
-extern float Policy_Flip_tr;    
-extern float Policy_Action_tr;
+extern float Policy_Trg_Action_tr;    
+extern float Policy_Flip_Action_tr;
 
 // =================================
 //    LANDING SURFACE PARAMETERS

@@ -252,8 +252,8 @@ float M_y_flip = 0.0f;      // [N*m]
 float M_z_flip = 0.0f;      // [N*m]
 
 // POLICY TRIGGER/ACTION VALUES
-float Policy_Flip_tr = 0.0f;    
-float Policy_Action_tr = 0.0f;
+float Policy_Trg_Action_tr = 0.0f;    
+float Policy_Flip_Action_tr = 0.0f;
 
 // =================================
 //    LANDING SURFACE PARAMETERS

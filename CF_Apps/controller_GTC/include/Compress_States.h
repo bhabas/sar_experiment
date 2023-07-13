@@ -55,25 +55,9 @@ struct {
     uint32_t Theta_xy_est;  // [milli-rad/s]
 
     // Compressed Policy Actions
-    int16_t Policy_Trg_Action;
-    int16_t Policy_Flip_Action;
+    uint32_t Policy_Actions;
 
 } States_Z;
-
-
-struct {
-    
-    uint32_t xy;  // Compressed position [mm]
-    int16_t z;
-
-    uint32_t vxy; // Compressed velocities [mm/s]
-    int16_t vz;
-
-    uint32_t axy; // Compress accelerations [mm/s^2]
-    int16_t az;
-
-} SetPoints_Z;
-
 
 struct {
 
@@ -104,10 +88,20 @@ struct {
     uint32_t Theta_xy_est;  // [milli-rad/s]
 
     // Compressed Policy Actions
-    int16_t Policy_Trg_Action;
-    int16_t Policy_Flip_Action;
+    uint32_t Policy_Actions;
 
 
 } TrgStates_Z;
 
+struct {
+    
+    uint32_t xy;  // Compressed position [mm]
+    int16_t z;
 
+    uint32_t vxy; // Compressed velocities [mm/s]
+    int16_t vz;
+
+    uint32_t axy; // Compress accelerations [mm/s^2]
+    int16_t az;
+
+} SetPoints_Z;

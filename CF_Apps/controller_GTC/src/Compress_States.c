@@ -43,20 +43,7 @@ void compressStates(){
     States_Z.Tau_est = (int16_t)(Tau_est * 1000.0f); 
 
     // COMPRESS POLICY ACTIONS
-    States_Z.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
-    States_Z.Policy_Flip_Action = (int16_t)(Policy_Flip_Action * 1000.0f);
-
-}
-
-void compressSetpoints(){
-    SetPoints_Z.xy = compressXY(x_d.x,x_d.y);
-    SetPoints_Z.z = (int16_t)(x_d.z * 1000.0f);
-
-    SetPoints_Z.vxy = compressXY(v_d.x,v_d.y);
-    SetPoints_Z.vz = (int16_t)(v_d.z * 1000.0f);
-
-    SetPoints_Z.axy = compressXY(a_d.x,a_d.y);
-    SetPoints_Z.az = (int16_t)(a_d.z * 1000.0f);
+    States_Z.Policy_Actions = compressXY(Policy_Trg_Action,Policy_Flip_Action);
 }
 
 void compressTrgStates(){
@@ -85,13 +72,25 @@ void compressTrgStates(){
     TrgStates_Z.Tau = (int16_t)(Tau_tr * 1000.0f); 
 
     // COMPRESS OPTICAL FLOW ESTIMATES
-    TrgStates_Z.Theta_xy = compressXY(Theta_x_est_tr,Theta_y_est_tr);
-    TrgStates_Z.Tau = (int16_t)(Tau_est_tr * 1000.0f); 
+    TrgStates_Z.Theta_xy_est = compressXY(Theta_x_est_tr,Theta_y_est_tr);
+    TrgStates_Z.Tau_est = (int16_t)(Tau_est_tr * 1000.0f); 
 
     // COMPRESS POLICY ACTIONS
-    TrgStates_Z.Policy_Trg_Action = (int16_t)(Policy_Trg_Action * 1000.0f);
-    TrgStates_Z.Policy_Flip_Action = (int16_t)(Policy_Flip_Action * 1000.0f);
+    TrgStates_Z.Policy_Actions = compressXY(Policy_Trg_Action_tr,Policy_Flip_Action_tr);
+
 }
+
+void compressSetpoints(){
+    SetPoints_Z.xy = compressXY(x_d.x,x_d.y);
+    SetPoints_Z.z = (int16_t)(x_d.z * 1000.0f);
+
+    SetPoints_Z.vxy = compressXY(v_d.x,v_d.y);
+    SetPoints_Z.vz = (int16_t)(v_d.z * 1000.0f);
+
+    SetPoints_Z.axy = compressXY(a_d.x,a_d.y);
+    SetPoints_Z.az = (int16_t)(a_d.z * 1000.0f);
+}
+
 
 
 uint32_t compressXY(float x, float y)
