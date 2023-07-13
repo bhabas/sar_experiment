@@ -51,7 +51,7 @@
       "Z_TrgStates.vxy",            "Z_TrgStates.vz",
       "Z_TrgStates.Thetaxy",        "Z_TrgStates.Tau",
       "Z_TrgStates.Thetaxy_est",    "Z_TrgStates.Tau_est",
-      "Z_TrgStates.Pol_Actions",
+      "Z_TrgStates.PolActions",
       ]
 
       <!-- SIZE: (14/26) BYTES -->
