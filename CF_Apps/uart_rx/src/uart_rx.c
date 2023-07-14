@@ -10,25 +10,23 @@
 #include "debug.h"
 
 #define DEBUG_MODULE "UART"
-#define NUM_VALUES 10
 
-
-// Define your markers
-uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
-uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
-
+// DEFINE AND INIT STATE MACHINE
 #define STATE_WAIT_START 0
 #define STATE_RECEIVE_DATA 1
 #define STATE_WAIT_END 2
-
-
-// Initialize state and data array
 int state = STATE_WAIT_START;
 
+// DATA CAP MARKERS
+uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
+uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
+
+// INIT DATA ARRAY
+#define NUM_VALUES 7
 int32_t data[NUM_VALUES];
 int data_counter = 0;
 
-
+// ASSUME 4-BYTE CHUNK
 int32_t bytes_to_int32(uint8_t* bytes) {
     int32_t result = 0;
     for (int i = 0; i < 4; i++) {
@@ -45,7 +43,6 @@ void appMain() {
 
     while(1) {
 
-        // uart1Getchar(&received_byte);
         // COLLECT NEW 4-BYTE BUFFER
         uart1GetBytesWithDefaultTimeout(4,buffer);
 
@@ -63,73 +60,45 @@ void appMain() {
                 if (memcmp(buffer, START_MARKER, sizeof(START_MARKER)) == 0) {
                     state = STATE_RECEIVE_DATA;
                     data_counter = 0;
-                    consolePrintf("1\n");
-                    break;
+                    // consolePrintf("1\n");
                 }
 
                 break;
 
             case STATE_RECEIVE_DATA:
 
+                // CONVERT BUFFER TO INT32_T DATA
                 data[data_counter] = bytes_to_int32(buffer);
                 data_counter++;
                 // consolePrintf("Val: %d \t %ld\n",data_counter,bytes_to_int32(buffer));
          
+                // TRANSITION TO NEXT STATE
                 if(data_counter == NUM_VALUES)
                 {
                     state = STATE_WAIT_END;
-                    consolePrintf("2\n");
+                    // consolePrintf("2\n");
                 }
                 break;
 
             case STATE_WAIT_END:
 
+                // CHECK IF BUFFER MATCHES END SEQUENCE
                 if (memcmp(buffer, END_MARKER, sizeof(END_MARKER)) == 0) {
                     // Print the received data
                     for (int i = 0; i < NUM_VALUES; i++) {
-                        consolePrintf("Received data[%d]: %ld\n", i, data[i]);
+                        consolePrintf("%ld ", data[i]);
                     }
+                    consolePrintf("\n");
+                    // consolePrintf("\n3\n");
 
-                    // Reset state to wait for the next transmission
+                    // RESET STATE TO WAIT FOR NEXT TRANSMISSION
                     state = STATE_WAIT_START;
-                    consolePrintf("3\n");
                 }
 
                 break;
 
-            
-            default:
-                break;
         }
         
-        
-
-        // switch (state)
-        // {
-        //     case STATE_WAIT_START:
-                
-        //         // Add the received byte to the buffer
-        //         buffer[buffer_counter] = received_byte;
-        //         buffer_counter++;
-
-        //         // Check for both markers
-        //         if (buffer_counter == sizeof(START_MARKER)) {
-        //             if (memcmp(buffer, START_MARKER, sizeof(START_MARKER)) == 0) {
-        //                 state = STATE_RECEIVE_DATA;
-        //                 buffer_counter = 0;
-        //                 consolePrintf("1\n");
-        //                 break;
-        //             }
-        //         } 
-        //         else if (buffer_counter == sizeof(START_MARKER_WITH_ZERO)) {
-        //             if (memcmp(buffer, START_MARKER_WITH_ZERO, sizeof(START_MARKER_WITH_ZERO)) == 0) {
-        //                 state = STATE_RECEIVE_DATA;
-        //                 buffer_counter = 0;
-        //                 consolePrintf("2\n");
-        //                 break;
-        //             }
-        //         }
-
-        // }
+    
     }
 }
