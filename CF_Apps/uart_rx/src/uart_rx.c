@@ -22,7 +22,7 @@ uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
 uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
 
 // INIT DATA ARRAY
-#define NUM_VALUES 7
+#define NUM_VALUES 10
 int32_t data[NUM_VALUES];
 int data_counter = 0;
 

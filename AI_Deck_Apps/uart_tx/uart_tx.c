@@ -4,7 +4,7 @@
 #include "pmsis.h"
 
 
-#define NUM_VAL 7
+#define NUM_VAL 10
 
 // Define your markers
 uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
@@ -13,7 +13,7 @@ uint8_t JUNK_MSG[] = {0x00, 0x00, 0x00};
 uint8_t JUNK_MSG2[4] = {0x55, 0xE3, 0x3D, 0x8C};;
 
 // Initialize your data array
-int32_t data[NUM_VAL] = {1234,2345,3456,4567,5678,6789,7890};
+int32_t data[NUM_VAL] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,7654};
 
 #define MESSAGE_SIZE (sizeof(START_MARKER) + NUM_VAL*sizeof(int32_t) + sizeof(END_MARKER))
 uint8_t message[MESSAGE_SIZE];
