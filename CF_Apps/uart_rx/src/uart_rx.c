@@ -10,7 +10,7 @@
 #include "debug.h"
 
 #define DEBUG_MODULE "UART"
-#define NUM_VALUES 2
+#define NUM_VALUES 10
 
 
 // Define your markers
@@ -28,8 +28,6 @@ int state = STATE_WAIT_START;
 int32_t data[NUM_VALUES];
 int data_counter = 0;
 
-
-int buffer_counter = 0;
 
 int32_t bytes_to_int32(uint8_t* bytes) {
     int32_t result = 0;
@@ -64,7 +62,7 @@ void appMain() {
                 // CHECK IF BUFFER MATCHES START SEQUENCE
                 if (memcmp(buffer, START_MARKER, sizeof(START_MARKER)) == 0) {
                     state = STATE_RECEIVE_DATA;
-                    buffer_counter = 0;
+                    data_counter = 0;
                     consolePrintf("1\n");
                     break;
                 }
@@ -73,9 +71,9 @@ void appMain() {
 
             case STATE_RECEIVE_DATA:
 
-                // data[data_counter] = bytes_to_int32(buffer);
-                consolePrintf("Val: %d \t %ld\n",data_counter,bytes_to_int32(buffer));
+                data[data_counter] = bytes_to_int32(buffer);
                 data_counter++;
+                // consolePrintf("Val: %d \t %ld\n",data_counter,bytes_to_int32(buffer));
          
                 if(data_counter == NUM_VALUES)
                 {
@@ -85,6 +83,17 @@ void appMain() {
                 break;
 
             case STATE_WAIT_END:
+
+                if (memcmp(buffer, END_MARKER, sizeof(END_MARKER)) == 0) {
+                    // Print the received data
+                    for (int i = 0; i < NUM_VALUES; i++) {
+                        consolePrintf("Received data[%d]: %ld\n", i, data[i]);
+                    }
+
+                    // Reset state to wait for the next transmission
+                    state = STATE_WAIT_START;
+                    consolePrintf("3\n");
+                }
 
                 break;
 
