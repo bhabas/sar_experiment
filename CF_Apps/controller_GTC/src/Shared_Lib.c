@@ -685,7 +685,7 @@ bool updateOpticalFlowEst()
             // COPY ARRAY CONTENTS
             for (int i = 0; i < NUM_VALUES; i++) 
             {
-                UART_arr[i] = valArr[i];
+                UART_arr[i] = data_arr[i];
             }
             isArrUpdated = false;
             UpdateOpticalFlow = true;

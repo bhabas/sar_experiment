@@ -108,7 +108,7 @@ static void test_gap8(void)
 
         
         pi_uart_write(&UART_device,message,MESSAGE_SIZE);
-        pi_time_wait_us(50000);
+        pi_time_wait_us(10000);
     }
     
     pmsis_exit(0);
