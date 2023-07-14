@@ -10,82 +10,117 @@
 #include "debug.h"
 
 #define DEBUG_MODULE "UART"
-#define NUM_VALUES 10
+#define NUM_VALUES 2
 
-uint8_t startMarker = '\3';
-uint8_t endMarker = '\4';
 
-typedef enum
-{
-    WAIT_FOR_START,
-    WAIT_FOR_SIZE,
-    WAIT_FOR_PAYLOAD,
-    WAIT_FOR_END,
-} ReadState;
+// Define your markers
+uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
+uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
 
-int32_t val_arr[NUM_VALUES];
-int valIndex = 0;
+#define STATE_WAIT_START 0
+#define STATE_RECEIVE_DATA 1
+#define STATE_WAIT_END 2
+
+
+// Initialize state and data array
+int state = STATE_WAIT_START;
+
+int32_t data[NUM_VALUES];
+int data_counter = 0;
+
+
+int buffer_counter = 0;
+
+int32_t bytes_to_int32(uint8_t* bytes) {
+    int32_t result = 0;
+    for (int i = 0; i < 4; i++) {
+        result |= ((int32_t) bytes[i]) << (i*8);
+    }
+    return result;
+}
 
 void appMain() {
     DEBUG_PRINT("Waiting for activation ...\n");
     uart1Init(115200);
 
-    ReadState state = WAIT_FOR_START;
-    uint8_t expectedSize = 0;
-    uint8_t byteCount = 0;
-    uint8_t buffer[sizeof(int32_t)];
+    uint8_t buffer[4];
 
     while(1) {
 
-        uint8_t byte;
-        uart1GetBytesWithDefaultTimeout(1, &byte);
+        // uart1Getchar(&received_byte);
+        // COLLECT NEW 4-BYTE BUFFER
+        uart1GetBytesWithDefaultTimeout(4,buffer);
+
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     consolePrintf("%02X ",buffer[i]);
+        // }
+        // consolePrintf("\n");
 
         switch (state)
         {
-            case WAIT_FOR_START:
-                if (byte == startMarker) {
-                    valIndex = 0;
-                    state = WAIT_FOR_SIZE;
+            case STATE_WAIT_START:
+
+                // CHECK IF BUFFER MATCHES START SEQUENCE
+                if (memcmp(buffer, START_MARKER, sizeof(START_MARKER)) == 0) {
+                    state = STATE_RECEIVE_DATA;
+                    buffer_counter = 0;
+                    consolePrintf("1\n");
+                    break;
+                }
+
+                break;
+
+            case STATE_RECEIVE_DATA:
+
+                // data[data_counter] = bytes_to_int32(buffer);
+                consolePrintf("Val: %d \t %ld\n",data_counter,bytes_to_int32(buffer));
+                data_counter++;
+         
+                if(data_counter == NUM_VALUES)
+                {
+                    state = STATE_WAIT_END;
+                    consolePrintf("2\n");
                 }
                 break;
 
-            case WAIT_FOR_SIZE:
-                if (byte == sizeof(int32_t)) {
-                    expectedSize = byte;
-                    byteCount = 0;
-                    state = WAIT_FOR_PAYLOAD;
-                } else {
-                    // Invalid size byte, go back to waiting for start marker
-                    state = WAIT_FOR_START;
-                }
+            case STATE_WAIT_END:
+
                 break;
 
-            case WAIT_FOR_PAYLOAD:
-                buffer[byteCount++] = byte;
-                if (byteCount == expectedSize) {
-                    int32_t value;
-                    memcpy(&value, buffer, sizeof(int32_t));
-                    val_arr[valIndex++] = value;
-                    state = WAIT_FOR_SIZE;  // Ready for next value size
-                }
-                break;
-
-            case WAIT_FOR_END:
-                if (byte == endMarker) {
-                    if (valIndex == NUM_VALUES) {
-                        // Print received values
-                        for (int i = 0; i < NUM_VALUES; i++) {
-                            consolePrintf("%ld ", val_arr[i]);
-                        }
-                        consolePrintf("\n");
-                    }
-                    // Regardless of whether we got a complete message or not,
-                    // we're ready to process the next one.
-                    state = WAIT_FOR_START;
-                } else {
-                    // Invalid end marker, keep waiting for end marker
-                }
+            
+            default:
                 break;
         }
+        
+        
+
+        // switch (state)
+        // {
+        //     case STATE_WAIT_START:
+                
+        //         // Add the received byte to the buffer
+        //         buffer[buffer_counter] = received_byte;
+        //         buffer_counter++;
+
+        //         // Check for both markers
+        //         if (buffer_counter == sizeof(START_MARKER)) {
+        //             if (memcmp(buffer, START_MARKER, sizeof(START_MARKER)) == 0) {
+        //                 state = STATE_RECEIVE_DATA;
+        //                 buffer_counter = 0;
+        //                 consolePrintf("1\n");
+        //                 break;
+        //             }
+        //         } 
+        //         else if (buffer_counter == sizeof(START_MARKER_WITH_ZERO)) {
+        //             if (memcmp(buffer, START_MARKER_WITH_ZERO, sizeof(START_MARKER_WITH_ZERO)) == 0) {
+        //                 state = STATE_RECEIVE_DATA;
+        //                 buffer_counter = 0;
+        //                 consolePrintf("2\n");
+        //                 break;
+        //             }
+        //         }
+
+        // }
     }
 }
