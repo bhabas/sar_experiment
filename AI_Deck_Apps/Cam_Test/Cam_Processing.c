@@ -46,6 +46,8 @@ void delegate_DotProducts(void *arg)
 {
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
 
+    // G_vp*G_vp, G_vp*G_up, G_vp*G_rp, G_vp*G_tp, G_up*G_up, G_up*G_rp, G_up*G_tp, G_rp*G_rp, G_rp*G_tp
+
     int32_t* arrays[4] = {G_vp, G_up, G_rp, G_tp};
     uint8_t result_index = 0;
     uint8_t array_len = 4;
