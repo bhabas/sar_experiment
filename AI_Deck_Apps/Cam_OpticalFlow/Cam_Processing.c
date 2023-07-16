@@ -1,34 +1,41 @@
 #include "Cam_Processing.h"
 
 
-
-
-
-/* Cluster main entry, executed by core 0. */
-void delegate_GradCalcs(void *arg)
+/**
+ * @brief Delegates image gradient task to each cluster core. This function is executed by core 0.
+ * 
+ * @param arg 
+ */
+void Delegate_Gradient_Calcs(void *arg)
 {
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
-    // int32_t* temp = (int32_t*) pi_cl_l1_malloc(&CL_device,CAM_WIDTH * sizeof(int32_t));
-    
-    pi_cl_team_fork(pi_cl_cluster_nb_cores(), CL_GradCalcs, arg);
+    pi_cl_team_fork(pi_cl_cluster_nb_cores(), Cluster_GradientCalcs, arg);
 }
 
 
-/* Task executed by cluster cores. */
-void CL_GradCalcs(void *arg)
+/**
+ * @brief This function assigns each core a specific image section and stride to 
+ * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
+ * 
+ * @param arg (ClusterImageData_t)
+ */
+void Cluster_GradientCalcs(void *arg)
 {
-    uint32_t core_id = pi_core_id();
+    // DETERMINE STRIDE AND CALCULATION RANGE FOR CLUSTER CORE
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
+    uint32_t core_id = pi_core_id();
+    int32_t stride = CL_ImageData->stride;
     int32_t start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
     int32_t end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
-    int32_t stride = CL_ImageData->stride;
 
-
+    // CALCULATE IMAGE GRADIENTS OVER SPECIFIED RANGE
     convolve2D(CL_ImageData->Cur_img_buff,G_up,Ku,start_row,end_row,stride);
     convolve2D(CL_ImageData->Cur_img_buff,G_vp,Kv,start_row,end_row,stride);
+    pi_cl_team_barrier(); // Wait for all cores to finish
+
+    // CALCULATE RADIAL AND TEMPORAL GRADIENTS OVER SPECIFIED RANGE
     radialGrad(CL_ImageData->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,stride);
     temporalGrad(CL_ImageData->Cur_img_buff,CL_ImageData->Prev_img_buff,G_tp,start_row,end_row,stride);
-
     pi_cl_team_barrier();
 
 }
@@ -42,28 +49,32 @@ void CL_GradCalcs(void *arg)
  * 
  * @param arg 
  */
-void delegate_DotProducts(void *arg)
+
+
+
+
+
+/**
+ * @brief Calculates dot products for every combination of gradient vectors. 
+ * Calculations are done in parallel with each core handling a row range and
+ * then combined to a total sum.
+ * 
+ * @param arg 
+ */
+void Delegate_DotProduct_Calcs(void *arg)
 {
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
 
-    // G_vp*G_vp, G_vp*G_up, G_vp*G_rp, G_vp*G_tp, G_up*G_up, G_up*G_rp, G_up*G_tp, G_rp*G_rp, G_rp*G_tp
-
+    uint8_t array_len = 4; // Four gradient terms
     int32_t* arrays[4] = {G_vp, G_up, G_rp, G_tp};
-    uint8_t result_index = 0;
-    uint8_t array_len = 4;
+    uint8_t UART_index = 0;
+    // G_vp•G_vp, G_vp•G_up, G_vp•G_rp, G_vp•G_tp, G_up•G_up, G_up•G_rp, G_up•G_tp, G_rp•G_rp, G_rp•G_tp
 
     for (int i = 0; i < array_len; i++)
     {
         for (int j = i; j < array_len; j++)
         {
-            // Ensure there is enough space in the results array
-            if (result_index > 9)
-            {
-                printf("Results array is full, cannot compute more dot products.\n");
-                return;
-            }
-
-            // Avoid duplicate pairings and exclude dot(G_tp, G_tp)
+            // Avoid duplicate pairings and exclude G_tp•G_tp
             if ((i != j && i > j) || (i == j && i == 3))
             {
                 continue;
@@ -71,23 +82,25 @@ void delegate_DotProducts(void *arg)
 
             CL_ImageData->DP_Vec1 = arrays[i];
             CL_ImageData->DP_Vec2 = arrays[j];
-            CL_ImageData->DP_Sum = &(CL_ImageData->UART_array[result_index]);
-            pi_cl_team_fork(pi_cl_cluster_nb_cores(), CL_DotProduct, CL_ImageData);
+            CL_ImageData->DP_Sum = &(CL_ImageData->UART_array[UART_index]);
+            pi_cl_team_fork(pi_cl_cluster_nb_cores(), Cluster_DotProduct, CL_ImageData);
 
-            // printf("Dot product of array %d and %d: %f\n", i, j, CL_ImageData->UART_array[result_index]);
-            result_index++;
+            // printf("Dot product of array %d and %d: %f\n", i, j, CL_ImageData->UART_array[UART_index]);
+            UART_index++;
         }
         
     }
 
-    // INCLUDE TIME BETWEEN IMAGES
-    CL_ImageData->UART_array[result_index] = 100; // Delta_t
     
-    // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
-    /* Do UART1 Stuff*/
 }
 
-void CL_DotProduct(void *arg)
+/**
+ * @brief This function assigns each core a specific image section and stride to 
+ * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
+ * 
+ * @param arg (ClusterImageData_t)
+ */
+void Cluster_DotProduct(void *arg)
 {
     // CALC LIMITS FOR CORE
     ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
@@ -100,9 +113,9 @@ void CL_DotProduct(void *arg)
     int32_t sum = 0;
     for (int32_t i = start_row; i <= end_row; i++)
     {
-        for (int32_t j = 1; j < CAM_WIDTH-1; j++)
+        for (int32_t j = 1; j < N_up-1; j++)
         {
-            sum += CL_ImageData->DP_Vec1[CAM_WIDTH*i + j] * CL_ImageData->DP_Vec2[CAM_WIDTH*i + j];
+            sum += CL_ImageData->DP_Vec1[N_up*i + j] * CL_ImageData->DP_Vec2[N_up*i + j];
         }
     }
     CL_ImageData->DP_Sum_array[core_id] = sum;
@@ -122,49 +135,39 @@ void CL_DotProduct(void *arg)
 }
 
   
-
-
-
-
-
-
-
-void process_images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
+void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
 {
 
     struct ClusterImageData CL_ImageData;
-    CL_ImageData.Rows_Per_Core = (CAM_HEIGHT - 2)/NUM_CORES;
+    CL_ImageData.Rows_Per_Core = (N_vp - 2)/NUM_CORES;
     CL_ImageData.Cur_img_buff = Cur_img_buff;
     CL_ImageData.Prev_img_buff = Prev_img_buff;
     CL_ImageData.stride = 2;
 
-
+    // CALC IMAGE GRADIENTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_Grad_task;
-    pi_cluster_task(&CL_Grad_task, delegate_GradCalcs, &CL_ImageData);
+    pi_cluster_task(&CL_Grad_task, Delegate_Gradient_Calcs, &CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_Grad_task);
 
-
+    // CALC GRADIENT DOT PRODUCTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_DotProducts_task;
-    pi_cluster_task(&CL_DotProducts_task, delegate_DotProducts, &CL_ImageData);
+    pi_cluster_task(&CL_DotProducts_task, Delegate_DotProduct_Calcs, &CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
+
+    // INCLUDE TIME BETWEEN IMAGES
+    CL_ImageData.UART_array[10] = (int32_t)100; // Delta_t
+    CL_ImageData.UART_array[11] = (int32_t)N_up; // Delta_t
+    CL_ImageData.UART_array[12] = (int32_t)N_vp; // Delta_t
+
+    
+    // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
+    /* Do UART1 Stuff*/
 
 }
 
 void System_Init(void)
 {
     printf("-- Starting Camera Test --\n");
-    
-    // ALLOCATE MEMORY FOR IMAGES
-    for (int i = 0; i < NUM_BUFFERS; i++)
-    {
-        ImgBuff[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
-        if (ImgBuff[i] == NULL)
-        {
-            printf("Failed to allocate memory for image\n");
-            pmsis_exit(-1);
-        }
-        
-    }
 
     // INITIALIZE CAMERA
     if (open_pi_camera_himax(&Cam_device))
@@ -187,27 +190,39 @@ void System_Init(void)
         pmsis_exit(-1);
     }
 
-    // MAKE SURE CAMEAR IS NOT SENDING DATA
+    // ALLOCATE MEMORY FOR IMAGES
+    for (int i = 0; i < NUM_BUFFERS; i++)
+    {
+        ImgBuff[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
+        if (ImgBuff[i] == NULL)
+        {
+            printf("Failed to allocate memory for image\n");
+            pmsis_exit(-1);
+        }
+        
+    }
+
+    // MAKE SURE CAMERA IS NOT SENDING DATA
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
 
     // CAPTURE FIRST IMAGE 
-    pi_task_block(&Cam_task);
-    pi_camera_capture_async(&Cam_device, ImgBuff[process_index1],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    pi_task_block(&Cam_Capture_Task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[prev_img_index],N_up*N_vp, &Cam_Capture_Task);
     pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
-    pi_task_wait_on(&Cam_task);
-    t_delta[process_index1] = pi_time_get_us();
+    pi_task_wait_on(&Cam_Capture_Task);
+    t_delta[prev_img_index] = pi_time_get_us();
 
 
     // CAPTURE SECOND IMAGE
-    pi_task_block(&Cam_task);
-    pi_camera_capture_async(&Cam_device, ImgBuff[process_index2],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
-    pi_task_wait_on(&Cam_task);
-    t_delta[process_index2] = pi_time_get_us() - t_delta[process_index1];
+    pi_task_block(&Cam_Capture_Task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[cur_img_index],N_up*N_vp, &Cam_Capture_Task);
+    pi_task_wait_on(&Cam_Capture_Task);
+    t_delta[cur_img_index] = pi_time_get_us() - t_delta[prev_img_index];
 }
 
 
 
-void Cam_Processing(void)
+void OpticalFlow_Processing_Test(void)
 {
     System_Init();
     printf("Main Loop start\n");
@@ -216,35 +231,33 @@ void Cam_Processing(void)
     uint32_t time_before = pi_time_get_us();
     while (pi_time_get_us() - time_before < 1000000)
     {
-        // LAUNCH CAPTURE OF NEXT IMAGE
-        pi_task_block(&Cam_task);
-        pi_camera_capture_async(&Cam_device, ImgBuff[fill_index],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+        // START CAPTURE OF NEXT IMAGE
+        pi_task_block(&Cam_Capture_Task);
+        pi_camera_capture_async(&Cam_device, ImgBuff[capture_index],N_up*N_vp, &Cam_Capture_Task);
 
 
         // PROCESS THE CURRENT AND PREV IMAGES
-        process_images(ImgBuff[process_index2],ImgBuff[process_index1]);
-        pi_task_wait_on(&Cam_task);
+        Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index]);
+        pi_task_wait_on(&Cam_Capture_Task);
 
 
         // ADVANCE BUFFER INDICES
-        fill_index = (fill_index + 1) % NUM_BUFFERS;
-        process_index1 = (process_index1 + 1) % NUM_BUFFERS;
-        process_index2 = (process_index2 + 1) % NUM_BUFFERS;
-        img_num_async++;
+        capture_index =  (capture_index + 1) % NUM_BUFFERS;
+        prev_img_index = (prev_img_index + 1) % NUM_BUFFERS;
+        cur_img_index =  (cur_img_index + 1) % NUM_BUFFERS;
+
+        // INCREMENT IMAGE COUNT
+        img_count++;
         
     }
     uint32_t time_after = pi_time_get_us();
     float capture_time = (float)(time_after-time_before)/1000000;
-    float FPS_async = (float)img_num_async/capture_time;
+    float FPS_async = (float)img_count/capture_time;
     printf("Capture FPS:        %.3f FPS\n",FPS_async);
-    printf("Capture Duration:   %.3f ms\n",capture_time/img_num_async*1000);
-    printf("Capture Count:      %d images\n",img_num_async);
+    printf("Capture Duration:   %.3f ms\n",capture_time/img_count*1000);
+    printf("Capture Count:      %d images\n",img_count);
     printf("Capture Time:       %.6f s\n",capture_time);
     printf("Exiting... \n");
-
-
-    // PROCESS IMAGES
-    process_images(ImgBuff[1],ImgBuff[0]);
 
     pmsis_exit(0);
 
@@ -261,6 +274,6 @@ int main(void)
     pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);
     __pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200); // Not sure on why set voltage?
 
-    return pmsis_kickoff((void *)Cam_Processing);
+    return pmsis_kickoff((void *)OpticalFlow_Processing_Test);
 }
 

@@ -21,19 +21,19 @@
 struct pi_device CL_device;
 struct pi_device Cam_device;
 struct pi_device UART_device;
-static pi_task_t Cam_task;
+static pi_task_t Cam_Capture_Task;
 
 
 
 uint8_t* ImgBuff[NUM_BUFFERS];
-int32_t G_up[CAM_WIDTH*CAM_HEIGHT] = {0};
-int32_t G_vp[CAM_WIDTH*CAM_HEIGHT] = {0};
-int32_t G_rp[CAM_WIDTH*CAM_HEIGHT] = {0};
-int32_t G_tp[CAM_WIDTH*CAM_HEIGHT] = {0};
+int32_t G_up[N_up*N_vp] = {0};
+int32_t G_vp[N_up*N_vp] = {0};
+int32_t G_rp[N_up*N_vp] = {0};
+int32_t G_tp[N_up*N_vp] = {0};
 
-uint8_t process_index1 = 0;
-uint8_t process_index2 = 1;
-uint8_t fill_index = 2;
+uint8_t prev_img_index = 0;
+uint8_t cur_img_index = 1;
+uint8_t capture_index = 2;
 
 uint32_t t_delta[NUM_BUFFERS] = {0};
 uint32_t t = 0;
@@ -44,39 +44,47 @@ uint32_t time_after = 0;
 
 // PERFORMANCE MEASURING VARIABLES
 volatile uint8_t buffer_index = 0;
-volatile uint8_t img_num_async = 0;
+volatile uint8_t img_count = 0;
 
 typedef struct ClusterImageData{
-    uint8_t  Rows_Per_Core;
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
-    int32_t  UART_array[10];
+
+    uint8_t  Rows_Per_Core;
     int32_t  stride;
 
+    // DOT PRODUCT TERMS
     int32_t* DP_Vec1;
     int32_t* DP_Vec2;
     int32_t  DP_Sum_array[NUM_CORES];
     int32_t* DP_Sum;
+
+    int32_t  UART_array[UART_ARR_SIZE];
 } ClusterImageData_t;
 
+// CONVOLUATION KERNEL U_p-DIRECTION
 int32_t Ku[9] = {-1, 0, 1,
                  -2, 0, 2,
                  -1, 0, 1};
-int32_t Ku_v[3] = { 1, 2, 1};
-int32_t Ku_h[3] = {-1, 0, 1};
 
+// CONVOLUATION KERNEL V_p-DIRECTION
 int32_t Kv[9] = {-1,-2,-1,
                   0, 0, 0,
                   1, 2, 1};
 
+// SEPERABLE CONVOLUTION KERNES U_p-DIRECTION
+int32_t Ku_v[3] = { 1, 2, 1};
+int32_t Ku_h[3] = {-1, 0, 1};
+
+// SEPERABLE CONVOLUTION KERNES V_p-DIRECTION
 int32_t Kv_v[3] = {-1, 0, 1};
 int32_t Kv_h[3] = { 1, 2, 1};
 
 
-void delegate_GradCalcs(void *arg);
-void CL_GradCalcs(void *arg);
-void delegate_DotProducts(void *arg);
-void CL_DotProduct(void *arg);
+void Delegate_Gradient_Calcs(void *arg);
+void Cluster_GradientCalcs(void *arg);
+void Delegate_DotProduct_Calcs(void *arg);
+void Cluster_DotProduct(void *arg);
 
 
 
@@ -136,7 +144,7 @@ static int32_t open_cluster(struct pi_device *device)
     }
         
 
-    pi_freq_set(PI_FREQ_DOMAIN_CL, CLOCK_FREQ_CL);
+    pi_freq_set(PI_FREQ_DOMAIN_CL, CLOCK_FREQ_CLUSTER);
     printf("[CLUSTER] Open\n");
 
     return 0;
