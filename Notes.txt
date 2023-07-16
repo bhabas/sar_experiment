@@ -16,6 +16,7 @@
   To fix this try restarting CF or a fresh firmware reload via cfclient
 - CPX commands are not thread-safe. Do not run them in cluster tasks because they 
   will try to access same memory in parallel and the program will hang with no output
+- Source GAP_SDK and then run make clean/all/run to start program.
 
 
        Crazyswarm
