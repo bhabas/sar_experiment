@@ -50,6 +50,44 @@ uint8_t* int32_to_bytes(int32_t value) {
     return bytes;
 }
 
+int send_uart_arr(struct pi_device *UART_device, int32_t uart_arr[])
+{
+    // FILL START MESSAGE
+    msg_index = 0;
+    for (size_t i = 0; i < sizeof(START_MARKER); i++) {
+        message[msg_index++] = START_MARKER[i];
+    }
+
+    // FILL DATA ARRAY
+    for (int i = 0; i < NUM_VAL; i++) {
+
+        uint8_t *byte_array = int32_to_bytes(uart_arr[i]);
+
+        // ADD BYTE TO BUFFER
+        for (int j = 0; j < 4; j++) {
+            message[msg_index++] = byte_array[j];
+        }
+    }
+
+    // FILL END MESSAGE
+    for (size_t i = 0; i < sizeof(END_MARKER); i++) {
+        message[msg_index++] = END_MARKER[i];
+    }
+
+    // // PRINT DATA MESSAGE BYTES
+    // for (size_t i = 0; i < MESSAGE_SIZE; i++)
+    // {
+    //     printf("%02X ",message[i]);
+    // }
+    // printf("  \n");
+
+    
+    int result = 0;
+    result = pi_uart_write(UART_device,message,MESSAGE_SIZE);
+    return result;
+
+}
+
 static void test_gap8(void)
 {
     printf("Entering main controller...\n");
@@ -77,38 +115,8 @@ static void test_gap8(void)
         // INCREMENT FIRST DATA VALUE
         data[0]++;
 
-        // FILL START MESSAGE
-        msg_index = 0;
-        for (size_t i = 0; i < sizeof(START_MARKER); i++) {
-            message[msg_index++] = START_MARKER[i];
-        }
-
-        // FILL DATA ARRAY
-        for (int i = 0; i < NUM_VAL; i++) {
-
-            uint8_t *byte_array = int32_to_bytes(data[i]);
-
-            // ADD BYTE TO BUFFER
-            for (int j = 0; j < 4; j++) {
-                message[msg_index++] = byte_array[j];
-            }
-        }
-
-        // FILL END MESSAGE
-        for (size_t i = 0; i < sizeof(END_MARKER); i++) {
-            message[msg_index++] = END_MARKER[i];
-        }
-
-        // PRINT DATA MESSAGE BYTES
-        // for (size_t i = 0; i < MESSAGE_SIZE; i++)
-        // {
-        //     printf("%02X ",message[i]);
-        // }
-        // printf("  \n");
-
-        
-        pi_uart_write(&UART_device,message,MESSAGE_SIZE);
-        pi_time_wait_us(10000);
+        send_uart_arr(&UART_device,data);
+        pi_time_wait_us(100000);
     }
     
     pmsis_exit(0);

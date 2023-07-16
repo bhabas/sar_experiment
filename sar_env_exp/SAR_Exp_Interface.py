@@ -50,7 +50,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
 
         ## SET EXP SETTINGS
-        if rospy.get_param("/SAR_SETTINGS/CamActive") == True:
+        if rospy.get_param("/SAR_SETTINGS/Cam_Active") == True:
             self.cf.setParam("CTRL_Params/isCamActive",1)
         else:
             self.cf.setParam("CTRL_Params/isCamActive",0)

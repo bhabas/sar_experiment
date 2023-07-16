@@ -167,9 +167,12 @@ float Theta_x_est = 0.0f;   // [rad/s]
 float Theta_y_est = 0.0f;   // [rad/s]
 
 // CAMERA PARAMETERS
-float IW = 1.0f;            // Image Width [m]
-float f = 0.5e-6f;          // Focal Length [m]
-int32_t N_p = 160;          // Pixel Count 
+float IW = 1.152e-3f;       // Image Width [m]
+float IH = 1.152e-3f;       // Image Height [m]
+float f = 0.66e-3f;         // Focal Length [m]
+int32_t N_up = 160;         // Pixel Count Horizontal [m]
+int32_t N_vp = 160;         // Pixel Count Vertical [m]
+
 int32_t dt_Cam = 100;       // Time Between Images [ms]
 
 
@@ -717,7 +720,7 @@ bool updateOpticalFlowEst()
         int32_t G_rp_rp = UART_arr[7];
         int32_t G_rp_tp = UART_arr[8];
 
-        N_p = UART_arr[9];
+        N_up = UART_arr[9];
         dt_Cam = UART_arr[10];
 
 
