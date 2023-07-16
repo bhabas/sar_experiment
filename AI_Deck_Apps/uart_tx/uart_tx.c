@@ -4,7 +4,7 @@
 #include "pmsis.h"
 
 
-#define NUM_VAL 11
+#define NUM_VAL 16
 
 // Define your markers
 uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
@@ -13,7 +13,7 @@ uint8_t JUNK_MSG[] = {0x00, 0x00, 0x00};
 uint8_t JUNK_MSG2[4] = {0x55, 0xE3, 0x3D, 0x8C};;
 
 // Initialize your data array
-int32_t data[NUM_VAL] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,180,100};
+int32_t data[NUM_VAL] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,33000,160,160,0,0,0,0};
 
 #define MESSAGE_SIZE (sizeof(START_MARKER) + NUM_VAL*sizeof(int32_t) + sizeof(END_MARKER))
 uint8_t message[MESSAGE_SIZE];
@@ -116,7 +116,7 @@ static void test_gap8(void)
         data[0]++;
 
         send_uart_arr(&UART_device,data);
-        pi_time_wait_us(100000);
+        pi_time_wait_us(1000);
     }
     
     pmsis_exit(0);
