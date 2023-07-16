@@ -187,22 +187,22 @@ void System_Init(void)
         pmsis_exit(-1);
     }
 
-    // // MAKE SURE CAMEAR IS NOT SENDING DATA
-    // pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
+    // MAKE SURE CAMEAR IS NOT SENDING DATA
+    pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
 
-    // // CAPTURE FIRST IMAGE 
-    // pi_task_block(&Cam_task);
-    // pi_camera_capture_async(&Cam_device, ImgBuff[process_index1],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
-    // pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
-    // pi_task_wait_on(&Cam_task);
-    // t_delta[process_index1] = pi_time_get_us();
+    // CAPTURE FIRST IMAGE 
+    pi_task_block(&Cam_task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[process_index1],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
+    pi_task_wait_on(&Cam_task);
+    t_delta[process_index1] = pi_time_get_us();
 
 
-    // // CAPTURE SECOND IMAGE
-    // pi_task_block(&Cam_task);
-    // pi_camera_capture_async(&Cam_device, ImgBuff[process_index2],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
-    // pi_task_wait_on(&Cam_task);
-    // t_delta[process_index2] = pi_time_get_us() - t_delta[process_index1];
+    // CAPTURE SECOND IMAGE
+    pi_task_block(&Cam_task);
+    pi_camera_capture_async(&Cam_device, ImgBuff[process_index2],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    pi_task_wait_on(&Cam_task);
+    t_delta[process_index2] = pi_time_get_us() - t_delta[process_index1];
 }
 
 
@@ -212,39 +212,39 @@ void Cam_Processing(void)
     System_Init();
     printf("Main Loop start\n");
 
-    // // CAPTURE IMAGES
-    // uint32_t time_before = pi_time_get_us();
-    // while (pi_time_get_us() - time_before < 1000000)
-    // {
-    //     // LAUNCH CAPTURE OF NEXT IMAGE
-    //     pi_task_block(&Cam_task);
-    //     pi_camera_capture_async(&Cam_device, ImgBuff[fill_index],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
+    // CAPTURE IMAGES
+    uint32_t time_before = pi_time_get_us();
+    while (pi_time_get_us() - time_before < 1000000)
+    {
+        // LAUNCH CAPTURE OF NEXT IMAGE
+        pi_task_block(&Cam_task);
+        pi_camera_capture_async(&Cam_device, ImgBuff[fill_index],CAM_WIDTH*CAM_HEIGHT, &Cam_task);
 
 
-    //     // PROCESS THE CURRENT AND PREV IMAGES
-    //     process_images(ImgBuff[process_index2],ImgBuff[process_index1]);
-    //     pi_task_wait_on(&Cam_task);
+        // PROCESS THE CURRENT AND PREV IMAGES
+        process_images(ImgBuff[process_index2],ImgBuff[process_index1]);
+        pi_task_wait_on(&Cam_task);
 
 
-    //     // ADVANCE BUFFER INDICES
-    //     fill_index = (fill_index + 1) % NUM_BUFFERS;
-    //     process_index1 = (process_index1 + 1) % NUM_BUFFERS;
-    //     process_index2 = (process_index2 + 1) % NUM_BUFFERS;
-    //     img_num_async++;
+        // ADVANCE BUFFER INDICES
+        fill_index = (fill_index + 1) % NUM_BUFFERS;
+        process_index1 = (process_index1 + 1) % NUM_BUFFERS;
+        process_index2 = (process_index2 + 1) % NUM_BUFFERS;
+        img_num_async++;
         
-    // }
-    // uint32_t time_after = pi_time_get_us();
-    // float capture_time = (float)(time_after-time_before)/1000000;
-    // float FPS_async = (float)img_num_async/capture_time;
-    // printf("Capture FPS:        %.3f FPS\n",FPS_async);
-    // printf("Capture Duration:   %.3f ms\n",capture_time/img_num_async*1000);
-    // printf("Capture Count:      %d images\n",img_num_async);
-    // printf("Capture Time:       %.6f s\n",capture_time);
-    // printf("Exiting... \n");
+    }
+    uint32_t time_after = pi_time_get_us();
+    float capture_time = (float)(time_after-time_before)/1000000;
+    float FPS_async = (float)img_num_async/capture_time;
+    printf("Capture FPS:        %.3f FPS\n",FPS_async);
+    printf("Capture Duration:   %.3f ms\n",capture_time/img_num_async*1000);
+    printf("Capture Count:      %d images\n",img_num_async);
+    printf("Capture Time:       %.6f s\n",capture_time);
+    printf("Exiting... \n");
 
 
     // PROCESS IMAGES
-    // process_images(ImgBuff[1],ImgBuff[0]);
+    process_images(ImgBuff[1],ImgBuff[0]);
 
     pmsis_exit(0);
 

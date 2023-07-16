@@ -87,6 +87,7 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     struct pi_himax_conf cam_config;
     pi_himax_conf_init(&cam_config);
     cam_config.format = PI_CAMERA_QQVGA;
+    printf("1\n");
 
     // OPEN CAMERA
     pi_open_from_conf(device, &cam_config);
@@ -99,6 +100,8 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
 
     // ROTATE CAMERA IMAGE
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_START, 0);
+    printf("2\n");
+
 
  
     uint8_t set_value = 3;
@@ -106,6 +109,8 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     pi_camera_reg_set(&Cam_device, IMG_ORIENTATION, &set_value);
     pi_time_wait_us(500000);
     pi_camera_reg_get(&Cam_device, IMG_ORIENTATION, &reg_value);
+    printf("3\n");
+
 
     if (set_value != reg_value)
     {
@@ -114,7 +119,10 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
                 
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP, 0);
     // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
+    printf("4\n");
     pi_time_wait_us(1000000); // Give time for Cam_device to adjust exposure
+    printf("5\n");
+
 
 
     return 0;
@@ -143,33 +151,19 @@ static int32_t open_cluster(struct pi_device *device)
 
 static int32_t open_uart(struct pi_device *device)
 {
-    // SET UART CONFIGURATIONS
-    struct pi_uart_conf conf;
-    pi_uart_conf_init(&conf);
+    struct pi_uart_conf UART_config;
+    pi_uart_conf_init(&UART_config);
+    UART_config.baudrate_bps = 115200;
+    UART_config.enable_tx = 1;
+    UART_config.enable_rx = 0;
 
-    conf.baudrate_bps = 9600;   // Baud Rate - Must match receiver
-    conf.enable_tx = 1;         // Enable data transfer (TX)
-    conf.enable_rx = 0;         // Disable data reception (RX)
-
-    // OPEN UART CONNECTION
-    pi_open_from_conf(&UART_device, &conf);
-    if (pi_uart_open(&UART_device))
+    pi_open_from_conf(device, &UART_config);
+    printf("[UART] Open\n");
+    if (pi_uart_open(device))
     {
-        return -1;
+        printf("[UART] open failed !\n");
+        pmsis_exit(-1);
     }
-
-    float value_arr[3] = {1.0f,2.0f,3.0f};
-
-    while(1)
-    {
-        // WRITE VALUE ARRAY TO CF OVER UART1
-        value_arr[0] += 1; // Increment first value of array
-        pi_uart_write(&UART_device, &value_arr, sizeof(value_arr));
-
-        // WAIT
-        pi_time_wait_us(500000); // Wait 0.5s [500,000 us]
-    }
-
 
     return 0;
 }
