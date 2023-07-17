@@ -1,0 +1,28 @@
+# Exit immediately if a command exits with a non-zero status.
+set -e
+REPO_ROOT=$PWD
+
+# Initialize Main Submodules
+git submodule init
+git submodule update
+
+# Install Crazyswarm
+cd crazyswarm
+./build.sh
+echo "source $REPO_ROOT/crazyswarm/ros_ws/devel/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+cd $REPO_ROOT
+
+
+# Install CF PC Client Submodule
+cd crazyflie-clients-python
+pip3 install -e .
+cd $REPO_ROOT
+
+# Install and Compile Crazyflie Firmware
+cd CF_Firmware_Old
+git submodule update --init --recursive
+git submodule init 
+git submodule update
+make PLATFORM=cf2
+cd $REPO_ROOT

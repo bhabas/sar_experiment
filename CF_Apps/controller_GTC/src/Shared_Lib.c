@@ -169,11 +169,11 @@ float Theta_y_est = 0.0f;   // [rad/s]
 // CAMERA PARAMETERS
 float IW = 1.152e-3f;       // Image Width [m]
 float IH = 1.152e-3f;       // Image Height [m]
-float f = 0.66e-3f;         // Focal Length [m]
+float focal_len = 0.66e-3f; // Focal Length [m]
 int32_t N_up = 160;         // Pixel Count Horizontal [m]
 int32_t N_vp = 160;         // Pixel Count Vertical [m]
 
-int32_t dt_Cam = 100;       // Time Between Images [ms]
+int32_t Cam_dt = 100;       // Time Between Images [ms]
 
 
 int32_t UART_arr[NUM_VALUES] = {0};
@@ -733,22 +733,23 @@ bool updateOpticalFlowEst()
         int32_t G_rp_tp = UART_arr[8];
 
         N_up = UART_arr[9];
-        dt_Cam = UART_arr[10];
+        N_vp = UART_arr[10];
+        Cam_dt = UART_arr[11];
 
-
-
-        // // UPDATE Ax=b MATRICES FROM UART ARRAY
-        // double temp_Grad_vec[3] = {
-        //     (8*IW*1000)/(f*N_p*dt_Cam)*G_vp_tp,
-        //     (8*IW*1000)/(f*N_p*dt_Cam)*G_up_tp,
-        //     (8*IW*1000)/(f*N_p*dt_Cam)*G_rp_tp,
-        // };
+        // UPDATE Ax=b MATRICES FROM UART ARRAY
 
         // double spatial_Grad_mat[9] = {
-        //     G_vp_vp, -G_vp_up, -IW/(2*N_p)*G_vp_rp,
-        //     G_vp_up, -G_up_up, -IW/(2*N_p)*G_up_rp,
-        //     G_vp_rp, -G_up_tp, -IW/(2*N_p)*G_rp_rp,
+        //     G_vp_vp, -G_vp_up, -IW/(2*N_up*focal_len)*G_vp_rp,
+        //     G_vp_up, -G_up_up, -IW/(2*N_up*focal_len)*G_up_rp,
+        //     G_vp_rp, -G_up_rp, -IW/(2*N_up*focal_len)*G_rp_rp,
         // };
+
+        // double temp_Grad_vec[3] = {
+        //     (8*IW)/(focal_len*N_p*Cam_dt)*G_vp_tp,
+        //     (8*IW)/(focal_len*N_p*Cam_dt)*G_up_tp,
+        //     (8*IW)/(focal_len*N_p*Cam_dt)*G_rp_tp,
+        // };
+
 
         double temp_Grad_vec[3] = {
              9,
