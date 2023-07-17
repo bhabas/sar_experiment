@@ -23,35 +23,28 @@ struct pi_device Cam_device;
 struct pi_device UART_device;
 static pi_task_t Cam_Capture_Task;
 
-
-
+// IMAGE BUFFERS AND INDEXES
 uint8_t* ImgBuff[NUM_BUFFERS];
-int32_t G_up[N_up*N_vp] = {0};
-int32_t G_vp[N_up*N_vp] = {0};
-int32_t G_rp[N_up*N_vp] = {0};
-int32_t G_tp[N_up*N_vp] = {0};
-
 uint8_t prev_img_index = 0;
 uint8_t cur_img_index = 1;
 uint8_t capture_index = 2;
 
+// IMAGE GRADIENTS
+int32_t G_up[N_up*N_vp] = {0};
+int32_t G_vp[N_up*N_vp] = {0};
+int32_t G_rp[N_up*N_vp] = {0};
+int32_t G_tp[N_up*N_vp] = {0};
 uint32_t t_delta[NUM_BUFFERS] = {0};
-uint32_t t = 0;
 
 
-uint32_t time_before = 0;
-uint32_t time_after = 0;
 
-// PERFORMANCE MEASURING VARIABLES
-volatile uint8_t buffer_index = 0;
-volatile uint8_t img_count = 0;
 
-typedef struct ClusterImageData{
+typedef struct ClusterCompData{
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
 
     uint8_t  Rows_Per_Core;
-    int32_t  stride;
+    int32_t  Stride;
 
     // DOT PRODUCT TERMS
     int32_t* DP_Vec1;
@@ -60,7 +53,7 @@ typedef struct ClusterImageData{
     int32_t* DP_Sum;
 
     int32_t  UART_array[UART_ARR_SIZE];
-} ClusterImageData_t;
+} ClusterCompData_t;
 
 // CONVOLUATION KERNEL U_p-DIRECTION
 int32_t Ku[9] = {-1, 0, 1,
@@ -81,14 +74,24 @@ int32_t Kv_v[3] = {-1, 0, 1};
 int32_t Kv_h[3] = { 1, 2, 1};
 
 
+// PERFORMANCE MEASURING VARIABLES
+uint32_t time_before = 0;
+uint32_t time_after = 0;
+volatile uint8_t img_count = 0;
+
+
 void Delegate_Gradient_Calcs(void *arg);
 void Cluster_GradientCalcs(void *arg);
 void Delegate_DotProduct_Calcs(void *arg);
 void Cluster_DotProduct(void *arg);
 
-
-
-
+/**
+ * @brief Opens camera device on the AI-Deck for future use. Camera configuration is defined here
+ * and is set to QQVGA (162 x 122) pixel format to minimize image size and maximize refresh rate.
+ * 
+ * @param device 
+ * @return int32_t 
+ */
 static int32_t open_pi_camera_himax(struct pi_device *device)
 {
     // CAMERA CONFIG
@@ -104,7 +107,7 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     }
 
 
-    // ROTATE CAMERA IMAGE
+    // ROTATE CAMERA IMAGE TO BE UPRIGHT
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_START, 0);
 
     uint8_t set_value = 3;
@@ -121,13 +124,20 @@ static int32_t open_pi_camera_himax(struct pi_device *device)
     }
                 
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP, 0);
-    // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);
-    pi_time_wait_us(1000000); // Give time for Cam_device to adjust exposure
+    // pi_camera_control(device, PI_CAMERA_CMD_AEG_INIT, 0);  // Auto-Exposure Gain (Not sure if good or bad yet)
+    pi_time_wait_us(1*1000000); // Give time for Cam_device to adjust exposure
 
-    printf("[CAMERA] Open\n");
+    printf("[CAMERA] \tOpen\n");
     return 0;
 }
 
+/**
+ * @brief Opens cluster device on GAP8 processor for future use. The cluster consists of 8 cores where tasks
+ * can be allocated and split between them for parallel computation
+ * 
+ * @param device 
+ * @return int32_t - Returns 1 if successful
+ */
 static int32_t open_cluster(struct pi_device *device)
 {
 
@@ -145,11 +155,19 @@ static int32_t open_cluster(struct pi_device *device)
         
 
     pi_freq_set(PI_FREQ_DOMAIN_CL, CLOCK_FREQ_CLUSTER);
-    printf("[CLUSTER] Open\n");
+    printf("[CLUSTER] \tOpen\n");
 
     return 0;
 }
 
+/**
+ * @brief Opens UART connection that communicates between the AI-Deck and Crazyflie. 
+ * Connection is over the UART1 pins/functions and is used to pass an int32_t array containing 
+ * gradient dot products and image capture data
+ * 
+ * @param device 
+ * @return int32_t - Returns 1 if successful
+ */
 static int32_t open_uart(struct pi_device *device)
 {
     // UART CONFIG
@@ -166,6 +184,6 @@ static int32_t open_uart(struct pi_device *device)
         return 1;
     }
 
-    printf("[UART] Open\n");
+    printf("[UART] \t\tOpen\n");
     return 0;
 }

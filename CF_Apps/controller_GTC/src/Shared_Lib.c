@@ -176,7 +176,7 @@ int32_t N_vp = 160;         // Pixel Count Vertical [m]
 int32_t Cam_dt = 100;       // Time Between Images [ms]
 
 
-int32_t UART_arr[NUM_VALUES] = {0};
+int32_t UART_arr[UART_ARR_SIZE] = {0};
 bool isOFUpdated = false;
 
 
@@ -690,7 +690,7 @@ bool updateOpticalFlowEst()
         if(isArrUpdated)
         {
             // COPY ARRAY CONTENTS
-            for (int i = 0; i < NUM_VALUES; i++) 
+            for (int i = 0; i < UART_ARR_SIZE; i++) 
             {
                 UART_arr[i] = data_arr[i];
             }
@@ -706,7 +706,7 @@ bool updateOpticalFlowEst()
     #ifdef CONFIG_SAR_SIM
         // Grab data from sim camera processing plugin
         // COPY ARRAY CONTENTS
-        // for (int i = 0; i < NUM_VALUES; i++) 
+        // for (int i = 0; i < UART_ARR_SIZE; i++) 
         // {
         //     UART_arr[i] = 0;
         // }
@@ -750,6 +750,11 @@ bool updateOpticalFlowEst()
         //     (8*IW)/(focal_len*N_p*Cam_dt)*G_rp_tp,
         // };
 
+        double spatial_Grad_mat[9] = {
+            3, 1,-1,
+            2,-2, 1,
+            1, 1, 1,
+        };
 
         double temp_Grad_vec[3] = {
              9,
@@ -757,11 +762,6 @@ bool updateOpticalFlowEst()
              7,
         };
 
-        double spatial_Grad_mat[9] = {
-            3, 1,-1,
-            2,-2, 1,
-            1, 1, 1,
-        };
 
         // SOLVE Ax=b EQUATION FOR OPTICAL FLOW VECTOR
         nml_mat* A_mat = nml_mat_from(3,3,9,spatial_Grad_mat);

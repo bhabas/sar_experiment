@@ -22,8 +22,8 @@ uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
 uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
 
 // INIT DATA ARRAY
-#define NUM_VALUES 10
-int32_t data[NUM_VALUES];
+#define UART_ARR_SIZE 10
+int32_t data[UART_ARR_SIZE];
 int data_counter = 0;
 
 // ASSUME 4-BYTE CHUNK
@@ -73,7 +73,7 @@ void appMain() {
                 // consolePrintf("Val: %d \t %ld\n",data_counter,bytes_to_int32(buffer));
          
                 // TRANSITION TO NEXT STATE
-                if(data_counter == NUM_VALUES)
+                if(data_counter == UART_ARR_SIZE)
                 {
                     state = STATE_WAIT_END;
                     // consolePrintf("2\n");
@@ -85,7 +85,7 @@ void appMain() {
                 // CHECK IF BUFFER MATCHES END SEQUENCE
                 if (memcmp(buffer, END_MARKER, sizeof(END_MARKER)) == 0) {
                     // Print the received data
-                    for (int i = 0; i < NUM_VALUES; i++) {
+                    for (int i = 0; i < UART_ARR_SIZE; i++) {
                         consolePrintf("%ld ", data[i]);
                     }
                     consolePrintf("\n");

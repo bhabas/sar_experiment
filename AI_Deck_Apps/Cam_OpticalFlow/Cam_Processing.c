@@ -4,11 +4,11 @@
 /**
  * @brief Delegates image gradient task to each cluster core. This function is executed by core 0.
  * 
- * @param arg 
+ * @param arg (ClusterCompData_t)
  */
 void Delegate_Gradient_Calcs(void *arg)
 {
-    ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
+    ClusterCompData_t* CL_ImageData = (ClusterCompData_t *)arg;
     pi_cl_team_fork(pi_cl_cluster_nb_cores(), Cluster_GradientCalcs, arg);
 }
 
@@ -17,14 +17,14 @@ void Delegate_Gradient_Calcs(void *arg)
  * @brief This function assigns each core a specific image section and stride to 
  * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
  * 
- * @param arg (ClusterImageData_t)
+ * @param arg (ClusterCompData_t)
  */
 void Cluster_GradientCalcs(void *arg)
 {
     // DETERMINE STRIDE AND CALCULATION RANGE FOR CLUSTER CORE
-    ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
+    ClusterCompData_t* CL_ImageData = (ClusterCompData_t *)arg;
     uint32_t core_id = pi_core_id();
-    int32_t stride = CL_ImageData->stride;
+    int32_t stride = CL_ImageData->Stride;
     int32_t start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
     int32_t end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
 
@@ -43,9 +43,7 @@ void Cluster_GradientCalcs(void *arg)
   
 /**
  * @brief Calc all the necessary dot products from image gradients
- * | G_tp G_vp |   | G_vp G_vp  G_up G_vp G_rp G_vp | | Theta_x |
- * | G_tp G_up | = | G_vp G_up  G_up G_up G_rp G_up | | Theta_y |
- * | G_tp G_rp |   | G_vp G_rp  G_up G_rp G_rp G_rp | | Theta_z |
+
  * 
  * @param arg 
  */
@@ -55,20 +53,24 @@ void Cluster_GradientCalcs(void *arg)
 
 
 /**
- * @brief Calculates dot products for every combination of gradient vectors. 
- * Calculations are done in parallel with each core handling a row range and
- * then combined to a total sum.
+ * @brief Calculates all the necessary dot products for every combination of gradient 
+ * vectors. Calculations are done in parallel with each core handling a row range of 
+ * the image and then combined to a total sum value.
  * 
- * @param arg 
+ * | G_tp•G_vp |   | G_vp•G_vp  G_up•G_vp G_rp•G_vp | | Theta_x |
+ * | G_tp•G_up | = | G_vp•G_up  G_up•G_up G_rp•G_up | | Theta_y |
+ * | G_tp•G_rp |   | G_vp•G_rp  G_up•G_rp G_rp•G_rp | | Theta_z |
+ * 
+ * @param arg (ClusterCompData_t)
  */
 void Delegate_DotProduct_Calcs(void *arg)
 {
-    ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
+    ClusterCompData_t* CL_ImageData = (ClusterCompData_t *)arg;
 
     uint8_t array_len = 4; // Four gradient terms
     int32_t* arrays[4] = {G_vp, G_up, G_rp, G_tp};
     uint8_t UART_index = 0;
-    // G_vp•G_vp, G_vp•G_up, G_vp•G_rp, G_vp•G_tp, G_up•G_up, G_up•G_rp, G_up•G_tp, G_rp•G_rp, G_rp•G_tp
+    // UART_Array_Order: (G_vp•G_vp, G_vp•G_up, G_vp•G_rp, G_vp•G_tp, G_up•G_up, G_up•G_rp, G_up•G_tp, G_rp•G_rp, G_rp•G_tp)
 
     for (int i = 0; i < array_len; i++)
     {
@@ -98,12 +100,12 @@ void Delegate_DotProduct_Calcs(void *arg)
  * @brief This function assigns each core a specific image section and stride to 
  * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
  * 
- * @param arg (ClusterImageData_t)
+ * @param arg (ClusterCompData_t)
  */
 void Cluster_DotProduct(void *arg)
 {
     // CALC LIMITS FOR CORE
-    ClusterImageData_t* CL_ImageData = (ClusterImageData_t *)arg;
+    ClusterCompData_t* CL_ImageData = (ClusterCompData_t *)arg;
     uint32_t core_id = pi_core_id();
     int32_t start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
     int32_t end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
@@ -135,14 +137,14 @@ void Cluster_DotProduct(void *arg)
 }
 
   
-void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
+void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_delta)
 {
 
-    struct ClusterImageData CL_ImageData;
+    struct ClusterCompData CL_ImageData;
     CL_ImageData.Rows_Per_Core = (N_vp - 2)/NUM_CORES;
     CL_ImageData.Cur_img_buff = Cur_img_buff;
     CL_ImageData.Prev_img_buff = Prev_img_buff;
-    CL_ImageData.stride = 2;
+    CL_ImageData.Stride = 2;
 
     // CALC IMAGE GRADIENTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_Grad_task;
@@ -155,7 +157,7 @@ void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff)
     pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
 
     // INCLUDE TIME BETWEEN IMAGES
-    CL_ImageData.UART_array[10] = (int32_t)100; // Delta_t
+    CL_ImageData.UART_array[10] = (int32_t)t_delta; // Delta_t
     CL_ImageData.UART_array[11] = (int32_t)N_up; // Delta_t
     CL_ImageData.UART_array[12] = (int32_t)N_vp; // Delta_t
 
@@ -237,7 +239,7 @@ void OpticalFlow_Processing_Test(void)
 
 
         // PROCESS THE CURRENT AND PREV IMAGES
-        Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index]);
+        Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
         pi_task_wait_on(&Cam_Capture_Task);
 
 
