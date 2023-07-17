@@ -35,7 +35,8 @@ int32_t G_vp[N_up*N_vp] = {0};
 int32_t G_rp[N_up*N_vp] = {0};
 int32_t G_tp[N_up*N_vp] = {0};
 uint32_t t_delta[NUM_BUFFERS] = {0};
-
+uint32_t t_capture[NUM_BUFFERS] = {0};
+uint32_t t_cap = 0;
 
 
 
@@ -77,7 +78,7 @@ int32_t Kv_h[3] = { 1, 2, 1};
 // PERFORMANCE MEASURING VARIABLES
 uint32_t time_before = 0;
 uint32_t time_after = 0;
-volatile uint8_t img_count = 0;
+volatile uint32_t img_count = 0;
 
 
 void Delegate_Gradient_Calcs(void *arg);

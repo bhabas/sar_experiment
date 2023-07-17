@@ -167,6 +167,12 @@ void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_de
 
 }
 
+void test_func(void* arg)
+{
+    uint32_t* t_end = (uint32_t*)arg;
+    *t_end = pi_time_get_us();
+}
+
 void System_Init(void)
 {
     printf("-- Starting Camera Test --\n");
@@ -206,20 +212,27 @@ void System_Init(void)
 
     // MAKE SURE CAMERA IS NOT SENDING DATA
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
+    pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
 
     // CAPTURE FIRST IMAGE 
-    pi_task_block(&Cam_Capture_Task);
+    // pi_task_block(&Cam_Capture_Task);
+    pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
     pi_camera_capture_async(&Cam_device, ImgBuff[prev_img_index],N_up*N_vp, &Cam_Capture_Task);
-    pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
+    uint32_t t_start = pi_time_get_us();
     pi_task_wait_on(&Cam_Capture_Task);
-    t_delta[prev_img_index] = pi_time_get_us();
+    t_capture[prev_img_index] = t_cap;
+
+    // printf("t_start %lu \t t_end %lu \t t_delta %lu\n",t_start,t_cap,(t_cap-t_start)/1000);
+
 
 
     // CAPTURE SECOND IMAGE
-    pi_task_block(&Cam_Capture_Task);
+    // pi_task_block(&Cam_Capture_Task);
+    pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
     pi_camera_capture_async(&Cam_device, ImgBuff[cur_img_index],N_up*N_vp, &Cam_Capture_Task);
     pi_task_wait_on(&Cam_Capture_Task);
-    t_delta[cur_img_index] = pi_time_get_us() - t_delta[prev_img_index];
+    t_capture[cur_img_index] = t_cap;
+    t_delta[cur_img_index] = t_capture[cur_img_index] - t_capture[prev_img_index];
 }
 
 
@@ -231,25 +244,45 @@ void OpticalFlow_Processing_Test(void)
 
     // CAPTURE IMAGES
     uint32_t time_before = pi_time_get_us();
-    while (pi_time_get_us() - time_before < 1000000)
+    while (pi_time_get_us() - time_before < 1*1000000)
     {
         // START CAPTURE OF NEXT IMAGE
-        pi_task_block(&Cam_Capture_Task);
+        pi_task_callback(&Cam_Capture_Task, test_func, (void*)&t_cap);
         pi_camera_capture_async(&Cam_device, ImgBuff[capture_index],N_up*N_vp, &Cam_Capture_Task);
-
 
         // PROCESS THE CURRENT AND PREV IMAGES
         Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
-        pi_task_wait_on(&Cam_Capture_Task);
 
+        
+        pi_task_wait_on(&Cam_Capture_Task);
+        t_capture[capture_index] = t_cap;
+        t_delta[capture_index] = t_capture[capture_index] - t_capture[cur_img_index];
+
+        // INCREMENT IMAGE COUNT
+        img_count++;
+
+
+        // // DEBUG PRINT
+        // if (img_count == 20)
+        // {
+        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
+        //     {
+        //         printf("idx: %d \t t_cap:   %lu\n",i,t_capture[i]);
+        //     }
+
+        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
+        //     {
+        //         printf("idx: %d \t t_delta: %lu\n",i,t_delta[i]);
+        //     }
+        //     break;
+
+        // }
 
         // ADVANCE BUFFER INDICES
         capture_index =  (capture_index + 1) % NUM_BUFFERS;
         prev_img_index = (prev_img_index + 1) % NUM_BUFFERS;
         cur_img_index =  (cur_img_index + 1) % NUM_BUFFERS;
 
-        // INCREMENT IMAGE COUNT
-        img_count++;
         
     }
     uint32_t time_after = pi_time_get_us();
