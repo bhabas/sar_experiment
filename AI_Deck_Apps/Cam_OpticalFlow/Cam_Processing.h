@@ -38,7 +38,7 @@ int32_t G_tp[N_up*N_vp] = {0};
 uint32_t t_delta[NUM_BUFFERS] = {0};
 uint32_t t_capture[NUM_BUFFERS] = {0};
 uint32_t t_cap = 0;
-
+uint32_t t_start = 0;
 
 
 

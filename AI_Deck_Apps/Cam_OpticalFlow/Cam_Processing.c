@@ -157,9 +157,14 @@ void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_de
     pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
 
     // INCLUDE TIME BETWEEN IMAGES
-    CL_ImageData.UART_array[10] = (int32_t)t_delta; // Delta_t
-    CL_ImageData.UART_array[11] = (int32_t)N_up; // Delta_t
-    CL_ImageData.UART_array[12] = (int32_t)N_vp; // Delta_t
+    CL_ImageData.UART_array[10] = (int32_t)t_delta/1000; // Delta_t
+    CL_ImageData.UART_array[11] = (int32_t)N_up;
+    CL_ImageData.UART_array[12] = (int32_t)N_vp;
+
+    CL_ImageData.UART_array[13] = 0;
+    CL_ImageData.UART_array[14] = 0;
+    CL_ImageData.UART_array[15] = 0;
+
 
     
     // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
@@ -218,22 +223,20 @@ void System_Init(void)
     pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
 
     // CAPTURE FIRST IMAGE 
-    // pi_task_block(&Cam_Capture_Task);
     pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
     pi_camera_capture_async(&Cam_device, ImgBuff[prev_img_index],N_up*N_vp, &Cam_Capture_Task);
-    uint32_t t_start = pi_time_get_us();
+    t_start = pi_time_get_us();
     pi_task_wait_on(&Cam_Capture_Task);
+
+    // INITIAL CAPTURE TIME
     t_capture[prev_img_index] = t_cap;
 
-    // printf("t_start %lu \t t_end %lu \t t_delta %lu\n",t_start,t_cap,(t_cap-t_start)/1000);
-
-
-
     // CAPTURE SECOND IMAGE
-    // pi_task_block(&Cam_Capture_Task);
     pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
     pi_camera_capture_async(&Cam_device, ImgBuff[cur_img_index],N_up*N_vp, &Cam_Capture_Task);
     pi_task_wait_on(&Cam_Capture_Task);
+
+    // NEW CAPTURE TIME
     t_capture[cur_img_index] = t_cap;
     t_delta[cur_img_index] = t_capture[cur_img_index] - t_capture[prev_img_index];
 }
@@ -250,7 +253,7 @@ void OpticalFlow_Processing_Test(void)
     
     // CAPTURE IMAGES
     uint32_t time_before = pi_time_get_us();
-    while (pi_time_get_us() - time_before < 1*1000000)
+    while (pi_time_get_us() - time_before < 3*1000000)
     {
         // START CAPTURE OF NEXT IMAGE
         pi_task_callback(&Cam_Capture_Task, test_func, (void*)&t_cap);
@@ -260,40 +263,46 @@ void OpticalFlow_Processing_Test(void)
         Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
 
 
-        
         pi_task_wait_on(&Cam_Capture_Task);
+
+        // GRAB NEW CAPTURE TIME
         t_capture[capture_index] = t_cap;
         t_delta[capture_index] = t_capture[capture_index] - t_capture[cur_img_index];
+
+
+        data[prev_img_index] = (t_capture[prev_img_index]-t_start)/1000;
+        data[cur_img_index] =  (t_capture[cur_img_index]-t_start)/1000;
+        data[capture_index] =  (t_capture[capture_index]-t_start)/1000;
+
+        data[prev_img_index+3] = (t_delta[prev_img_index])/1000;
+        data[cur_img_index+3] =  (t_delta[cur_img_index])/1000;
+        data[capture_index+3] =  (t_delta[capture_index])/1000;
 
         send_uart_arr(&UART_device,data);
 
 
-        // data[0] = t_capture[0];
-        // data[1] = t_capture[1];
-        // data[2] = t_capture[2];
-
-
+        
 
 
         // INCREMENT IMAGE COUNT
         img_count++;
 
 
-        // // DEBUG PRINT
-        // if (img_count == 20)
-        // {
-        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
-        //     {
-        //         printf("idx: %d \t t_cap:   %lu\n",i,t_capture[i]);
-        //     }
+        // DEBUG PRINT
+        if (img_count == 60)
+        {
+            for (size_t i = 0; i < NUM_BUFFERS; i++)
+            {
+                printf("idx: %d \t t_cap:   %lu\n",i,t_capture[i]);
+            }
 
-        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
-        //     {
-        //         printf("idx: %d \t t_delta: %lu\n",i,t_delta[i]);
-        //     }
-        //     break;
+            for (size_t i = 0; i < NUM_BUFFERS; i++)
+            {
+                printf("idx: %d \t t_delta: %lu\n",i,t_delta[i]);
+            }
+            break;
 
-        // }
+        }
 
         // ADVANCE BUFFER INDICES
         capture_index =  (capture_index + 1) % NUM_BUFFERS;
