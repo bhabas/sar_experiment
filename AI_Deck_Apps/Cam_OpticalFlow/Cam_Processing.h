@@ -15,6 +15,7 @@
 
 #include "CalcFuncs.h"
 #include "params.h"
+#include "UART.h"
 
 
 // CAMERA BUFFERS AND TASKS
@@ -38,11 +39,7 @@ uint32_t t_delta[NUM_BUFFERS] = {0};
 uint32_t t_capture[NUM_BUFFERS] = {0};
 uint32_t t_cap = 0;
 
-// Define your markers
-uint8_t START_MARKER[] = {0xAA, 0xBB, 0xCC, 0xCD};
-uint8_t END_MARKER[] = {0xFF, 0xEE, 0xDD, 0xDC};
-uint8_t JUNK_MSG[] = {0x00, 0x00, 0x00};
-uint8_t JUNK_MSG2[4] = {0x55, 0xE3, 0x3D, 0x8C};
+
 
 
 typedef struct ClusterCompData{
@@ -166,31 +163,3 @@ static int32_t open_cluster(struct pi_device *device)
     return 0;
 }
 
-/**
- * @brief Opens UART connection that communicates between the AI-Deck and Crazyflie. 
- * Connection is over the UART1 pins/functions and is used to pass an int32_t array containing 
- * gradient dot products and image capture data
- * 
- * @param device 
- * @return int32_t - Returns 1 if successful
- */
-static int32_t open_uart(struct pi_device *device)
-{
-    struct pi_uart_conf UART_config;
-    pi_uart_conf_init(&UART_config);
-    UART_config.baudrate_bps = 115200;
-    UART_config.enable_tx = 1;
-    UART_config.enable_rx = 0;
-
-    pi_open_from_conf(device, &UART_config);
-    if (pi_uart_open(device))
-    {
-        return 1;
-    }
-    printf("[UART] Open\n");
-    
-    // WRITE JUNK MSG BECAUSE OF EXTRA 00 SENT
-    pi_uart_write(&UART_device,&JUNK_MSG,3);
-
-    return 0;
-}
