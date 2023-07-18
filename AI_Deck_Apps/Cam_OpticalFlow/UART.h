@@ -22,4 +22,6 @@ static uint8_t JUNK_MSG_TEST[4] = {0x55, 0xE3, 0x3D, 0x8C};
 int32_t open_uart(struct pi_device *device);
 uint8_t* int32_to_bytes(int32_t value);
 int send_uart_arr(struct pi_device *UART_device, int32_t uart_arr[]);
+uint8_t* create_uart_msg(int32_t uart_arr[]);
+
 

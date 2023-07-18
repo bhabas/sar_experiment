@@ -28,19 +28,22 @@ static pi_task_t Cam_Capture_Task;
 uint8_t* ImgBuff[NUM_BUFFERS];
 uint8_t prev_img_index = 0;
 uint8_t cur_img_index = 1;
-uint8_t capture_index = 2;
+uint8_t cap_img_index = 2;
 
 // IMAGE GRADIENTS
 int32_t G_up[N_up*N_vp] = {0};
 int32_t G_vp[N_up*N_vp] = {0};
 int32_t G_rp[N_up*N_vp] = {0};
 int32_t G_tp[N_up*N_vp] = {0};
+
+
 uint32_t t_delta[NUM_BUFFERS] = {0};
-uint32_t t_capture[NUM_BUFFERS] = {0};
-uint32_t t_cap = 0;
+uint32_t t_cap[NUM_BUFFERS] = {0};
 uint32_t t_start = 0;
+uint32_t t_prev = 0;
+uint32_t t_capture = 0;
 
-
+int32_t data[UART_ARR_SIZE] = {0,0,0,0,0,0,0,0,0,0,N_up,N_vp,0,0,0,0};
 
 typedef struct ClusterCompData{
     uint8_t* Cur_img_buff;
@@ -87,6 +90,7 @@ void Delegate_Gradient_Calcs(void *arg);
 void Cluster_GradientCalcs(void *arg);
 void Delegate_DotProduct_Calcs(void *arg);
 void Cluster_DotProduct(void *arg);
+void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_delta);
 
 /**
  * @brief Opens camera device on the AI-Deck for future use. Camera configuration is defined here

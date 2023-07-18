@@ -71,6 +71,36 @@ int send_uart_arr(struct pi_device *UART_device, int32_t uart_arr[])
 
 }
 
+
+uint8_t* create_uart_msg(int32_t uart_arr[])
+{
+    static uint8_t message[MESSAGE_SIZE];
+    int msg_index = 0;
+    
+    // FILL START MESSAGE
+    for (size_t i = 0; i < sizeof(START_MARKER); i++) {
+        message[msg_index++] = START_MARKER[i];
+    }
+
+    // FILL DATA ARRAY
+    for (int i = 0; i < UART_ARR_SIZE; i++) {
+
+        uint8_t *byte_array = int32_to_bytes(uart_arr[i]);
+
+        // ADD BYTE TO BUFFER
+        for (int j = 0; j < 4; j++) {
+            message[msg_index++] = byte_array[j];
+        }
+    }
+
+    // FILL END MESSAGE
+    for (size_t i = 0; i < sizeof(END_MARKER); i++) {
+        message[msg_index++] = END_MARKER[i];
+    }
+    
+    return message;
+}
+
 /**
  * @brief Converts a single int32_t value into its uint8_t byte components
  * so they can be send via UART. It outputs a pointer to the first uint8_t byte
