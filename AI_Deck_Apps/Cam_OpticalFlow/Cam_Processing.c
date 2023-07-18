@@ -2,8 +2,7 @@
 
 
 
-// Initialize your data array
-int32_t data[UART_ARR_SIZE] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,33000,160,160,0,0,0,0};
+
 
 
 
@@ -298,7 +297,9 @@ void OpticalFlow_Processing_Test(void)
     // printf("Exiting... \n");
 
     
-
+    // Initialize your data array
+    int32_t data[UART_ARR_SIZE] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,33000,160,160,0,0,0,0};
+    
     while (1)
     {
 
@@ -306,7 +307,7 @@ void OpticalFlow_Processing_Test(void)
         data[0]++;
 
         send_uart_arr(&UART_device,data);
-        pi_time_wait_us(1000);
+        pi_time_wait_us(33000);
     }
 
     pmsis_exit(0);
