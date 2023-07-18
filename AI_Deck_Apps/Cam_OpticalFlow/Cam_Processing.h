@@ -48,6 +48,7 @@ int32_t data[UART_ARR_SIZE] = {0,0,0,0,0,0,0,0,0,0,N_up,N_vp,0,0,0,0};
 typedef struct ClusterCompData{
     uint8_t* Cur_img_buff;
     uint8_t* Prev_img_buff;
+    uint32_t t_delta;
 
     uint8_t  Rows_Per_Core;
     int32_t  Stride;
@@ -59,7 +60,12 @@ typedef struct ClusterCompData{
     int32_t* DP_Sum;
 
     int32_t  UART_array[UART_ARR_SIZE];
+    uint8_t* UART_msg;
 } ClusterCompData_t;
+
+struct ClusterCompData CL_ImageData;
+uint8_t* UART_msg;
+
 
 // CONVOLUATION KERNEL U_p-DIRECTION
 int32_t Ku[9] = {-1, 0, 1,
@@ -90,7 +96,8 @@ void Delegate_Gradient_Calcs(void *arg);
 void Cluster_GradientCalcs(void *arg);
 void Delegate_DotProduct_Calcs(void *arg);
 void Cluster_DotProduct(void *arg);
-void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_delta);
+void Process_Images(struct ClusterCompData *CL_ImageData);
+
 
 /**
  * @brief Opens camera device on the AI-Deck for future use. Camera configuration is defined here

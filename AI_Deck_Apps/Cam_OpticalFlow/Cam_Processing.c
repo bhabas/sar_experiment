@@ -39,6 +39,10 @@ void System_Init(void)
         
     }
 
+    // INITIALIZE CLUSTER IMAGE DATA
+    CL_ImageData.Rows_Per_Core = (N_vp - 2)/NUM_CORES;
+    CL_ImageData.Stride = 2;
+
     // MAKE SURE CAMERA IS NOT SENDING DATA
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
     pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
@@ -77,9 +81,6 @@ void OpticalFlow_Processing_Test(void)
     System_Init();
   
     
-    pi_task_t wait_task;
-    uint8_t* uart_msg;
-    
     // CAPTURE IMAGES
     uint32_t time_before = pi_time_get_us();
     while (pi_time_get_us() - time_before < 3*1000000)
@@ -89,59 +90,39 @@ void OpticalFlow_Processing_Test(void)
         pi_camera_capture_async(&Cam_device, ImgBuff[cap_img_index],N_up*N_vp, &Cam_Capture_Task);
 
         // PROCESS THE CURRENT AND PREV IMAGES
-        // Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
-        uart_msg = create_uart_msg(data);
+        CL_ImageData.Cur_img_buff = ImgBuff[cur_img_index];
+        CL_ImageData.Prev_img_buff = ImgBuff[prev_img_index];
+        CL_ImageData.t_delta = t_delta[cur_img_index];
 
-        pi_task_block(&wait_task);
-        pi_uart_write_async(&UART_device,uart_msg,MESSAGE_SIZE, &wait_task);
-        pi_task_wait_on(&wait_task);
+        Process_Images(&CL_ImageData);
 
-
+        // WAIT FOR CAMERA CAPTURE TO FINISH AND SEND DATA
         pi_task_wait_on(&Cam_Capture_Task);
+        pi_uart_write(&UART_device,CL_ImageData.UART_msg,MESSAGE_SIZE);
 
+
+        // UPDATE CAPTURE TIME AND TIME BETWEEN IMAGE CAPTURES
         t_capture = pi_time_get_us();
         t_cap[cap_img_index] = t_capture;
         
         t_delta[cap_img_index] = t_capture - t_prev;
         t_prev = t_capture;
-        
-        
-        data[0] = (t_cap[prev_img_index]-t_start)/1000;
-        data[1] = (t_cap[cur_img_index]-t_start)/1000;
-        data[2] = (t_cap[cap_img_index]-t_start)/1000;
-        data[5] = (int32_t)(t_delta[cur_img_index])/1000;
-        // send_uart_arr(&UART_device,data);
-        // uint8_t* uart_msg = create_uart_msg(data);
-        // int result = pi_uart_write(&UART_device, uart_msg, MESSAGE_SIZE);
 
-
-
-
-        // DEBUG PRINT
-        if (img_count == 20)
-        {
-
-            
-
-            break;
-        }
-
-
-
-        
-
-        
-        // INCREMENT IMAGE COUNT
-        img_count++;
-
-        
 
         // ADVANCE BUFFER INDICES
         cap_img_index =  (cap_img_index + 1) % NUM_BUFFERS;
         prev_img_index = (prev_img_index + 1) % NUM_BUFFERS;
         cur_img_index =  (cur_img_index + 1) % NUM_BUFFERS;
-
         
+        
+        // INCREMENT IMAGE COUNT
+        img_count++;
+        
+
+        if (img_count == 60)
+        {
+            break;
+        }
     }
     uint32_t time_after = pi_time_get_us();
     float capture_time = (float)(time_after-time_before)/1000000;
@@ -162,8 +143,6 @@ int main(void)
 {
     pi_bsp_init();
     
-
-
     // Increase the FC freq to 250 MHz
     pi_freq_set(PI_FREQ_DOMAIN_FC, CLOCK_FREQ);
     __pi_pmu_voltage_set(PI_PMU_DOMAIN_FC, 1200); // Not sure on why set voltage?
@@ -174,43 +153,31 @@ int main(void)
 
 
 
-void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_delta)
+void Process_Images(struct ClusterCompData *CL_ImageData)
 {
-
-    struct ClusterCompData CL_ImageData;
-    CL_ImageData.Rows_Per_Core = (N_vp - 2)/NUM_CORES;
-    CL_ImageData.Cur_img_buff = Cur_img_buff;
-    CL_ImageData.Prev_img_buff = Prev_img_buff;
-    CL_ImageData.Stride = 2;
 
     // CALC IMAGE GRADIENTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_Grad_task;
-    pi_cluster_task(&CL_Grad_task, Delegate_Gradient_Calcs, &CL_ImageData);
+    pi_cluster_task(&CL_Grad_task, Delegate_Gradient_Calcs, CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_Grad_task);
 
-    // CALC GRADIENT DOT PRODUCTS VIA CLUSTER PARALLEL COMPUTATION
+    // CALC DOT PRODUCTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_DotProducts_task;
-    pi_cluster_task(&CL_DotProducts_task, Delegate_DotProduct_Calcs, &CL_ImageData);
+    pi_cluster_task(&CL_DotProducts_task, Delegate_DotProduct_Calcs, CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
 
     // INCLUDE TIME BETWEEN IMAGES
-    CL_ImageData.UART_array[10] = (int32_t)t_delta/1000; // Delta_t
-    CL_ImageData.UART_array[11] = (int32_t)N_up;
-    CL_ImageData.UART_array[12] = (int32_t)N_vp;
+    CL_ImageData->UART_array[10] = (int32_t)CL_ImageData->t_delta; // Delta_t
+    CL_ImageData->UART_array[11] = (int32_t)N_up;
+    CL_ImageData->UART_array[12] = (int32_t)N_vp;
 
-    CL_ImageData.UART_array[13] = 0;
-    CL_ImageData.UART_array[14] = 0;
-    CL_ImageData.UART_array[15] = 0;
+    // EXTRA SPACE FOR FUTURE USE
+    CL_ImageData->UART_array[13] = 0;
+    CL_ImageData->UART_array[14] = 0;
+    CL_ImageData->UART_array[15] = 0;
 
-    // pi_cl_uart_write(&UART_device, &JUNK_MSG_TEST,4, &cl_uart_req);
-
-
-    
-    // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
-    /* Do UART1 Stuff*/
-    // send_uart_arr(&UART_device,CL_ImageData.UART_array);
-
-
+    // CREATE UART MESSAGE OF DATA FOR FINAL COMPUTATION ON CRAZYFLIE
+    CL_ImageData->UART_msg = create_uart_msg(CL_ImageData->UART_array);
 }
 
 
