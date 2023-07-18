@@ -164,6 +164,8 @@ void Process_Images(uint8_t* Cur_img_buff, uint8_t* Prev_img_buff, uint32_t t_de
     
     // SEND CALC DATA TO CRAZYFLIE FOR FINAL COMPUTATION
     /* Do UART1 Stuff*/
+    // send_uart_arr(&UART_device,CL_ImageData.UART_array);
+
 
 }
 
@@ -199,41 +201,41 @@ void System_Init(void)
     }
 
 
-    // // ALLOCATE MEMORY FOR IMAGES
-    // for (int i = 0; i < NUM_BUFFERS; i++)
-    // {
-    //     ImgBuff[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
-    //     if (ImgBuff[i] == NULL)
-    //     {
-    //         printf("Failed to allocate memory for image\n");
-    //         pmsis_exit(-1);
-    //     }
+    // ALLOCATE MEMORY FOR IMAGES
+    for (int i = 0; i < NUM_BUFFERS; i++)
+    {
+        ImgBuff[i] = (uint8_t *)pmsis_l2_malloc(BUFFER_SIZE);
+        if (ImgBuff[i] == NULL)
+        {
+            printf("Failed to allocate memory for image\n");
+            pmsis_exit(-1);
+        }
         
-    // }
+    }
 
-    // // MAKE SURE CAMERA IS NOT SENDING DATA
-    // pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
-    // pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
+    // MAKE SURE CAMERA IS NOT SENDING DATA
+    pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
+    pi_camera_control(&Cam_device,PI_CAMERA_CMD_START,0);
 
-    // // CAPTURE FIRST IMAGE 
-    // // pi_task_block(&Cam_Capture_Task);
-    // pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
-    // pi_camera_capture_async(&Cam_device, ImgBuff[prev_img_index],N_up*N_vp, &Cam_Capture_Task);
-    // uint32_t t_start = pi_time_get_us();
-    // pi_task_wait_on(&Cam_Capture_Task);
-    // t_capture[prev_img_index] = t_cap;
+    // CAPTURE FIRST IMAGE 
+    // pi_task_block(&Cam_Capture_Task);
+    pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
+    pi_camera_capture_async(&Cam_device, ImgBuff[prev_img_index],N_up*N_vp, &Cam_Capture_Task);
+    uint32_t t_start = pi_time_get_us();
+    pi_task_wait_on(&Cam_Capture_Task);
+    t_capture[prev_img_index] = t_cap;
 
-    // // printf("t_start %lu \t t_end %lu \t t_delta %lu\n",t_start,t_cap,(t_cap-t_start)/1000);
+    // printf("t_start %lu \t t_end %lu \t t_delta %lu\n",t_start,t_cap,(t_cap-t_start)/1000);
 
 
 
-    // // CAPTURE SECOND IMAGE
-    // // pi_task_block(&Cam_Capture_Task);
-    // pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
-    // pi_camera_capture_async(&Cam_device, ImgBuff[cur_img_index],N_up*N_vp, &Cam_Capture_Task);
-    // pi_task_wait_on(&Cam_Capture_Task);
-    // t_capture[cur_img_index] = t_cap;
-    // t_delta[cur_img_index] = t_capture[cur_img_index] - t_capture[prev_img_index];
+    // CAPTURE SECOND IMAGE
+    // pi_task_block(&Cam_Capture_Task);
+    pi_task_callback(&Cam_Capture_Task, test_func, (void *)&t_cap);
+    pi_camera_capture_async(&Cam_device, ImgBuff[cur_img_index],N_up*N_vp, &Cam_Capture_Task);
+    pi_task_wait_on(&Cam_Capture_Task);
+    t_capture[cur_img_index] = t_cap;
+    t_delta[cur_img_index] = t_capture[cur_img_index] - t_capture[prev_img_index];
 }
 
 
@@ -243,72 +245,84 @@ void OpticalFlow_Processing_Test(void)
     System_Init();
     printf("Main Loop start\n");
 
-    
-    // // CAPTURE IMAGES
-    // uint32_t time_before = pi_time_get_us();
-    // while (pi_time_get_us() - time_before < 1*1000000)
-    // {
-    //     // START CAPTURE OF NEXT IMAGE
-    //     pi_task_callback(&Cam_Capture_Task, test_func, (void*)&t_cap);
-    //     pi_camera_capture_async(&Cam_device, ImgBuff[capture_index],N_up*N_vp, &Cam_Capture_Task);
-
-    //     // PROCESS THE CURRENT AND PREV IMAGES
-    //     Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
-
-        
-    //     pi_task_wait_on(&Cam_Capture_Task);
-    //     t_capture[capture_index] = t_cap;
-    //     t_delta[capture_index] = t_capture[capture_index] - t_capture[cur_img_index];
-
-    //     // INCREMENT IMAGE COUNT
-    //     img_count++;
-
-
-    //     // // DEBUG PRINT
-    //     // if (img_count == 20)
-    //     // {
-    //     //     for (size_t i = 0; i < NUM_BUFFERS; i++)
-    //     //     {
-    //     //         printf("idx: %d \t t_cap:   %lu\n",i,t_capture[i]);
-    //     //     }
-
-    //     //     for (size_t i = 0; i < NUM_BUFFERS; i++)
-    //     //     {
-    //     //         printf("idx: %d \t t_delta: %lu\n",i,t_delta[i]);
-    //     //     }
-    //     //     break;
-
-    //     // }
-
-    //     // ADVANCE BUFFER INDICES
-    //     capture_index =  (capture_index + 1) % NUM_BUFFERS;
-    //     prev_img_index = (prev_img_index + 1) % NUM_BUFFERS;
-    //     cur_img_index =  (cur_img_index + 1) % NUM_BUFFERS;
-
-        
-    // }
-    // uint32_t time_after = pi_time_get_us();
-    // float capture_time = (float)(time_after-time_before)/1000000;
-    // float FPS_async = (float)img_count/capture_time;
-    // printf("Capture FPS:        %.3f FPS\n",FPS_async);
-    // printf("Capture Duration:   %.3f ms\n",capture_time/img_count*1000);
-    // printf("Capture Count:      %d images\n",img_count);
-    // printf("Capture Time:       %.6f s\n",capture_time);
-    // printf("Exiting... \n");
-
-    
     // Initialize your data array
-    int32_t data[UART_ARR_SIZE] = {1234,2345,3456,4567,5678,6789,7890,9876,8765,33000,160,160,0,0,0,0};
+    int32_t data[UART_ARR_SIZE] = {0,0,0,0,0,0,0,0,0,0,N_up,N_vp,0,0,0,0};
     
-    while (1)
+    // CAPTURE IMAGES
+    uint32_t time_before = pi_time_get_us();
+    while (pi_time_get_us() - time_before < 1*1000000)
     {
+        // START CAPTURE OF NEXT IMAGE
+        pi_task_callback(&Cam_Capture_Task, test_func, (void*)&t_cap);
+        pi_camera_capture_async(&Cam_device, ImgBuff[capture_index],N_up*N_vp, &Cam_Capture_Task);
 
-        // INCREMENT FIRST DATA VALUE
-        data[0]++;
+        // PROCESS THE CURRENT AND PREV IMAGES
+        Process_Images(ImgBuff[cur_img_index],ImgBuff[prev_img_index],t_delta[cur_img_index]);
+
+
+        
+        pi_task_wait_on(&Cam_Capture_Task);
+        t_capture[capture_index] = t_cap;
+        t_delta[capture_index] = t_capture[capture_index] - t_capture[cur_img_index];
 
         send_uart_arr(&UART_device,data);
-        pi_time_wait_us(33000);
+
+
+        // data[0] = t_capture[0];
+        // data[1] = t_capture[1];
+        // data[2] = t_capture[2];
+
+
+
+
+        // INCREMENT IMAGE COUNT
+        img_count++;
+
+
+        // // DEBUG PRINT
+        // if (img_count == 20)
+        // {
+        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
+        //     {
+        //         printf("idx: %d \t t_cap:   %lu\n",i,t_capture[i]);
+        //     }
+
+        //     for (size_t i = 0; i < NUM_BUFFERS; i++)
+        //     {
+        //         printf("idx: %d \t t_delta: %lu\n",i,t_delta[i]);
+        //     }
+        //     break;
+
+        // }
+
+        // ADVANCE BUFFER INDICES
+        capture_index =  (capture_index + 1) % NUM_BUFFERS;
+        prev_img_index = (prev_img_index + 1) % NUM_BUFFERS;
+        cur_img_index =  (cur_img_index + 1) % NUM_BUFFERS;
+
+        
     }
+    uint32_t time_after = pi_time_get_us();
+    float capture_time = (float)(time_after-time_before)/1000000;
+    float FPS_async = (float)img_count/capture_time;
+    printf("Capture FPS:        %.3f FPS\n",FPS_async);
+    printf("Capture Duration:   %.3f ms\n",capture_time/img_count*1000);
+    printf("Capture Count:      %d images\n",img_count);
+    printf("Capture Time:       %.6f s\n",capture_time);
+    printf("Exiting... \n");
+
+    
+    
+    
+    // while (1)
+    // {
+
+    //     // INCREMENT FIRST DATA VALUE
+    //     data[0]++;
+
+    //     send_uart_arr(&UART_device,data);
+    //     pi_time_wait_us(33000);
+    // }
 
     pmsis_exit(0);
 
