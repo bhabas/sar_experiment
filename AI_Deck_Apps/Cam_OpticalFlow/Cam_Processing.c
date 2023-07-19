@@ -41,7 +41,7 @@ void System_Init(void)
 
     // INITIALIZE CLUSTER IMAGE DATA
     CL_ImageData.Rows_Per_Core = (N_vp - 2)/NUM_CORES;
-    CL_ImageData.Stride = 1;
+    CL_ImageData.Stride = 2;
 
     // MAKE SURE CAMERA IS NOT SENDING DATA
     pi_camera_control(&Cam_device, PI_CAMERA_CMD_STOP,0);
@@ -90,15 +90,21 @@ void OpticalFlow_Processing_Test(void)
         pi_camera_capture_async(&Cam_device, ImgBuff[cap_img_index],N_up*N_vp, &Cam_Capture_Task);
 
         // PROCESS THE CURRENT AND PREV IMAGES
-        CL_ImageData.Cur_img_buff = img_cur;
-        CL_ImageData.Prev_img_buff = img_prev;
+        CL_ImageData.Cur_img_buff = ImgBuff[cur_img_index];
+        CL_ImageData.Prev_img_buff = ImgBuff[prev_img_index];
         CL_ImageData.t_delta = t_delta[cur_img_index];
 
-        Process_Images(&CL_ImageData);
+        // PROCESS IMAGES
+        // Process_Images(&CL_ImageData);
+        CL_ImageData.UART_array[0] = (int32_t)CL_ImageData.Cur_img_buff[0];
+
+
+        // CREATE UART MESSAGE OF DATA FOR FINAL COMPUTATION ON CRAZYFLIE
+        CL_ImageData.UART_msg = create_uart_msg(CL_ImageData.UART_array);
 
         // WAIT FOR CAMERA CAPTURE TO FINISH AND SEND DATA
         pi_task_wait_on(&Cam_Capture_Task);
-        // pi_uart_write(&UART_device,CL_ImageData.UART_msg,MESSAGE_SIZE);
+        pi_uart_write(&UART_device,CL_ImageData.UART_msg,MESSAGE_SIZE);
 
 
         // UPDATE CAPTURE TIME AND TIME BETWEEN IMAGE CAPTURES
@@ -119,7 +125,7 @@ void OpticalFlow_Processing_Test(void)
         img_count++;
         
 
-        if (img_count == 1)
+        if (img_count == 30)
         {
             break;
         }
@@ -156,31 +162,16 @@ int main(void)
 void Process_Images(struct ClusterCompData *CL_ImageData)
 {
 
-    // CALC IMAGE GRADIENTS VIA CLUSTER PARALLEL COMPUTATION
+    // // CALC IMAGE GRADIENTS VIA CLUSTER PARALLEL COMPUTATION
     struct pi_cluster_task CL_Grad_task;
     pi_cluster_task(&CL_Grad_task, Delegate_Gradient_Calcs, (void *)CL_ImageData);
     pi_cluster_send_task(&CL_device,&CL_Grad_task);
 
-    for (int i = 0; i < N_vp; i++)
-    {
-        for (int j = 0; j < N_up; j++)
-        {
-            printf("%d ",G_rp[i*N_up + j]);
-        }
-        printf("\n");
-        
-    }
-    printf("\n");
-    
-    
-
-    
-
-
     // CALC DOT PRODUCTS VIA CLUSTER PARALLEL COMPUTATION
-    struct pi_cluster_task CL_DotProducts_task;
-    pi_cluster_task(&CL_DotProducts_task, Delegate_DotProduct_Calcs, (void *)CL_ImageData);
+    // struct pi_cluster_task CL_DotProducts_task;
+    // pi_cluster_task(&CL_DotProducts_task, Delegate_DotProduct_Calcs, (void *)CL_ImageData);
     // pi_cluster_send_task(&CL_device,&CL_DotProducts_task);
+
 
     // INCLUDE TIME BETWEEN IMAGES
     CL_ImageData->UART_array[10] = (int32_t)CL_ImageData->t_delta; // Delta_t
@@ -192,8 +183,6 @@ void Process_Images(struct ClusterCompData *CL_ImageData)
     CL_ImageData->UART_array[14] = 0;
     CL_ImageData->UART_array[15] = 0;
 
-    // CREATE UART MESSAGE OF DATA FOR FINAL COMPUTATION ON CRAZYFLIE
-    CL_ImageData->UART_msg = create_uart_msg(CL_ImageData->UART_array);
 }
 
 
@@ -229,13 +218,10 @@ void Cluster_GradientCalcs(void *arg)
 }
 
 
-
-
-
-
 void Delegate_DotProduct_Calcs(void *arg)
 {
     ClusterCompData_t* CL_ImageData = (ClusterCompData_t *)arg;
+
 
     uint8_t array_len = 4; // Four gradient terms
     int32_t* arrays[4] = {G_vp, G_up, G_rp, G_tp};
@@ -252,12 +238,23 @@ void Delegate_DotProduct_Calcs(void *arg)
                 continue;
             }
 
-            CL_ImageData->DP_Vec1 = arrays[i];
-            CL_ImageData->DP_Vec2 = arrays[j];
-            CL_ImageData->DP_Sum = &(CL_ImageData->UART_array[UART_index]);
-            pi_cl_team_fork(pi_cl_cluster_nb_cores(), Cluster_DotProduct, CL_ImageData);
+            if (i == 0 && j == 0)
+            {
+                // ASSIGN ARRAYS
+                CL_ImageData->DP_Vec1 = arrays[i];
+                CL_ImageData->DP_Vec2 = arrays[j];
+                pi_cl_team_fork(pi_cl_cluster_nb_cores(), Cluster_DotProduct, arg);
 
-            // printf("Dot product of array %d and %d: %f\n", i, j, CL_ImageData->UART_array[UART_index]);
+                // COMBINE ALL VALUES INTO A SINGLE SUM
+                int32_t DP_Sum = 0;
+                for (int ii = 0; ii < pi_cl_cluster_nb_cores(); ii++)
+                {
+                    DP_Sum += CL_ImageData->DP_Sum_array[ii];
+
+                }
+                CL_ImageData->UART_array[UART_index] = DP_Sum;
+            }
+            
             UART_index++;
         }
         
@@ -275,7 +272,6 @@ void Cluster_DotProduct(void *arg)
     int32_t start_row = core_id * CL_ImageData->Rows_Per_Core + 1;
     int32_t end_row = start_row + CL_ImageData->Rows_Per_Core - 1;
 
-
     // CALC DOT PRODUCT INSIDE CORE LIMITS
     int32_t sum = 0;
     for (int32_t i = start_row; i <= end_row; i++)
@@ -288,15 +284,4 @@ void Cluster_DotProduct(void *arg)
     CL_ImageData->DP_Sum_array[core_id] = sum;
     pi_cl_team_barrier(); // Wait for all cores to finish
 
-
-    // COMBINE RESULTS TO SINGLE DOT PRODUCT VALUE
-    if (core_id == 0)
-    {
-        int32_t sum = 0;
-        for (int i = 0; i < pi_cl_cluster_nb_cores(); i++)
-        {
-            sum += CL_ImageData->DP_Sum_array[i];
-        }
-        *(CL_ImageData->DP_Sum) = sum;
-    }
 }
