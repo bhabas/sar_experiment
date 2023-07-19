@@ -91,11 +91,71 @@ uint32_t time_before = 0;
 uint32_t time_after = 0;
 volatile uint32_t img_count = 0;
 
+uint8_t img_cur[] = {
+        0,0,0,0,0,0,0,0,0,0,
+        1,1,1,1,1,1,1,1,1,1,
+        2,2,2,2,2,2,2,2,2,2,
+        3,3,3,3,3,3,3,3,3,3,
+        4,4,4,4,4,4,4,4,4,4,
+        5,5,5,5,5,5,5,5,5,5,
+        6,6,6,6,6,6,6,6,6,6,
+        7,7,7,7,7,7,7,7,7,7,
+        8,8,8,8,8,8,8,8,8,8,
+        9,9,9,9,9,9,9,9,9,9,
+    };
 
+    uint8_t img_prev[] = {
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        1,1,1,1,1,1,1,1,1,1,
+        2,2,2,2,2,2,2,2,2,2,
+        3,3,3,3,3,3,3,3,3,3,
+        4,4,4,4,4,4,4,4,4,4,
+        5,5,5,5,5,5,5,5,5,5,
+        6,6,6,6,6,6,6,6,6,6,
+        7,7,7,7,7,7,7,7,7,7,
+        8,8,8,8,8,8,8,8,8,8,
+    };
+
+
+/**
+ * @brief Delegates image gradient task to each cluster core. This function is executed by core 0.
+ * 
+ * @param arg (ClusterCompData_t)
+ */
 void Delegate_Gradient_Calcs(void *arg);
+
+/**
+ * @brief This function assigns each core a specific image section and stride to 
+ * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
+ * 
+ * @param arg (ClusterCompData_t)
+ */
 void Cluster_GradientCalcs(void *arg);
+
+/**
+ * @brief Calculates all the necessary dot products for every combination of gradient 
+ * vectors. Calculations are done in parallel with each core handling a row range of 
+ * the image and then combined to a total sum value.
+ * 
+ * | G_tp•G_vp |   | G_vp•G_vp  G_up•G_vp G_rp•G_vp | | Theta_x |
+ * | G_tp•G_up | = | G_vp•G_up  G_up•G_up G_rp•G_up | | Theta_y |
+ * | G_tp•G_rp |   | G_vp•G_rp  G_up•G_rp G_rp•G_rp | | Theta_z |
+ * 
+ * @param arg (ClusterCompData_t)
+ */
 void Delegate_DotProduct_Calcs(void *arg);
+
+/**
+ * @brief This function assigns each core a specific image section and stride to 
+ * compute brightness gradients (G_up and G_vp), radial image gradient G_rp, and temporal gradient (G_tp)
+ * 
+ * @param arg (ClusterCompData_t)
+ */
 void Cluster_DotProduct(void *arg);
+
+
+
 void Process_Images(struct ClusterCompData *CL_ImageData);
 
 
