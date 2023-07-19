@@ -222,7 +222,7 @@ void Cluster_GradientCalcs(void *arg)
     pi_cl_team_barrier(); // Wait for all cores to finish
 
     // CALCULATE RADIAL AND TEMPORAL GRADIENTS OVER SPECIFIED RANGE
-    // radialGrad(CL_ImageData->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,stride);
+    radialGrad(CL_ImageData->Cur_img_buff,G_rp,G_up,G_vp,start_row,end_row,stride);
     temporalGrad(CL_ImageData->Cur_img_buff,CL_ImageData->Prev_img_buff,G_tp,start_row,end_row,stride);
     pi_cl_team_barrier();
 

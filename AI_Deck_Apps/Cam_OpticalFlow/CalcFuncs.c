@@ -68,7 +68,7 @@ void radialGrad(uint8_t* img, int32_t* result, int32_t* G_up, int32_t* G_vp, int
         for (int32_t u_p = 1; u_p < N_up - 1; u_p += stride)
         {
             int32_t curPos = v_p*N_up + u_p;
-            result[curPos] = (2*u_p - N_up + 1)*G_up[curPos];
+            result[curPos] = (2*u_p - N_up + 1)*G_up[curPos] + (2*v_p - N_vp + 1)*G_vp[curPos];
         }
     }
 }
