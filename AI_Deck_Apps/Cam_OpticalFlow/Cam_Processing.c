@@ -83,7 +83,7 @@ void OpticalFlow_Processing_Test(void)
     
     // CAPTURE IMAGES
     uint32_t time_before = pi_time_get_us();
-    while (pi_time_get_us() - time_before < 10*1000000)
+    while (pi_time_get_us() - time_before < 20*1000000)
     {
         // START CAPTURE OF NEXT IMAGE
         pi_task_block(&Cam_Capture_Task);
@@ -96,19 +96,16 @@ void OpticalFlow_Processing_Test(void)
         CL_ImageData.Prev_img_buff = img_prev;
         CL_ImageData.t_delta = t_delta[cur_img_index];
 
-        // // PROCESS IMAGES
-        // Process_Images(&CL_ImageData);
-        // CL_ImageData.UART_array[0] = (int32_t)&(ImgBuff[prev_img_index]);
-        // CL_ImageData.UART_array[0] = ImgBuff[cur_img_index][9962];
-
-
-
-        // CREATE UART MESSAGE OF DATA FOR FINAL COMPUTATION ON CRAZYFLIE
-        CL_ImageData.UART_msg = create_uart_msg(CL_ImageData.UART_array);
+        // PROCESS IMAGES
+        Process_Images(&CL_ImageData);
 
         // WAIT FOR CAMERA CAPTURE TO FINISH AND SEND DATA
         pi_task_wait_on(&Cam_Capture_Task);
+
+        // CREATE UART MESSAGE OF DATA FOR FINAL COMPUTATION ON CRAZYFLIE
+        CL_ImageData.UART_msg = create_uart_msg(CL_ImageData.UART_array);
         pi_uart_write(&UART_device,CL_ImageData.UART_msg,MESSAGE_SIZE);
+
 
 
         // UPDATE CAPTURE TIME AND TIME BETWEEN IMAGE CAPTURES
@@ -128,11 +125,6 @@ void OpticalFlow_Processing_Test(void)
         // INCREMENT IMAGE COUNT
         img_count++;
         
-
-        if (img_count == 10)
-        {
-            break;
-        }
     }
     uint32_t time_after = pi_time_get_us();
     float capture_time = (float)(time_after-time_before)/1000000;
@@ -179,11 +171,12 @@ void Process_Images(struct ClusterCompData *CL_ImageData)
 
 
     // INCLUDE TIME BETWEEN IMAGES
-    CL_ImageData->UART_array[10] = (int32_t)CL_ImageData->t_delta; // Delta_t
-    CL_ImageData->UART_array[11] = (int32_t)N_up/STRIDE;
-    CL_ImageData->UART_array[12] = (int32_t)N_vp/STRIDE;
+    CL_ImageData->UART_array[9] = (int32_t)CL_ImageData->t_delta; // Delta_t
+    CL_ImageData->UART_array[10] = (int32_t)N_up/STRIDE;
+    CL_ImageData->UART_array[11] = (int32_t)N_vp/STRIDE;
 
     // EXTRA SPACE FOR FUTURE USE
+    CL_ImageData->UART_array[12] = 0;
     CL_ImageData->UART_array[13] = 0;
     CL_ImageData->UART_array[14] = 0;
     CL_ImageData->UART_array[15] = 0;
