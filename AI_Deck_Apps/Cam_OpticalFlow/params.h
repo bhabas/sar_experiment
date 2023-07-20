@@ -2,8 +2,9 @@
 
 #define IMG_ORIENTATION 0x0101
 
-#define N_up 162
-#define N_vp 22
+#define N_up 10
+#define N_vp 10
+#define STRIDE 1
 
 
 #define CLOCK_FREQ 250*1000000 // [MHz]
