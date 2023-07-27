@@ -9,8 +9,8 @@
 #define CLOCK_FREQ 250*1000000
 #define MS_2_US 1000
 #define IMG_ORIENTATION 0x0101
-#define CAM_WIDTH 162
-#define CAM_HEIGHT 122
+#define CAM_WIDTH 162*2
+#define CAM_HEIGHT 122*2
 
 static unsigned char *imgBuff;
 static struct pi_device camera;
@@ -40,7 +40,7 @@ static int open_pi_camera_himax(struct pi_device *device)
     // CAMERA CONFIG
     struct pi_himax_conf cam_config;
     pi_himax_conf_init(&cam_config);
-    cam_config.format = PI_CAMERA_QQVGA;
+    cam_config.format = PI_CAMERA_QVGA;
 
 
     // OPEN CAMERA
@@ -111,12 +111,12 @@ void camera_task(void *parameters)
             captureTime = pi_time_get_us() - start;
             pi_camera_control(&camera, PI_CAMERA_CMD_STOP, 0);
 
-            // PROCESS IMAGE
-            for (int i = 0; i < CAM_HEIGHT; i++) {
-                for (int j = 0; j < CAM_WIDTH; j++) {
-                    imgBuff[i * CAM_WIDTH + j] = i;
-                }
-            }
+            // // PROCESS IMAGE
+            // for (int i = 0; i < CAM_HEIGHT; i++) {
+            //     for (int j = 0; j < CAM_WIDTH; j++) {
+            //         imgBuff[i * CAM_WIDTH + j] = i;
+            //     }
+            // }
             
 
             // SEND INFORMATION ABOUT THE IMAGE

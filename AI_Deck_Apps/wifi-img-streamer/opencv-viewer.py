@@ -58,7 +58,7 @@ while(1):
 
 
         bayer_img = np.frombuffer(imgStream, dtype=np.uint8)   
-        bayer_img.shape = (122,162)
+        bayer_img.shape = (122*2,162*2)
         # color_img = cv2.cvtColor(bayer_img, cv2.COLOR_BayerBG2BGRA)
         cv2.namedWindow('Raw',cv2.WINDOW_NORMAL)
         cv2.imshow('Raw', bayer_img)

@@ -5,7 +5,7 @@ platform = board
 
 APP              = test
 # App sources
-APP_SRCS         += Cam_Processing.c CalcFuncs.c
+APP_SRCS         += Cam_Processing.c CalcFuncs.c UART.c
 
 # App includes
 APP_INC	         = .

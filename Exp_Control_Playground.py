@@ -9,14 +9,14 @@ import rospy
 import rospkg
 import sys
 
-from sar_env_exp import CrazyflieEnv_Exp
+from sar_env_exp import SAR_Exp_Interface
 from sar_general.Scripts.Control_Playground import cmd_send
 
 
 if __name__ == '__main__':
 
     ## INIT GAZEBO ENVIRONMENT
-    env = CrazyflieEnv_Exp()
+    env = SAR_Exp_Interface()
 
     ## INITIALIZE CRAZYFLIE
     env.safeMode(True)
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     ## INIT COMMANDER THREAD
     cmd_thread = threading.Thread(target=cmd_send,args=(env,logName))
     cmd_thread.start()   
-    env.cf.setParam("GTC_Params/SafeModeFlag_p", 0)
+    # env.cf.setParam("GTC_Params/SafeModeFlag_p", 0)
 
 
     rospy.spin()
