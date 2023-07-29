@@ -26,6 +26,7 @@ print(sensor.get_framebuffers())
 while(True):
     clock.tick()
     img = sensor.snapshot()
+    img.save("temp/bg.bmp")
     sensor.set_frame_callback(frame_cb)
 
 #    print(clock.fps())
