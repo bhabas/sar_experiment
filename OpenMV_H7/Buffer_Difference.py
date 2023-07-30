@@ -17,7 +17,7 @@ sensor.set_hmirror(True)
 ## ALLOW SYSTEM TO UPDATE CAMERA SETTINGS
 sensor.skip_frames(time = 1000) # Let new settings take affect.
 clock = time.clock() # Tracks FPS.
-sensor.set_auto_exposure(True, exposure_us=30_000) # make smaller to go faster
+sensor.set_auto_exposure(True, exposure_us=10_000) # make smaller to go faster
 
 ## CAPTURE INITIAL IMAGE
 img_prev = sensor.snapshot().copy()
@@ -34,6 +34,25 @@ K_vp = [-1, -2, -1,
          0,  0,  0,
          1,  2,  1]
 kernel_size = 1
+
+u_p_dist = np.zeros((N_vp,N_up),dtype=np.int16)
+v_p_dist = np.zeros((N_vp,N_up),dtype=np.int16)
+
+
+for u_p in range(0,N_up):
+    u_p_dist[:,u_p] = (2*u_p-N_up+1)
+
+for v_p in range(0,N_vp):
+    v_p_dist[v_p,:] = (2*v_p-N_vp+1)
+
+
+
+#while True:
+
+#    print(u_p_dist)
+#    print(v_p_dist)
+#    time.sleep(0.1)
+
 
 while True:
 
@@ -61,17 +80,7 @@ while True:
     G_vp = np.frombuffer(img_G_vp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
     G_rp = np.zeros((N_up,N_vp),dtype=np.uint8)
 
-
-    for u_p in range(0,N_up):
-        for v_p in range(0,N_vp):
-#            G_rp[u_p,v_p] = (2*u_p-64+1)*G_up[u_p,v_p] + (2*v_p-64+1)*G_vp[u_p,v_p]
-            pass
-
-
-#    for u_p in range(0,64):
-#            for v_p in range(0,64):
-#                pixel_val = (2*u_p - 64 + 1)*img_G_up.get_pixel(u_p,v_p) + (2*v_p - 64 + 1)*img_G_vp.get_pixel(u_p,v_p)
-#                img_G_rp.set_pixel(u_p,v_p,pixel_val)
+#    G_rp = u_p_dist*G_up + v_p_dist*G_vp
 
     t_delta = t_curr - t_prev
     print(f"t_delta: {t_delta/1_000_000:.3f} ms \t FPS_Avg: {clock.fps():.1f}")
@@ -84,6 +93,6 @@ while True:
     img_prev = img_curr
     t_prev = t_curr
 
-#    time.sleep(0.1)
+##    time.sleep(0.1)
 
 
