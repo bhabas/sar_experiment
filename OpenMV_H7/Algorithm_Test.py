@@ -95,17 +95,36 @@ for x in range(10):
         val = int(img_arr_cur[x,y])
         img_curr.set_pixel(x, y, val)
 
+img_arr_prev = np.array(img_arr_prev).reshape((10,10))
+
+
 
 #while True:
 
 
 
-sensor.flush()  # Ensure framebuffer is clean
+#sensor.flush()  # Ensure framebuffer is clean
 
 img_G_tp = img_curr.copy()  # Create a copy of current image
 img_G_up = img_curr.copy()
 img_G_vp = img_curr.copy()
 
+#img_G_tp.sub(img_prev)
+
+img_arr_prev = np.frombuffer(img_prev.bytearray(), dtype=np.int8).reshape((N_up,N_vp))
+img_arr_cur = np.frombuffer(img_curr.bytearray(), dtype=np.int8).reshape((N_up,N_vp))
+
+
+
+## WRITE CURRENT IMAGE
+#for x in range(10):
+#    for y in range(10):
+#        print(img_G_tp.get_pixel(x, y),end=' ')
+#    print()
+
+print(img_arr_cur-img_arr_prev)
+
+print("i")
 #    t_delta = 0.01
 #    time.sleep(0.1)
 
@@ -114,89 +133,12 @@ img_G_vp = img_curr.copy()
 #    img_G_up.morph(kernel_size, K_up)
 #    img_G_vp.morph(kernel_size, K_up)
 
-## CONVERT IMAGE BUFFERS TO ARRAYS
-img_bytearray = img_curr.bytearray() # Convert image to bytestring
-G_tp = np.frombuffer(img_G_tp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_up = np.frombuffer(img_G_up.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_vp = np.frombuffer(img_G_vp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_rp = np.zeros((N_up,N_vp),dtype=np.uint8)
-#    G_rp = u_p_dist*G_up + v_p_dist*G_vp
+### CONVERT IMAGE BUFFERS TO ARRAYS
+#img_bytearray = img_curr.bytearray() # Convert image to bytestring
+#G_tp = np.frombuffer(img_G_tp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
+##    G_up = np.frombuffer(img_G_up.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
+##    G_vp = np.frombuffer(img_G_vp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
+##    G_rp = np.zeros((N_up,N_vp),dtype=np.uint8)
+##    G_rp = u_p_dist*G_up + v_p_dist*G_vp
 
-#    print(G_tp)
-
-
-
-#    clock.tick()
-
-#    ## CAPTURE CURRENT IMAGE
-#    img_curr = sensor.snapshot()
-#    t_curr = time.time_ns()
-#    t_delta = t_curr - t_prev
-#    t_delta = 0.01
-
-#    img_curr
-
-#    img_G_tp = img_curr.copy()  # Create a copy of current image
-#    img_G_up = img_curr.copy()
-#    img_G_vp = img_curr.copy()
-
-#    ## SUBTRACT CUR_IMG FROM PREV_IMG AND PERFORM GRAD CONVOLUTIONS
-#    img_G_tp.sub(img_prev)
-#    img_G_up.morph(kernel_size, K_up)
-#    img_G_vp.morph(kernel_size, K_up)
-
-#    ## CONVERT IMAGE BUFFERS TO ARRAYS
-#    img_bytearray = img_curr.bytearray() # Convert image to bytestring
-#    G_tp = np.frombuffer(img_G_tp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_up = np.frombuffer(img_G_up.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_vp = np.frombuffer(img_G_vp.bytearray(), dtype=np.uint8).reshape((N_up,N_vp))
-#    G_rp = np.zeros((N_up,N_vp),dtype=np.uint8)
-#    G_rp = u_p_dist*G_up + v_p_dist*G_vp
-
-#    ## CALC DOT PRODUCTS
-#    G_vp_vp = np.sum(G_vp*G_vp)
-#    G_vp_up = np.sum(G_vp*G_up)
-#    G_vp_rp = np.sum(G_vp*G_rp)
-#    G_vp_tp = np.sum(G_vp*G_tp)
-
-#    G_up_up = np.sum(G_up*G_up)
-#    G_up_rp = np.sum(G_up*G_rp)
-#    G_up_tp = np.sum(G_up*G_tp)
-
-#    G_rp_rp = np.sum(G_rp*G_rp)
-#    G_rp_tp = np.sum(G_rp*G_tp)
-
-#    ## SOLVE LEAST SQUARES PROBLEM
-#    A = np.array([
-#        [G_vp_vp, -G_vp_up, -IW/(2*N_up*f)*G_vp_rp],
-#        [G_vp_up, -G_up_up, -IW/(2*N_up*f)*G_up_rp],
-#        [G_vp_rp, -G_up_rp, -IW/(2*N_up*f)*G_rp_rp]
-#    ])
-
-#    b = np.array([
-#        [G_vp_tp],
-#        [G_up_tp],
-#        [G_rp_tp]
-#    ])*(8*IW/(f*N_up*t_delta))
-
-#    A = np.array([[25, 15, -5], [15, 18,  0], [-5,  0, 11]])
-#    b = np.array([9,-3,7])
-
-
-#    ## SOLVE b VIA PSEUDO-INVERSE
-#    try:
-#        A = np.linalg.cholesky(A)
-#        x = spy.linalg.cho_solve(A, b)
-##        print(x[:])
-#    except:
-#        print("Singular Matrix")
-
-#    print(f"t_delta: {t_delta/1_000_000:.3f} ms \t FPS_Avg: {clock.fps():.1f}")
-
-#    # Now, we need to replace img_prev with img_current for the next iteration
-#    img_prev = img_curr
-#    t_prev = t_curr
-
-#    time.sleep(0.1)
-
-
+#print(G_tp)
