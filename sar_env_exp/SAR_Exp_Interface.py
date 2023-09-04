@@ -128,9 +128,9 @@ class SAR_Exp_Interface(SAR_Base_Interface):
     def safeMode(self,status):
         
         if status == True:
-            self.cf.setParam("CTRL_Params/SafeMode",1)
+            self.cf.setParam("System_Params/SafeMode",1)
         elif status == False:
-            self.cf.setParam("CTRL_Params/SafeMode",0)
+            self.cf.setParam("System_Params/SafeMode",0)
 
 
 if __name__ == "__main__":
