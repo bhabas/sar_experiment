@@ -1,5 +1,10 @@
 #include "Compress_States.h"
 
+// Definition of the global instances
+States_Z_Struct States_Z;
+TrgStates_Z_Struct TrgStates_Z;
+SetPoints_Z_Struct SetPoints_Z;
+
 
 void compressStates(){
 
