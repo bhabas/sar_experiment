@@ -35,7 +35,12 @@ CONFIG_CPX_UART2_BAUDRATE=576000
 CONFIG_APP_ENABLE=y
 CONFIG_APP_PRIORITY=3
 CONFIG_APP_STACKSIZE=350
+
+#
+# Controller configuration
+#
 CONFIG_CONTROLLER_OOT=y
+
 
 #
 # Expansion deck configuration

@@ -4,8 +4,8 @@
   <include file="$(find sar_launch_exp)/Load_Params.launch"/>
 
 
-  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflieTypes.yaml" />
-  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflies.yaml" />
+  <rosparam command="load" file="$(find sar_config_exp)/crazyflieTypes.yaml" />
+  <rosparam command="load" file="$(find sar_config_exp)/crazyflies.yaml" />
 
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
