@@ -23,4 +23,4 @@ PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
 
 
 SAR_DC_SETTINGS:
-  Logging_Rate: 20 # [Hz]
+  Logging_Rate: 1 # [Hz]

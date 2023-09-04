@@ -1,2 +1,0 @@
-k_ep,k_run,t,Policy_Flip,Policy_Action,mu,sigma,policy,x,y,z,vx,vy,vz,D_perp,Tau,Tau_est,Theta_x,Theta_x_est,Theta_y,Theta_y_est,flip_flag,impact_flag,eul_x,eul_y,eul_z,wx,wy,wz,qx,qy,qz,qw,F_thrust,Mx,My,Mz,x_d.x,x_d.y,x_d.z,v_d.x,v_d.y,v_d.z,a_d.x,a_d.y,a_d.z,Error
-## DATA_TYPE: EXP, QUAD_SETTINGS: {Policy_Type: PARAM_OPTIM, CF_Type: Standard, CF_Config: Narrow_Long}, PLANE_SETTINGS: {Plane_Model: Standard_Plane, Plane_Config: 180_deg}, 
