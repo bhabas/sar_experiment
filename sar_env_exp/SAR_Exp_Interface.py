@@ -23,9 +23,12 @@ np.set_printoptions(suppress=True)
 
 class SAR_Exp_Interface(SAR_Base_Interface):
     def __init__(self):
-        print("[STARTING] CrazyflieEnv is starting...")
+        print("[STARTING] SAR_Exp is starting...")
+
+        os.system("roslaunch sar_launch Load_Params.launch")
+        os.system("roslaunch sar_launch_exp Load_Params.launch")
+
         SAR_Base_Interface.__init__(self,Exp_Flag=True)
-        os.system("roslaunch sar_launch_exp params.launch")
 
         ## CRAZYSWARM INITIALIZATION
         cf_yaml = f"{crazyswarm_path}/launch/crazyflies.yaml"
@@ -37,8 +40,6 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         ## SAR PARAMETERS
         self.SAR_Type = rospy.get_param('/SAR_SETTINGS/SAR_Type')
         self.SAR_Config = rospy.get_param('/SAR_SETTINGS/SAR_Config')
-        self.modelInitials = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Initials")
-        self.modelName = f"{self.SAR_Type}_{self.SAR_Config}"
         self.Done = False
         self.setParams()
 
@@ -46,25 +47,25 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
     def setParams(self):
 
-        os.system("roslaunch sar_launch_exp params.launch")
+        os.system("roslaunch sar_launch_exp Load_Params.launch")
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
 
         ## SET EXP SETTINGS
-        if rospy.get_param("/SAR_SETTINGS/Cam_Active") == True:
-            self.cf.setParam("CTRL_Params/isCamActive",1)
+        if rospy.get_param("/CAM_SETTINGS/Cam_Active") == True:
+            self.cf.setParam("System_Params/CamActive",1)
         else:
-            self.cf.setParam("CTRL_Params/isCamActive",0)
+            self.cf.setParam("System_Params/CamActive",0)
 
 
         ## SET EXP SETTINGS
         if rospy.get_param("/SAR_SETTINGS/Policy_Type") == "PARAM_OPTIM":
-            self.cf.setParam("CTRL_Params/PolicyType",0)
+            self.cf.setParam("System_Params/PolicyType",0)
 
         elif rospy.get_param("/SAR_SETTINGS/Policy_Type") == "DEEP_RL_SB3":
-            self.cf.setParam("CTRL_Params/PolicyType",1)
+            self.cf.setParam("System_Params/PolicyType",1)
 
         elif rospy.get_param("/SAR_SETTINGS/Policy_Type") == "DEEP_RL_ONBOARD":
-            self.cf.setParam("CTRL_Params/PolicyType",2)
+            self.cf.setParam("System_Params/PolicyType",2)
 
         
         ## SET CONTROLLER GAIN VALUES
@@ -97,11 +98,16 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         self.cf.setParams(GainsDict)
         
         ## SET SYSTEM GEOMETRY PARAMETERS INERTIA VALUES
+
+
         temp_str = f"/SAR_Type/{self.SAR_Type}/System_Params"
         SystemParamDict = {
-            "CTRL_Params/Prop_Dist":    rospy.get_param(f"{temp_str}/Prop_Dist"), 
-            "CTRL_Params/C_tf":         rospy.get_param(f"{temp_str}/C_tf"),
-            "CTRL_Params/f_max":        rospy.get_param(f"{temp_str}/f_max"),
+            "System_Params/Prop_14_x":    rospy.get_param(f"{temp_str}/Prop_Front")[0], 
+            "System_Params/Prop_14_y":    rospy.get_param(f"{temp_str}/Prop_Front")[1], 
+            "System_Params/Prop_23_x":    rospy.get_param(f"{temp_str}/Prop_Rear")[0],
+            "System_Params/Prop_23_y":    rospy.get_param(f"{temp_str}/Prop_Rear")[1],
+            "System_Params/C_tf":         rospy.get_param(f"{temp_str}/C_tf"),
+            "System_Params/f_max":        rospy.get_param(f"{temp_str}/f_max"),
         }
         self.cf.setParams(SystemParamDict)
 
@@ -109,10 +115,10 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         ## SET CONTROLLER INERTIA VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}"
         InertiaParamDict = {
-            "CTRL_Params/CF_mass": rospy.get_param(f"{temp_str}/Mass"),
-            "CTRL_Params/Ixx":     rospy.get_param(f"{temp_str}/Ixx"), 
-            "CTRL_Params/Iyy":     rospy.get_param(f"{temp_str}/Iyy"),
-            "CTRL_Params/Izz":     rospy.get_param(f"{temp_str}/Izz"),
+            "System_Params/Mass": rospy.get_param(f"{temp_str}/Mass"),
+            "System_Params/Ixx":     rospy.get_param(f"{temp_str}/Ixx"), 
+            "System_Params/Iyy":     rospy.get_param(f"{temp_str}/Iyy"),
+            "System_Params/Izz":     rospy.get_param(f"{temp_str}/Izz"),
         }
         self.cf.setParams(InertiaParamDict)
 

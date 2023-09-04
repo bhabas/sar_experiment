@@ -59,7 +59,7 @@
       "CTRL_Flags.Pos_Ctrl",        "CTRL_Flags.Vel_Ctrl",
       "CTRL_Flags.Motorstop",       "CTRL_Flags.Moment_Flag",
       "CTRL_Flags.Tumbled",         "CTRL_Flags.Tumble_Detect",
-      "CTRL_Flags.Pol_Armed",       "CTRL_Flags.isCamActive",
+      "CTRL_Flags.Pol_Armed",       "CTRL_Flags.CamActive",
       ]
 
       <!-- SIZE: (4/26) BYTES -->

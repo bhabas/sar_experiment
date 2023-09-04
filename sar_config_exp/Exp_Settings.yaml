@@ -2,16 +2,16 @@ DATA_TYPE: "EXP"
 
 
 SAR_SETTINGS:
-  SAR_Type: "Crazyflie"
-  SAR_Config: "A20_L75_K08"
+  SAR_Type: "Source_One_V5"
+  SAR_Config: "Base_Model"
 
-  # Policy_Type: "PARAM_OPTIM"
+  Policy_Type: "PARAM_OPTIM"
   # Policy_Type: "DEEP_RL_SB3" 
-  Policy_Type: "DEEP_RL_ONBOARD" 
-
+  # Policy_Type: "DEEP_RL_ONBOARD" 
+  
 CAM_SETTINGS:
-  Cam_Config: "AI_Deck"
-  Cam_Active: True
+  Cam_Config: "None"
+  Cam_Active: False
 
 
 PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
@@ -23,4 +23,4 @@ PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
 
 
 SAR_DC_SETTINGS:
-  Logging_Rate: 10 # [Hz]
+  Logging_Rate: 20 # [Hz]
