@@ -1,3 +1,0 @@
-<launch>
-    <rosparam file="$(find sar_launch_exp)/config/Exp_Settings.yaml" />
-</launch>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find sar_launch)/launch/params.launch"/>
-  <include file="$(find sar_launch_exp)/launch/params.launch"/>
+  <include file="$(find sar_launch)/Load_Params.launch"/>
+  <include file="$(find sar_launch_exp)/Load_Params.launch"/>
 
 
   <rosparam command="load" file="$(find crazyswarm)/launch/crazyflieTypes.yaml" />
