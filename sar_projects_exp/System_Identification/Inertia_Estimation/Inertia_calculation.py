@@ -14,8 +14,8 @@ sys.path.insert(0,BASE_PATH)
 from sar_logging.Log_Data_Parser import DataFile
 # os.system("clear")
 
-dataPath = f"{BASE_PATH}/sar_logging_exp/local_logs/"
-fileName = "Izz_Log_1.csv"
+dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Source_One_V5/"
+fileName = "Izz_Log_05.csv"
 trial = DataFile(dataPath,fileName,dataType='EXP')
 
 k_ep = 0
