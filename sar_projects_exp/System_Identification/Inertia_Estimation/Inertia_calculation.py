@@ -15,11 +15,11 @@ from sar_logging.Log_Data_Parser import DataFile
 # os.system("clear")
 
 dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Source_One_V5/"
-fileName = "Izz_Log_05.csv"
+fileName = "Izz_Log.csv"
 trial = DataFile(dataPath,fileName,dataType='EXP')
 
 k_ep = 0
-k_run = 0
+k_run = 1
 
 trial.plot_state(k_ep,k_run,['wz'])
 # trial.plot_convg(saveFig=True)

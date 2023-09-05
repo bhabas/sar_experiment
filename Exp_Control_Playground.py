@@ -25,8 +25,8 @@ if __name__ == '__main__':
     env.SendCmd('Ctrl_Reset')
 
     ## INITIALIALIZE LOGGING DATA
-    trial_num = 6
-    logName = f"Izz_Log_{trial_num:02d}.csv"
+    trial_num = 5
+    logName = f"Ixx_Log_{trial_num:02d}.csv"
     env.createCSV(logName)
 
 
