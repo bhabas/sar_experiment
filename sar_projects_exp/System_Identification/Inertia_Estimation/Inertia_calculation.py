@@ -13,17 +13,23 @@ sys.path.insert(0,BASE_PATH)
 
 
 ## LOAD DATA FILE
-from sar_logging.Log_Data_Parser import DataFile
-dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Source_One_V5/"
-fileName = "Ixx_Log.csv"
-trial = DataFile(dataPath,fileName,dataType='EXP')
+dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Impulse_Micro/"
+fileName = "Izz_2.csv"
 
+df = pd.read_csv(dataPath + fileName)
+
+## GRAB DESIRED DATA
+times = df["gyro.x_x"].to_numpy().flatten()*1e-3
+wx = df["gyro.x_y"].to_numpy().flatten()
+wy = df["gyro.y_y"].to_numpy().flatten()
+wz = df["gyro.z_y"].to_numpy().flatten()
 
 ## SYSTEM PARAMETERS
-m = 590.0e-3    # [kg]
-g = 9.81        # [m/s^2]
-D = 22.0e-3     # [m]
-L = 24.8e-2     # [m]
+L = 71.8e-2   # [m]
+D = 15.94e-2   # [m]
+m = 0.275   # [kg]
+g = 9.81    # [m/s^2]
+data = wz
 
 
 def get_time_differences(times, peaks):
@@ -45,41 +51,31 @@ def plot_data_with_peaks(times, data, peaks):
     plt.title("Data with Peaks Marked")
     plt.xlabel("Time")
     plt.ylabel("Value")
-    plt.show()
+    plt.show(block=True)
 
 
-Inertia_arr = []
-for k_run in range(0,5):
-    ## GRAB DESIRED DATA
-    k_ep = 0
-    data = trial.grab_stateData(k_ep,k_run,['wx']).flatten()
-    times = trial.grab_stateData(k_ep,k_run,['t']).flatten()
 
 
-    ## FIND PEAKS. YOU CAN ADJUST DISTANCE PARAMETER AS NEEDED
-    peaks, _ = find_peaks(data, distance=60)
+## FIND PEAKS. YOU CAN ADJUST DISTANCE PARAMETER AS NEEDED
+peaks, _ = find_peaks(data, distance=45)
 
-    ## PLOT DATA WITH PEAKS
-    plot_data_with_peaks(times, data, peaks)
+## PLOT DATA WITH PEAKS
+plot_data_with_peaks(times, data, peaks)
 
 
-    ## CALC PERIOD DATA
-    time_diffs = get_time_differences(times, peaks)
-    T_avg = np.average(time_diffs)
-    T_std = np.std(time_diffs)
+## CALC PERIOD DATAI
+time_diffs = get_time_differences(times, peaks)
+T_avg = np.average(time_diffs)
+T_std = np.std(time_diffs)
 
-    ## CALCULATE INERTIA VALUE
-    Inertia = m*g*(D*T_avg)**2/(L*(4*np.pi)**2)
-    Inertia_arr.append(Inertia)
+## CALCULATE INERTIA VALUE
+Inertia = m*g*(D*T_avg)**2/(L*(4*np.pi)**2)
 
-    print(f"K_run: {k_run:02d}")
-    print("Time differences between peaks [s]:", time_diffs)
-    print(f"T_avg: {T_avg:.3f} \t T_std: {T_std:.3f}")
-    print(f"Inertia: {Inertia:.3e} [kg*m^2]")
+print("Time differences between peaks [s]:", time_diffs)
+print(f"T_avg: {T_avg:.3f} \t T_std: {T_std:.3f}")
+print(f"Inertia: {Inertia:.3e} [kg*m^2]")
 
-Inertia_avg = np.average(Inertia_arr)
-print(f"\n==========================\n")
-print(f"I_avg: {Inertia_avg:.3e} [kg*m^2]")
+
 
 
 
