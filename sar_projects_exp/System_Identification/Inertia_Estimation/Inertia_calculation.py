@@ -7,13 +7,13 @@ import os
 
 ## ADD SAR_SIMULATION DIRECTORY TO PYTHONPATH SO ABSOLUTE IMPORTS CAN BE USED
 import sys,rospkg
-BASE_PATH = os.path.dirname(rospkg.RosPack().get_path('sar_logging_exp'))
+BASE_PATH = "/home/bhabas/Desktop/sar_experiment"
 sys.path.insert(0,BASE_PATH)
 
 
 
 ## LOAD DATA FILE
-dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Impulse_Micro/"
+dataPath = f"{BASE_PATH}/sar_projects_exp/System_Identification/Inertia_Estimation/Logs/Crazyflie/"
 fileName = "Izz_2.csv"
 
 df = pd.read_csv(dataPath + fileName)
@@ -25,9 +25,9 @@ wy = df["gyro.y_y"].to_numpy().flatten()
 wz = df["gyro.z_y"].to_numpy().flatten()
 
 ## SYSTEM PARAMETERS
-L = 71.8e-2   # [m]
-D = 15.94e-2   # [m]
-m = 0.275   # [kg]
+L = 42.6e-2   # [m]
+D = 9.3e-2   # [m]
+m = 0.037   # [kg]
 g = 9.81    # [m/s^2]
 data = wz
 
@@ -57,7 +57,7 @@ def plot_data_with_peaks(times, data, peaks):
 
 
 ## FIND PEAKS. YOU CAN ADJUST DISTANCE PARAMETER AS NEEDED
-peaks, _ = find_peaks(data, distance=45)
+peaks, _ = find_peaks(data, distance=20)
 
 ## PLOT DATA WITH PEAKS
 plot_data_with_peaks(times, data, peaks)
