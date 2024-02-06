@@ -12,3 +12,4 @@ rospkg==1.5.0
 pygame==2.5.2
 versioneer==0.29
 tqdm==4.66.1
+empy==3.3.4
