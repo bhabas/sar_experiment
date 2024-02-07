@@ -500,36 +500,37 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 
 LOG_GROUP_START(Z_States)
-// r_B_O_x,r_B_O_y,r_B_O_z
-// v_B_O_x,v_B_O_y,v_B_O_z
-// a_B_O_x,a_B_O_y,a_B_O_z
 
-// quat_B_O
-// omega_B_O_y
-// Ang_Accel_B_O_y
 
-// Vel_mag_B_P
-// Vel_angle_B_P
+
 
 // MS_PWM12,MS_PWM34
 // M_thrust12,M_thrust34
 // FMz,Mxy
 
 
-// LOG_ADD(LOG_UINT32, xy,         &States_Z.xy)
+LOG_ADD(LOG_UINT32, r_BOxy,         &States_Z.r_BOxy)
 LOG_ADD(LOG_INT16,  r_BOz,          &States_Z.r_BOz)
 
-// LOG_ADD(LOG_UINT32, vxy,        &States_Z.vxy)
-// LOG_ADD(LOG_INT16,  vz,         &States_Z.vz)
+LOG_ADD(LOG_UINT32, V_BOxy,         &States_Z.V_BOxy)
+LOG_ADD(LOG_INT16,  V_BOz,          &States_Z.V_BOz)
 
-// LOG_ADD(LOG_UINT32, quat,       &States_Z.quat)
+LOG_ADD(LOG_UINT32, Acc_BOxy,       &States_Z.Acc_BOxy)
+LOG_ADD(LOG_INT16,  Acc_BOz,        &States_Z.Acc_BOz)
 
-// LOG_ADD(LOG_UINT32, wxy,        &States_Z.wxy)
-// LOG_ADD(LOG_INT16,  wz,         &States_Z.wz)
+LOG_ADD(LOG_UINT32, Quat_BO,        &States_Z.Quat_BO)
+
+LOG_ADD(LOG_UINT32, Omega_BOxy,     &States_Z.Omega_BOxy)
+LOG_ADD(LOG_INT16,  Omega_BOz,      &States_Z.Omega_BOz)
+
+LOG_ADD(LOG_INT16,  dOmega_BOy,     &States_Z.dOmega_BOy)
+
 
 // LOG_ADD(LOG_UINT32, Thetaxy,    &States_Z.Theta_xy)
-// LOG_ADD(LOG_INT16,  Tau,        &States_Z.Tau)
-// LOG_ADD(LOG_INT16,  D_perp,     &States_Z.D_perp)
+LOG_ADD(LOG_UINT32, VelRel_BP,      &States_Z.VelRel_BP)
+// LOG_ADD(LOG_UINT32, D_perp,         &States_Z.D_perp)
+// LOG_ADD(LOG_INT16,  Tau,            &States_Z.Tau)
+// LOG_ADD(LOG_INT16,  Theta_x,        &States_Z.Theta_x)
 
 // LOG_ADD(LOG_UINT32, FMz,        &States_Z.FMz)
 // LOG_ADD(LOG_UINT32, Mxy,        &States_Z.Mxy)

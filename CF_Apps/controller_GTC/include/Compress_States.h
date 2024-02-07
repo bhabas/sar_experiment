@@ -19,22 +19,37 @@ uint32_t compressXY(float x, float y); // Compresses values in range (-32.767 - 
 
 typedef struct {
     // Compressed positions [mm]
-    // uint32_t xy; 
+    uint32_t r_BOxy; 
     int16_t r_BOz;
 
-    // // Compressed Distance to Surface [mm]
-    // int16_t D_perp;
+    // Compressed velocities [mm/s]
+    uint32_t V_BOxy; 
+    int16_t V_BOz;
 
-    // // Compressed velocities [mm/s]
-    // uint32_t vxy; 
-    // int16_t vz;
+    // Compressed accelerations [mm/s^2]
+    uint32_t Acc_BOxy; 
+    int16_t Acc_BOz;
 
-    // // compressed quaternion, see quatcompress.h
-    // int32_t quat; 
+    // compressed quaternion, see quatcompress.h
+    int32_t Quat_BO; 
 
-    // // Compressed angular velocity [milli-rad/sec]
-    // uint32_t wxy; 
-    // int16_t wz;
+    // Compressed angular velocity [milli-rad/sec]
+    uint32_t Omega_BOxy; 
+    int16_t Omega_BOz;
+
+    // Compressed angular acceleration [milli-rad/sec^2]
+    int16_t dOmega_BOy;
+
+    // Compressed Relative Velocity [mm/s]
+    uint32_t VelRel_BP;
+
+    // Compressed Distance to Surface [mm]
+    uint32_t D_perp;
+
+    // Compressed Optical Flow Cues
+    uint32_t Tau;
+    int16_t Theta_x;
+
 
     // // Compressed actuation states
     // uint32_t Mxy;   // [N*um]Values
@@ -46,16 +61,10 @@ typedef struct {
     // uint32_t M_thrust12;    // [mg]
     // uint32_t M_thrust34;    // [mg]
 
-    // // Compressed Optical Flow Values
-    // int16_t Tau;        // [ms]
-    // uint32_t Theta_xy;  // [milli-rad/s]
-
-    // // Compressed Optical Flow Estimates
-    // int16_t Tau_Cam;        // [ms]
-    // uint32_t Theta_xy_est;  // [milli-rad/s]
 
     // // Compressed Policy Actions
     // uint32_t Policy_Actions;
+
 
 } States_Z_Struct;
 

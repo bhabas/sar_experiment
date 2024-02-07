@@ -10,24 +10,26 @@
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
-      genericLogTopics: ["FullState",]
-      genericLogTopicFrequencies: [100]
+      genericLogTopics: ["States_B_O","States_B_P",]
+      genericLogTopicFrequencies: [100,100]
 
 
-      <!-- SIZE: (20/26) BYTES -->
-      genericLogTopic_FullState_Variables: [
-      "Z_States.r_BOz",
-
+      <!-- Important States -->
+      <!-- SIZE: (24/26) BYTES -->
+      genericLogTopic_States_B_O_Variables: [
+      "Z_States.r_BOxy","Z_States.r_BOz",
+      "Z_States.V_BOxy","Z_States.V_BOz",
+      "Z_States.Omega_BOxy","Z_States.Omega_BOz",
+      "Z_States.Quat_BO","Z_States.dOmega_BOy",
       ]
 
-      <!-- SIZE: (19/26) BYTES -->
-      <!-- genericLogTopic_PolicyState_Variables: [
-      "Z_States.D_perp",
-      "Z_States.Thetaxy",       "Z_States.Tau",
-      "Z_Policy.Thetaxy_est",   "Z_Policy.Tau_est",
-      "Z_Policy.Pol_Actions",   "Z_TrgStates.Flip_Flag"
-      
-      ] -->
+      <!-- SIZE: (0/26) BYTES -->
+      genericLogTopic_States_B_P_Variables: [
+      "Z_States.VelRel_BP",
+      <!-- "Z_States.D_perp",
+      "Z_States.Tau","Z_States.Theta_x", -->
+    
+      ]
 
       <!-- SIZE: (24/26) BYTES -->
       <!-- genericLogTopic_CTRL_Output_Variables: [
