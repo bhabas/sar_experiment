@@ -26,9 +26,9 @@
       <!-- SIZE: (0/26) BYTES -->
       genericLogTopic_States_B_P_Variables: [
       "Z_States.VelRel_BP",
-      <!-- "Z_States.D_perp",
-      "Z_States.Tau","Z_States.Theta_x", -->
-    
+      "Z_States.D_perp","Z_States.Tau",
+      "Z_States.Theta_x",
+      "Z_States.Pol_Actions",
       ]
 
       <!-- SIZE: (24/26) BYTES -->

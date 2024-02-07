@@ -31,28 +31,28 @@ void compressStates(){
 
     States_Z.VelRel_BP = compressXY(Vel_mag_B_P, Vel_angle_B_P);
 
-    // States_Z.D_perp = compressXY(D_perp,D_perp_CR);
-    // States_Z.Tau = compressXY(Tau,Tau_CR);
-    // States_Z.Theta_x = (int16_t)(Theta_x * 1000.0f);
+    States_Z.D_perp = compressXY(D_perp,D_perp_CR);
+    States_Z.Tau = compressXY(Tau,Tau_CR);
+    States_Z.Theta_x = (int16_t)(Theta_x * 1000.0f);
 
 
 
 
-    // // COMPRESS THRUST/MOMENT VALUES
-    // States_Z.FMz = compressXY(F_thrust,M.z*1000.0f);
-    // States_Z.Mxy = compressXY(M.x*1000.0f,M.y*1000.0f);
+    // COMPRESS THRUST/MOMENT VALUES
+    States_Z.FMz = compressXY(F_thrust,M.z*1000.0f);
+    States_Z.Mxy = compressXY(M.x*1000.0f,M.y*1000.0f);
 
-    // // COMPRESS MOTOR THRUST VALUES
-    // States_Z.M_thrust12 = compressXY(M1_thrust,M2_thrust);
-    // States_Z.M_thrust34 = compressXY(M3_thrust,M4_thrust);
+    // COMPRESS MOTOR THRUST VALUES
+    States_Z.M_thrust12 = compressXY(M1_thrust,M2_thrust);
+    States_Z.M_thrust34 = compressXY(M3_thrust,M4_thrust);
 
-    // // COMPRESS PWM VALUES
-    // States_Z.MS_PWM12 = compressXY(M1_pwm*0.5e-3f,M2_pwm*0.5e-3f);
-    // States_Z.MS_PWM34 = compressXY(M3_pwm*0.5e-3f,M4_pwm*0.5e-3f);
+    // COMPRESS PWM VALUES
+    States_Z.MS_PWM12 = compressXY(M1_pwm*0.5e-3f,M2_pwm*0.5e-3f);
+    States_Z.MS_PWM34 = compressXY(M3_pwm*0.5e-3f,M4_pwm*0.5e-3f);
 
 
     // COMPRESS POLICY ACTIONS
-    // States_Z.Policy_Actions = compressXY(Policy_Trg_Action,Policy_Rot_Action);
+    States_Z.Policy_Actions = compressXY(Policy_Trg_Action,Policy_Rot_Action);
 }
 
 void compressTrgStates(){

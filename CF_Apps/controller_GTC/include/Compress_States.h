@@ -51,19 +51,19 @@ typedef struct {
     int16_t Theta_x;
 
 
-    // // Compressed actuation states
-    // uint32_t Mxy;   // [N*um]Values
-    // uint32_t FMz;   // [mN | N*um]
+    // Compressed actuation states
+    uint32_t Mxy;   // [N*um]Values
+    uint32_t FMz;   // [mN | N*um]
 
-    // uint32_t MS_PWM12; 
-    // uint32_t MS_PWM34;
+    uint32_t MS_PWM12; 
+    uint32_t MS_PWM34;
 
-    // uint32_t M_thrust12;    // [mg]
-    // uint32_t M_thrust34;    // [mg]
+    uint32_t M_thrust12;    // [mg]
+    uint32_t M_thrust34;    // [mg]
 
 
-    // // Compressed Policy Actions
-    // uint32_t Policy_Actions;
+    // Compressed Policy Actions
+    uint32_t Policy_Actions;
 
 
 } States_Z_Struct;

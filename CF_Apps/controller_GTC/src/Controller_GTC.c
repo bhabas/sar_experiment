@@ -526,20 +526,21 @@ LOG_ADD(LOG_INT16,  Omega_BOz,      &States_Z.Omega_BOz)
 LOG_ADD(LOG_INT16,  dOmega_BOy,     &States_Z.dOmega_BOy)
 
 
-// LOG_ADD(LOG_UINT32, Thetaxy,    &States_Z.Theta_xy)
 LOG_ADD(LOG_UINT32, VelRel_BP,      &States_Z.VelRel_BP)
-// LOG_ADD(LOG_UINT32, D_perp,         &States_Z.D_perp)
-// LOG_ADD(LOG_INT16,  Tau,            &States_Z.Tau)
-// LOG_ADD(LOG_INT16,  Theta_x,        &States_Z.Theta_x)
+LOG_ADD(LOG_UINT32, D_perp,         &States_Z.D_perp)
+LOG_ADD(LOG_UINT32, Tau,            &States_Z.Tau)
+LOG_ADD(LOG_INT16,  Theta_x,        &States_Z.Theta_x)
 
-// LOG_ADD(LOG_UINT32, FMz,        &States_Z.FMz)
-// LOG_ADD(LOG_UINT32, Mxy,        &States_Z.Mxy)
+LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
 
-// LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
-// LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
+LOG_ADD(LOG_UINT32, FMz,            &States_Z.FMz)
+LOG_ADD(LOG_UINT32, Mxy,            &States_Z.Mxy)
 
-// LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
-// LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
+LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
+LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
+
+LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
+LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
 LOG_GROUP_STOP(Z_States)
 
 
