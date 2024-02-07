@@ -453,135 +453,135 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 // NOTE: PARAM GROUP + NAME + 1 CANNOT EXCEED 26 CHARACTERS (WHY? IDK.)
 // NOTE: CANNOT HAVE A LOG AND A PARAM ACCESS THE SAME VALUE
-PARAM_GROUP_START(System_Params)
-PARAM_ADD(PARAM_FLOAT, Mass, &m)
-PARAM_ADD(PARAM_FLOAT, Ixx, &Ixx)
-PARAM_ADD(PARAM_FLOAT, Iyy, &Iyy)
-PARAM_ADD(PARAM_FLOAT, Izz, &Izz)
+// PARAM_GROUP_START(System_Params)
+// PARAM_ADD(PARAM_FLOAT, Mass, &m)
+// PARAM_ADD(PARAM_FLOAT, Ixx, &Ixx)
+// PARAM_ADD(PARAM_FLOAT, Iyy, &Iyy)
+// PARAM_ADD(PARAM_FLOAT, Izz, &Izz)
 
-PARAM_ADD(PARAM_FLOAT, Prop_14_x, &Prop_14_x)
-PARAM_ADD(PARAM_FLOAT, Prop_14_y, &Prop_14_y)
-PARAM_ADD(PARAM_FLOAT, Prop_23_x, &Prop_23_x)
-PARAM_ADD(PARAM_FLOAT, Prop_23_y, &Prop_23_y)
+// PARAM_ADD(PARAM_FLOAT, Prop_14_x, &Prop_14_x)
+// PARAM_ADD(PARAM_FLOAT, Prop_14_y, &Prop_14_y)
+// PARAM_ADD(PARAM_FLOAT, Prop_23_x, &Prop_23_x)
+// PARAM_ADD(PARAM_FLOAT, Prop_23_y, &Prop_23_y)
 
-PARAM_ADD(PARAM_FLOAT, C_tf, &C_tf)
-PARAM_ADD(PARAM_FLOAT, Thrust_max, &Thrust_max)
+// PARAM_ADD(PARAM_FLOAT, C_tf, &C_tf)
+// PARAM_ADD(PARAM_FLOAT, Thrust_max, &Thrust_max)
 
-PARAM_ADD(PARAM_UINT8, SafeMode, &SafeMode_Flag)
-PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
-PARAM_ADD(PARAM_UINT8, CamActive_Flag, &CamActive_Flag)
-PARAM_GROUP_STOP(System_Params)
-
-
-PARAM_GROUP_START(CTRL_Params)
-PARAM_ADD(PARAM_FLOAT, P_kp_xy, &P_kp_xy)
-PARAM_ADD(PARAM_FLOAT, P_kd_xy, &P_kd_xy) 
-PARAM_ADD(PARAM_FLOAT, P_ki_xy, &P_ki_xy)
-PARAM_ADD(PARAM_FLOAT, i_range_xy, &i_range_xy)
-
-PARAM_ADD(PARAM_FLOAT, P_kp_z,  &P_kp_z)
-PARAM_ADD(PARAM_FLOAT, P_kd_z,  &P_kd_z)
-PARAM_ADD(PARAM_FLOAT, P_ki_z,  &P_ki_z)
-PARAM_ADD(PARAM_FLOAT, i_range_z, &i_range_z)
-
-PARAM_ADD(PARAM_FLOAT, R_kp_xy, &R_kp_xy)
-PARAM_ADD(PARAM_FLOAT, R_kd_xy, &R_kd_xy) 
-PARAM_ADD(PARAM_FLOAT, R_ki_xy, &R_ki_xy)
-PARAM_ADD(PARAM_FLOAT, i_range_R_xy, &i_range_R_xy)
-
-PARAM_ADD(PARAM_FLOAT, R_kp_z,  &R_kp_z)
-PARAM_ADD(PARAM_FLOAT, R_kd_z,  &R_kd_z)
-PARAM_ADD(PARAM_FLOAT, R_ki_z,  &R_ki_z)
-PARAM_ADD(PARAM_FLOAT, i_range_R_z, &i_range_R_z)
-PARAM_GROUP_STOP(CTRL_Params)
+// PARAM_ADD(PARAM_UINT8, SafeMode, &SafeMode_Flag)
+// PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
+// PARAM_ADD(PARAM_UINT8, CamActive_Flag, &CamActive_Flag)
+// PARAM_GROUP_STOP(System_Params)
 
 
+// PARAM_GROUP_START(CTRL_Params)
+// PARAM_ADD(PARAM_FLOAT, P_kp_xy, &P_kp_xy)
+// PARAM_ADD(PARAM_FLOAT, P_kd_xy, &P_kd_xy) 
+// PARAM_ADD(PARAM_FLOAT, P_ki_xy, &P_ki_xy)
+// PARAM_ADD(PARAM_FLOAT, i_range_xy, &i_range_xy)
 
-LOG_GROUP_START(Z_States)
-LOG_ADD(LOG_UINT32, xy,         &States_Z.xy)
-LOG_ADD(LOG_INT16,  z,          &States_Z.z)
+// PARAM_ADD(PARAM_FLOAT, P_kp_z,  &P_kp_z)
+// PARAM_ADD(PARAM_FLOAT, P_kd_z,  &P_kd_z)
+// PARAM_ADD(PARAM_FLOAT, P_ki_z,  &P_ki_z)
+// PARAM_ADD(PARAM_FLOAT, i_range_z, &i_range_z)
 
-LOG_ADD(LOG_UINT32, vxy,        &States_Z.vxy)
-LOG_ADD(LOG_INT16,  vz,         &States_Z.vz)
+// PARAM_ADD(PARAM_FLOAT, R_kp_xy, &R_kp_xy)
+// PARAM_ADD(PARAM_FLOAT, R_kd_xy, &R_kd_xy) 
+// PARAM_ADD(PARAM_FLOAT, R_ki_xy, &R_ki_xy)
+// PARAM_ADD(PARAM_FLOAT, i_range_R_xy, &i_range_R_xy)
 
-LOG_ADD(LOG_UINT32, quat,       &States_Z.quat)
-
-LOG_ADD(LOG_UINT32, wxy,        &States_Z.wxy)
-LOG_ADD(LOG_INT16,  wz,         &States_Z.wz)
-
-LOG_ADD(LOG_UINT32, Thetaxy,    &States_Z.Theta_xy)
-LOG_ADD(LOG_INT16,  Tau,        &States_Z.Tau)
-LOG_ADD(LOG_INT16,  D_perp,     &States_Z.D_perp)
-
-LOG_ADD(LOG_UINT32, FMz,        &States_Z.FMz)
-LOG_ADD(LOG_UINT32, Mxy,        &States_Z.Mxy)
-
-LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
-LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
-
-LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
-LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
-LOG_GROUP_STOP(Z_States)
+// PARAM_ADD(PARAM_FLOAT, R_kp_z,  &R_kp_z)
+// PARAM_ADD(PARAM_FLOAT, R_kd_z,  &R_kd_z)
+// PARAM_ADD(PARAM_FLOAT, R_ki_z,  &R_ki_z)
+// PARAM_ADD(PARAM_FLOAT, i_range_R_z, &i_range_R_z)
+// PARAM_GROUP_STOP(CTRL_Params)
 
 
 
-LOG_GROUP_START(Z_Policy)
-LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
-LOG_ADD(LOG_INT16,  Tau_Cam,        &States_Z.Tau_Cam)
-LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
-LOG_GROUP_STOP(Z_Policy)
+// LOG_GROUP_START(Z_States)
+// LOG_ADD(LOG_UINT32, xy,         &States_Z.xy)
+// LOG_ADD(LOG_INT16,  z,          &States_Z.z)
+
+// LOG_ADD(LOG_UINT32, vxy,        &States_Z.vxy)
+// LOG_ADD(LOG_INT16,  vz,         &States_Z.vz)
+
+// LOG_ADD(LOG_UINT32, quat,       &States_Z.quat)
+
+// LOG_ADD(LOG_UINT32, wxy,        &States_Z.wxy)
+// LOG_ADD(LOG_INT16,  wz,         &States_Z.wz)
+
+// LOG_ADD(LOG_UINT32, Thetaxy,    &States_Z.Theta_xy)
+// LOG_ADD(LOG_INT16,  Tau,        &States_Z.Tau)
+// LOG_ADD(LOG_INT16,  D_perp,     &States_Z.D_perp)
+
+// LOG_ADD(LOG_UINT32, FMz,        &States_Z.FMz)
+// LOG_ADD(LOG_UINT32, Mxy,        &States_Z.Mxy)
+
+// LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
+// LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
+
+// LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
+// LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
+// LOG_GROUP_STOP(Z_States)
 
 
 
-LOG_GROUP_START(Z_SetPoints)
-LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
-LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
-
-LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
-LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
-
-LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
-LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
-LOG_GROUP_STOP(Z_SetPoints)
+// LOG_GROUP_START(Z_Policy)
+// LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
+// LOG_ADD(LOG_INT16,  Tau_Cam,        &States_Z.Tau_Cam)
+// LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
+// LOG_GROUP_STOP(Z_Policy)
 
 
 
-LOG_GROUP_START(Z_TrgStates)
-LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
-LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
-LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
-LOG_ADD(LOG_INT16,  vz,             &TrgStates_Z.vz)
+// LOG_GROUP_START(Z_SetPoints)
+// LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
+// LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
 
-LOG_ADD(LOG_UINT32, quat,           &TrgStates_Z.quat)
+// LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
+// LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
 
-LOG_ADD(LOG_UINT32, wxy,            &TrgStates_Z.wxy)
-LOG_ADD(LOG_INT16,  wz,             &TrgStates_Z.wz)
-
-LOG_ADD(LOG_UINT32, Thetaxy,        &TrgStates_Z.Theta_xy)
-LOG_ADD(LOG_INT16,  Tau,            &TrgStates_Z.Tau)
-LOG_ADD(LOG_INT16,  D_perp,         &TrgStates_Z.D_perp)
-
-LOG_ADD(LOG_UINT32, Thetaxy_est,    &TrgStates_Z.Theta_xy_est)
-LOG_ADD(LOG_INT16,  Tau_Cam,        &TrgStates_Z.Tau_Cam)
-
-LOG_ADD(LOG_UINT32, PolActions,    &TrgStates_Z.Policy_Actions)
-
-LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
-LOG_GROUP_STOP(Z_TrgStates)
+// LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
+// LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
+// LOG_GROUP_STOP(Z_SetPoints)
 
 
 
-LOG_GROUP_START(CTRL_Flags)
-LOG_ADD(LOG_FLOAT, Pos_Ctrl,        &kp_xf)
-LOG_ADD(LOG_FLOAT, Vel_Ctrl,        &kd_xf)
-LOG_ADD(LOG_UINT8, Motorstop,       &MotorStop_Flag)
-LOG_ADD(LOG_UINT8, Tumbled_Flag,         &Tumbled_Flag)
-LOG_ADD(LOG_UINT8, Tumble_Detect,   &TumbleDetect_Flag)
-LOG_ADD(LOG_UINT8, AngAccel_Flag,     &AngAccel_Flag)
-LOG_ADD(LOG_UINT8, CamActive_Flag,     &CamActive_Flag)
-LOG_ADD(LOG_UINT8, SafeMode_Flag,  &SafeMode_Flag)
-LOG_ADD(LOG_UINT8, Pol_Armed,       &Policy_Armed_Flag)
-LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
-LOG_ADD(LOG_UINT8, CustomPWM,       &CustomPWM_Flag)
-LOG_GROUP_STOP(CTRL_Flags)
+// LOG_GROUP_START(Z_TrgStates)
+// LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
+// LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
+// LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
+// LOG_ADD(LOG_INT16,  vz,             &TrgStates_Z.vz)
+
+// LOG_ADD(LOG_UINT32, quat,           &TrgStates_Z.quat)
+
+// LOG_ADD(LOG_UINT32, wxy,            &TrgStates_Z.wxy)
+// LOG_ADD(LOG_INT16,  wz,             &TrgStates_Z.wz)
+
+// LOG_ADD(LOG_UINT32, Thetaxy,        &TrgStates_Z.Theta_xy)
+// LOG_ADD(LOG_INT16,  Tau,            &TrgStates_Z.Tau)
+// LOG_ADD(LOG_INT16,  D_perp,         &TrgStates_Z.D_perp)
+
+// LOG_ADD(LOG_UINT32, Thetaxy_est,    &TrgStates_Z.Theta_xy_est)
+// LOG_ADD(LOG_INT16,  Tau_Cam,        &TrgStates_Z.Tau_Cam)
+
+// LOG_ADD(LOG_UINT32, PolActions,    &TrgStates_Z.Policy_Actions)
+
+// LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
+// LOG_GROUP_STOP(Z_TrgStates)
+
+
+
+// LOG_GROUP_START(CTRL_Flags)
+// LOG_ADD(LOG_FLOAT, Pos_Ctrl,        &kp_xf)
+// LOG_ADD(LOG_FLOAT, Vel_Ctrl,        &kd_xf)
+// LOG_ADD(LOG_UINT8, Motorstop,       &MotorStop_Flag)
+// LOG_ADD(LOG_UINT8, Tumbled_Flag,         &Tumbled_Flag)
+// LOG_ADD(LOG_UINT8, Tumble_Detect,   &TumbleDetect_Flag)
+// LOG_ADD(LOG_UINT8, AngAccel_Flag,     &AngAccel_Flag)
+// LOG_ADD(LOG_UINT8, CamActive_Flag,     &CamActive_Flag)
+// LOG_ADD(LOG_UINT8, SafeMode_Flag,  &SafeMode_Flag)
+// LOG_ADD(LOG_UINT8, Pol_Armed,       &Policy_Armed_Flag)
+// LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
+// LOG_ADD(LOG_UINT8, CustomPWM,       &CustomPWM_Flag)
+// LOG_GROUP_STOP(CTRL_Flags)
 #endif

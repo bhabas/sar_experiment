@@ -10,64 +10,63 @@
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
-      genericLogTopics: ["FullState","PolicyState","CTRL_Output","SetPoints","TrgState","Flags","Misc"]
-      genericLogTopicFrequencies: [20,20,100,100,100,200,200]
+      genericLogTopics: []
+      genericLogTopicFrequencies: []
 
 
       <!-- SIZE: (20/26) BYTES -->
-      genericLogTopic_FullState_Variables: [
+      <!-- genericLogTopic_FullState_Variables: [
       "Z_States.xy",    "Z_States.z",
       "Z_States.vxy",   "Z_States.vz",
       "Z_States.quat",  
       "Z_States.wxy",   "Z_States.wz",
-      ]
+      ] -->
 
       <!-- SIZE: (19/26) BYTES -->
-      genericLogTopic_PolicyState_Variables: [
+      <!-- genericLogTopic_PolicyState_Variables: [
       "Z_States.D_perp",
       "Z_States.Thetaxy",       "Z_States.Tau",
       "Z_Policy.Thetaxy_est",   "Z_Policy.Tau_est",
       "Z_Policy.Pol_Actions",   "Z_TrgStates.Flip_Flag"
       
-      ]
+      ] -->
 
       <!-- SIZE: (24/26) BYTES -->
-      genericLogTopic_CTRL_Output_Variables: [
+      <!-- genericLogTopic_CTRL_Output_Variables: [
       "Z_States.Mxy",      "Z_States.FMz",
       "Z_States.f_12",     "Z_States.f_34",
       "Z_States.PWM12",    "Z_States.PWM34",
-      ]
+      ] -->
 
       <!-- SIZE: (18/26) BYTES -->
-      genericLogTopic_SetPoints_Variables: [      
+      <!-- genericLogTopic_SetPoints_Variables: [      
       "Z_SetPoints.xy",    "Z_SetPoints.z",
       "Z_SetPoints.vxy",   "Z_SetPoints.vz",
       "Z_SetPoints.axy",   "Z_SetPoints.az",
-      ]
+      ] -->
 
       <!-- SIZE: (26/26) BYTES -->
-      genericLogTopic_TrgState_Variables: [
+      <!-- genericLogTopic_TrgState_Variables: [
       "Z_TrgStates.D_perp",         "Z_TrgStates.z",
       "Z_TrgStates.vxy",            "Z_TrgStates.vz",
       "Z_TrgStates.Thetaxy",        "Z_TrgStates.Tau",
       "Z_TrgStates.Thetaxy_est",    "Z_TrgStates.Tau_est",
       "Z_TrgStates.PolActions",
-      ]
+      ] -->
 
       <!-- SIZE: (14/26) BYTES -->
-      genericLogTopic_Flags_Variables: [
+      <!-- genericLogTopic_Flags_Variables: [
       "CTRL_Flags.Pos_Ctrl",        "CTRL_Flags.Vel_Ctrl",
       "CTRL_Flags.Motorstop",       "CTRL_Flags.Moment_Flag",
       "CTRL_Flags.Tumbled",         "CTRL_Flags.Tumble_Detect",
       "CTRL_Flags.Pol_Armed",       "CTRL_Flags.CamActive",
-      ]
+      ] -->
 
       <!-- SIZE: (4/26) BYTES -->
-      genericLogTopic_Misc_Variables: [
+      <!-- genericLogTopic_Misc_Variables: [
       "CTRL_Flags.CustomThrust",    "CTRL_Flags.CustomPWM",
       "CTRL_Flags.SafeModeEnable",  "CTRL_Flags.AttCtrl_Flag",
-      <!-- "pm.vbat", -->
-      ]
+      ] -->
 
       
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
@@ -90,7 +89,7 @@
 
       # motion_capture_interface_ip: "" # optional for optitrack with multiple interfaces
       save_point_clouds: "/dev/null" # set to a valid path to log mocap point cloud binary file.
-      print_latency: False
+      print_latency: True
       write_csvs: False
       force_no_cache: False
       enable_parameters: True
