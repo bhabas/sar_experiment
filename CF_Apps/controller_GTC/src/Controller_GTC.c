@@ -54,7 +54,15 @@ void controllerOutOfTreeInit() {
     Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
-    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    NN_init(&NN_DeepRL,NN_Params_DeepRL);
+
+    // PASS OBSERVATION THROUGH POLICY NN
+    NN_forward(X_input,Y_output,&NN_DeepRL);
+
+    consolePrintf("Value of Y_output: %f\n",Y_output->data[0][0]);
+
+    // SAMPLE POLICY TRIGGER ACTION
+    // Policy_Trg_Action = GaussianSample(Y_output->data[0][0],exp(Y_output->data[2][0]));
 
     consolePrintf("GTC Controller Initiated\n");
 }
