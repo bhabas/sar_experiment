@@ -35,7 +35,8 @@ void compressStates(){
     States_Z.Tau = compressXY(Tau,Tau_CR);
     States_Z.Theta_x = (int16_t)(Theta_x * 1000.0f);
 
-
+    States_Z.r_PBxy = compressXY(Pos_P_B.x,Pos_P_B.y);
+    States_Z.r_PBz = (int16_t)(Pos_P_B.z * 1000.0f);
 
 
     // COMPRESS THRUST/MOMENT VALUES

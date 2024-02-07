@@ -19,16 +19,19 @@
       genericLogTopic_States_B_O_Variables: [
       "Z_States.r_BOxy","Z_States.r_BOz",
       "Z_States.V_BOxy","Z_States.V_BOz",
+      "Z_States.Quat_BO",
       "Z_States.Omega_BOxy","Z_States.Omega_BOz",
-      "Z_States.Quat_BO","Z_States.dOmega_BOy",
+      "Z_States.dOmega_BOy",
       ]
 
       <!-- SIZE: (0/26) BYTES -->
       genericLogTopic_States_B_P_Variables: [
+      "Z_States.r_PBxy","Z_States.r_PBz",
       "Z_States.VelRel_BP",
       "Z_States.D_perp","Z_States.Tau",
       "Z_States.Theta_x",
       "Z_States.Pol_Actions",
+      "Z_Trg.Trg_Flag",
       ]
 
       <!-- SIZE: (24/26) BYTES -->

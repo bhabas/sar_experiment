@@ -40,6 +40,10 @@ typedef struct {
     // Compressed angular acceleration [milli-rad/sec^2]
     int16_t dOmega_BOy;
 
+    // Compressed Relative Position [mm]
+    uint32_t r_PBxy;
+    int16_t r_PBz;
+
     // Compressed Relative Velocity [mm/s]
     uint32_t VelRel_BP;
 

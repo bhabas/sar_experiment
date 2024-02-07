@@ -501,14 +501,6 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 LOG_GROUP_START(Z_States)
 
-
-
-
-// MS_PWM12,MS_PWM34
-// M_thrust12,M_thrust34
-// FMz,Mxy
-
-
 LOG_ADD(LOG_UINT32, r_BOxy,         &States_Z.r_BOxy)
 LOG_ADD(LOG_INT16,  r_BOz,          &States_Z.r_BOz)
 
@@ -527,6 +519,9 @@ LOG_ADD(LOG_INT16,  dOmega_BOy,     &States_Z.dOmega_BOy)
 
 
 LOG_ADD(LOG_UINT32, VelRel_BP,      &States_Z.VelRel_BP)
+LOG_ADD(LOG_UINT32, r_PBxy,         &States_Z.r_PBxy)
+LOG_ADD(LOG_INT16,  r_PBz,          &States_Z.r_PBz)
+
 LOG_ADD(LOG_UINT32, D_perp,         &States_Z.D_perp)
 LOG_ADD(LOG_UINT32, Tau,            &States_Z.Tau)
 LOG_ADD(LOG_INT16,  Theta_x,        &States_Z.Theta_x)
@@ -566,7 +561,7 @@ LOG_GROUP_STOP(Z_SetPoints)
 
 
 
-LOG_GROUP_START(z_Trg)
+LOG_GROUP_START(Z_Trg)
 
 // V_B_O_trg_x,V_B_O_trg_z
 // Quat_B_O_trg
@@ -602,8 +597,8 @@ LOG_GROUP_START(z_Trg)
 // LOG_ADD(LOG_UINT32, PolActions,    &TrgStates_Z.Policy_Actions)
 
 
-// LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
-LOG_GROUP_STOP(z_Trg)
+LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
+LOG_GROUP_STOP(Z_Trg)
 
 
 LOG_GROUP_START(Z_Impact)
