@@ -56,14 +56,6 @@ void controllerOutOfTreeInit() {
     // INIT DEEP RL NN POLICY
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
 
-    // PASS OBSERVATION THROUGH POLICY NN
-    NN_forward(X_input,Y_output,&NN_DeepRL);
-
-    consolePrintf("Value of Y_output: %f\n",Y_output->data[0][0]);
-
-    // SAMPLE POLICY TRIGGER ACTION
-    // Policy_Trg_Action = GaussianSample(Y_output->data[0][0],exp(Y_output->data[2][0]));
-
     consolePrintf("GTC Controller Initiated\n");
 }
 
@@ -507,9 +499,25 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 
 
-// LOG_GROUP_START(Z_States)
+LOG_GROUP_START(Z_States)
+// r_B_O_x,r_B_O_y,r_B_O_z
+// v_B_O_x,v_B_O_y,v_B_O_z
+// a_B_O_x,a_B_O_y,a_B_O_z
+
+// quat_B_O
+// omega_B_O_y
+// Ang_Accel_B_O_y
+
+// Vel_mag_B_P
+// Vel_angle_B_P
+
+// MS_PWM12,MS_PWM34
+// M_thrust12,M_thrust34
+// FMz,Mxy
+
+
 // LOG_ADD(LOG_UINT32, xy,         &States_Z.xy)
-// LOG_ADD(LOG_INT16,  z,          &States_Z.z)
+LOG_ADD(LOG_INT16,  r_BOz,          &States_Z.r_BOz)
 
 // LOG_ADD(LOG_UINT32, vxy,        &States_Z.vxy)
 // LOG_ADD(LOG_INT16,  vz,         &States_Z.vz)
@@ -531,32 +539,47 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 // LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
 // LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
-// LOG_GROUP_STOP(Z_States)
+LOG_GROUP_STOP(Z_States)
 
 
 
-// LOG_GROUP_START(Z_Policy)
+LOG_GROUP_START(Z_Policy)
 // LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
 // LOG_ADD(LOG_INT16,  Tau_Cam,        &States_Z.Tau_Cam)
 // LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
-// LOG_GROUP_STOP(Z_Policy)
+LOG_GROUP_STOP(Z_Policy)
 
 
 
-// LOG_GROUP_START(Z_SetPoints)
-// LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
-// LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
+LOG_GROUP_START(Z_SetPoints)
+LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
+LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
 
-// LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
-// LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
+LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
+LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
 
-// LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
-// LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
-// LOG_GROUP_STOP(Z_SetPoints)
+LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
+LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
+LOG_GROUP_STOP(Z_SetPoints)
 
 
 
-// LOG_GROUP_START(Z_TrgStates)
+LOG_GROUP_START(z_Trg)
+
+// V_B_O_trg_x,V_B_O_trg_z
+// Quat_B_O_trg
+
+// Vel_mag_B_P_trg, Vel_mag_B_P_trg
+// Quat_P_B_trg
+
+// Tau_trg, D_perp_trg
+// Tau_CR_trg, D_perp_CR_trg
+// Theta_x_trg,
+// Policy_Trg_Action_trg, Policy_Rot_Action_trg
+
+// Trg_Flag
+
+
 // LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
 // LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
 // LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
@@ -576,8 +599,15 @@ PARAM_GROUP_STOP(CTRL_Params)
 
 // LOG_ADD(LOG_UINT32, PolActions,    &TrgStates_Z.Policy_Actions)
 
+
 // LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
-// LOG_GROUP_STOP(Z_TrgStates)
+LOG_GROUP_STOP(z_Trg)
+
+
+LOG_GROUP_START(Z_Impact)
+
+
+LOG_GROUP_STOP(Z_Impact)
 
 
 
