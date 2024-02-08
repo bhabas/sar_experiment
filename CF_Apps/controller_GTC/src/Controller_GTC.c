@@ -563,47 +563,34 @@ LOG_GROUP_STOP(Z_SetPoints)
 
 LOG_GROUP_START(Z_Trg)
 
-// V_B_O_trg_x,V_B_O_trg_z
-// Quat_B_O_trg
-
-// Vel_mag_B_P_trg, Vel_mag_B_P_trg
-// Quat_P_B_trg
-
-// Tau_trg, D_perp_trg
-// Tau_CR_trg, D_perp_CR_trg
-// Theta_x_trg,
-// Policy_Trg_Action_trg, Policy_Rot_Action_trg
-
-// Trg_Flag
-
-
-// LOG_ADD(LOG_UINT32, xy,             &TrgStates_Z.xy)
-// LOG_ADD(LOG_INT16,  z,              &TrgStates_Z.z)
-// LOG_ADD(LOG_UINT32, vxy,            &TrgStates_Z.vxy)
-// LOG_ADD(LOG_INT16,  vz,             &TrgStates_Z.vz)
-
-// LOG_ADD(LOG_UINT32, quat,           &TrgStates_Z.quat)
-
-// LOG_ADD(LOG_UINT32, wxy,            &TrgStates_Z.wxy)
-// LOG_ADD(LOG_INT16,  wz,             &TrgStates_Z.wz)
-
-// LOG_ADD(LOG_UINT32, Thetaxy,        &TrgStates_Z.Theta_xy)
-// LOG_ADD(LOG_INT16,  Tau,            &TrgStates_Z.Tau)
-// LOG_ADD(LOG_INT16,  D_perp,         &TrgStates_Z.D_perp)
-
-// LOG_ADD(LOG_UINT32, Thetaxy_est,    &TrgStates_Z.Theta_xy_est)
-// LOG_ADD(LOG_INT16,  Tau_Cam,        &TrgStates_Z.Tau_Cam)
-
-// LOG_ADD(LOG_UINT32, PolActions,    &TrgStates_Z.Policy_Actions)
-
-
 LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
+
+LOG_ADD(LOG_UINT32, r_BOxy,         &TrgStates_Z.r_BOxy)
+LOG_ADD(LOG_INT16,  r_BOz,          &TrgStates_Z.r_BOz)
+
+LOG_ADD(LOG_UINT32, V_BOxy,         &TrgStates_Z.V_BOxy)
+LOG_ADD(LOG_INT16,  V_BOz,          &TrgStates_Z.V_BOz)
+
+LOG_ADD(LOG_UINT32, Quat_BO,        &TrgStates_Z.Quat_BO)
+LOG_ADD(LOG_INT16, Omega_BOy,       &TrgStates_Z.Omega_BOy)
+
+LOG_ADD(LOG_UINT32, VelRel_BP,      &TrgStates_Z.VelRel_BP)
+
+LOG_ADD(LOG_UINT32, r_PBxy,         &TrgStates_Z.r_PBxy)
+LOG_ADD(LOG_INT16,  r_PBz,          &TrgStates_Z.r_PBz)
+
+LOG_ADD(LOG_UINT32, D_perp,         &TrgStates_Z.D_perp)
+LOG_ADD(LOG_UINT32, Tau,            &TrgStates_Z.Tau)
+LOG_ADD(LOG_INT16,  Theta_x,        &TrgStates_Z.Theta_x)
+
+LOG_ADD(LOG_UINT32, Pol_Actions,    &TrgStates_Z.Policy_Actions)
+
+
 LOG_GROUP_STOP(Z_Trg)
 
 
 LOG_GROUP_START(Z_Impact)
-
-
+// TBD IF NEEDED/CAPBABLE
 LOG_GROUP_STOP(Z_Impact)
 
 

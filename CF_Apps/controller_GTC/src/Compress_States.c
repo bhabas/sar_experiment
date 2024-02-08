@@ -58,35 +58,34 @@ void compressStates(){
 
 void compressTrgStates(){
 
-    // // COMPRESS FULL STATE VALUES
-    // TrgStates_Z.xy = compressXY(Pos_B_O_trg.x,Pos_B_O_trg.y);
-    // TrgStates_Z.z = (int16_t)(Pos_B_O_trg.z * 1000.0f);
+    // COMPRESS FULL STATE VALUES
+    TrgStates_Z.r_BOxy = compressXY(Pos_B_O_trg.x,Pos_B_O_trg.y);
+    TrgStates_Z.r_BOz = (int16_t)(Pos_B_O_trg.z * 1000.0f);
 
-    // TrgStates_Z.D_perp = (int16_t)(D_perp_trg * 1000.0f);
+    TrgStates_Z.V_BOxy = compressXY(Vel_B_O_trg.x, Vel_B_O_trg.y);
+    TrgStates_Z.V_BOz = (int16_t)(Vel_B_O_trg.z * 1000.0f);
 
-    // TrgStates_Z.vxy = compressXY(Vel_B_O_trg.x, Vel_B_O_trg.y);
-    // TrgStates_Z.vz = (int16_t)(Vel_B_O_trg.z * 1000.0f);
+    float const q[4] = {
+        Quat_B_O_trg.x,
+        Quat_B_O_trg.y,
+        Quat_B_O_trg.z,
+        Quat_B_O_trg.w};
+    TrgStates_Z.Quat_BO = quatcompress(q);
 
-    // TrgStates_Z.wxy = compressXY(Omega_B_O_trg.x,Omega_B_O_trg.y);
-    // TrgStates_Z.wz = (int16_t)(Omega_B_O_trg.z * 1000.0f);
+    TrgStates_Z.Omega_BOy = (int16_t)(Omega_B_O_trg.y * 1000.0f);
 
-    // float const q[4] = {
-    //     Quat_B_O_trg.x,
-    //     Quat_B_O_trg.y,
-    //     Quat_B_O_trg.z,
-    //     Quat_B_O_trg.w};
-    // TrgStates_Z.quat = quatcompress(q);
+    TrgStates_Z.VelRel_BP = compressXY(Vel_mag_B_P_trg, Vel_mag_B_P_trg);
 
-    // // COMPRESS OPTICAL FLOW VALUES
-    // TrgStates_Z.Theta_xy = compressXY(Theta_x_trg,Theta_y_trg);
-    // TrgStates_Z.Tau = (int16_t)(Tau_trg * 1000.0f); 
+    TrgStates_Z.D_perp = compressXY(D_perp_trg,D_perp_CR_trg);
+    TrgStates_Z.Tau = compressXY(Tau_trg,Tau_CR_trg);
+    TrgStates_Z.Theta_x = (int16_t)(Theta_x_trg * 1000.0f);
 
-    // // COMPRESS OPTICAL FLOW ESTIMATES
-    // TrgStates_Z.Theta_xy_est = compressXY(Theta_x_Cam_trg,Theta_y_Cam_trg);
-    // TrgStates_Z.Tau_Cam = (int16_t)(Tau_Cam_trg * 1000.0f); 
+    TrgStates_Z.r_PBxy = compressXY(Pos_P_B_trg.x,Pos_P_B_trg.y);
+    TrgStates_Z.r_PBz = (int16_t)(Pos_P_B_trg.z * 1000.0f);
 
-    // // COMPRESS POLICY ACTIONS
-    // TrgStates_Z.Policy_Actions = compressXY(Policy_Trg_Action_trg,Policy_Rot_Action_trg);
+
+    // COMPRESS POLICY ACTIONS
+    TrgStates_Z.Policy_Actions = compressXY(Policy_Trg_Action_trg,Policy_Rot_Action_trg);
 
 }
 
