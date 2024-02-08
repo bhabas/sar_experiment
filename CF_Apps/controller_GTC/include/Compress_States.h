@@ -59,8 +59,8 @@ typedef struct {
     uint32_t Mxy;   // [N*um]Values
     uint32_t FMz;   // [mN | N*um]
 
-    uint32_t MS_PWM12; 
-    uint32_t MS_PWM34;
+    uint32_t M_CMD12; 
+    uint32_t M_CMD34;
 
     uint32_t M_thrust12;    // [mg]
     uint32_t M_thrust34;    // [mg]

@@ -158,14 +158,14 @@ float M2_thrust = 0.0f;     // Motor 2 [g]
 float M3_thrust = 0.0f;     // Motor 3 [g]
 float M4_thrust = 0.0f;     // Motor 4 [g]
 
-// MOTOR PWM VALUES
-uint16_t M1_pwm = 0;        // [0 - 65,535]
-uint16_t M2_pwm = 0;        // [0 - 65,535]
-uint16_t M3_pwm = 0;        // [0 - 65,535]
-uint16_t M4_pwm = 0;        // [0 - 65,535]
+// MOTOR M_CMD VALUES
+uint16_t M1_CMD = 0;        // [0 - 65,535]
+uint16_t M2_CMD = 0;        // [0 - 65,535]
+uint16_t M3_CMD = 0;        // [0 - 65,535]
+uint16_t M4_CMD = 0;        // [0 - 65,535]
 
 // CONTROL OVERRIDE VALUES
-uint16_t PWM_override[4] = {0,0,0,0};               // Motor PWM values
+uint16_t M_CMD_override[4] = {0,0,0,0};               // Motor M_CMD values
 float thrust_override[4] = {0.0f,0.0f,0.0f,0.0f};   // Motor thrusts [g] 
 
 
@@ -225,7 +225,7 @@ bool MotorStop_Flag = false;
 bool AngAccel_Flag = false;
 bool SafeMode_Flag = true;
 bool CustomThrust_Flag = false;
-bool CustomPWM_Flag = false;
+bool CustomMotorCMD_Flag = false;
 
 
 // SENSOR FLAGS
@@ -516,13 +516,13 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 
             break;
 
-        case 31: // Custom PWM Values
+        case 31: // Custom M_CMD Values
 
-            CustomPWM_Flag = true;
-            PWM_override[0] = CTRL_Cmd->cmd_val1;
-            PWM_override[1] = CTRL_Cmd->cmd_val2;
-            PWM_override[2] = CTRL_Cmd->cmd_val3;
-            PWM_override[3] = CTRL_Cmd->cmd_flag;
+            CustomMotorCMD_Flag = true;
+            M_CMD_override[0] = CTRL_Cmd->cmd_val1;
+            M_CMD_override[1] = CTRL_Cmd->cmd_val2;
+            M_CMD_override[2] = CTRL_Cmd->cmd_val3;
+            M_CMD_override[3] = CTRL_Cmd->cmd_flag;
 
             break;
 
@@ -643,10 +643,10 @@ void controlOutput(const state_t *state, const sensorData_t *sensors)
 
 }
 
-// Converts thrust in grams to their respective PWM values
-uint16_t thrust2PWM(float f) 
+// Converts thrust in grams to their respective M_CMD values
+uint16_t thrust2Motor_CMD(float f) 
 {
-    // VOLTAGE IS WHAT DRIVES THE MOTORS, THEREFORE ADJUST PWM TO MEET VOLTAGE NEED
+    // VOLTAGE IS WHAT DRIVES THE MOTORS, THEREFORE ADJUST M_CMD TO MEET VOLTAGE NEED
     // CALCULATE REQUIRED VOLTAGE FOR DESIRED THRUST
 
     float a,b,c;
@@ -671,16 +671,16 @@ uint16_t thrust2PWM(float f)
     float percentage = voltage_needed / supply_voltage;
     percentage = percentage > 1.0f ? 1.0f : percentage; // If % > 100%, then cap at 100% else keep same
 
-    // CONVERT RATIO TO PWM OF PWM_MAX
-    float PWM = percentage * (float)UINT16_MAX; // Remap percentage back to PWM range
+    // CONVERT RATIO TO M_CMD OF MOTOR_CMD_MAX
+    float M_CMD = percentage * (float)UINT16_MAX; // Remap percentage back to M_CMD range
 
-    // IF MINIMAL THRUST ENSURE PWM = 0
+    // IF MINIMAL THRUST ENSURE M_CMD = 0
     if(f <= 0.25f)
     {
-        PWM = 0.0f;
+        M_CMD = 0.0f;
     }
 
-    return PWM;
+    return M_CMD;
 }
 
 

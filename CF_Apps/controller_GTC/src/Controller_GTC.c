@@ -84,7 +84,7 @@ void controllerOutOfTreeReset() {
     Tumbled_Flag = false;
     MotorStop_Flag = false;
     CustomThrust_Flag = false;
-    CustomPWM_Flag = false;
+    CustomMotorCMD_Flag = false;
     AngAccel_Flag = false;
 
     // RESET TRAJECTORY FLAGS
@@ -402,21 +402,21 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         }
 
-        // UPDATE PWM COMMANDS
-        if(CustomPWM_Flag)
+        // UPDATE M_CMD COMMANDS
+        if(CustomMotorCMD_Flag)
         {
-            M1_pwm = PWM_override[0]; 
-            M2_pwm = PWM_override[1];
-            M3_pwm = PWM_override[2];
-            M4_pwm = PWM_override[3];
+            M1_CMD = M_CMD_override[0]; 
+            M2_CMD = M_CMD_override[1];
+            M3_CMD = M_CMD_override[2];
+            M4_CMD = M_CMD_override[3];
         }
         else 
         {
-            // CONVERT THRUSTS TO PWM SIGNALS
-            M1_pwm = (int32_t)thrust2PWM(M1_thrust); 
-            M2_pwm = (int32_t)thrust2PWM(M2_thrust);
-            M3_pwm = (int32_t)thrust2PWM(M3_thrust);
-            M4_pwm = (int32_t)thrust2PWM(M4_thrust);
+            // CONVERT THRUSTS TO M_CMD SIGNALS
+            M1_CMD = (int32_t)thrust2Motor_CMD(M1_thrust); 
+            M2_CMD = (int32_t)thrust2Motor_CMD(M2_thrust);
+            M3_CMD = (int32_t)thrust2Motor_CMD(M3_thrust);
+            M4_CMD = (int32_t)thrust2Motor_CMD(M4_thrust);
         }
 
         // COMPRESS STATES
@@ -433,11 +433,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             motorsSetRatio(MOTOR_M4, 0);
         }
         else{
-            // SEND PWM VALUES TO MOTORS
-            motorsSetRatio(MOTOR_M1, M4_pwm);
-            motorsSetRatio(MOTOR_M2, M3_pwm);
-            motorsSetRatio(MOTOR_M3, M2_pwm);
-            motorsSetRatio(MOTOR_M4, M1_pwm);
+            // SEND M_CMD VALUES TO MOTORS
+            motorsSetRatio(MOTOR_M1, M4_CMD);
+            motorsSetRatio(MOTOR_M2, M3_CMD);
+            motorsSetRatio(MOTOR_M3, M2_CMD);
+            motorsSetRatio(MOTOR_M4, M1_CMD);
         }
         #endif
 
@@ -503,20 +503,14 @@ LOG_GROUP_START(Z_States)
 
 LOG_ADD(LOG_UINT32, r_BOxy,         &States_Z.r_BOxy)
 LOG_ADD(LOG_INT16,  r_BOz,          &States_Z.r_BOz)
-
 LOG_ADD(LOG_UINT32, V_BOxy,         &States_Z.V_BOxy)
 LOG_ADD(LOG_INT16,  V_BOz,          &States_Z.V_BOz)
-
 LOG_ADD(LOG_UINT32, Acc_BOxy,       &States_Z.Acc_BOxy)
 LOG_ADD(LOG_INT16,  Acc_BOz,        &States_Z.Acc_BOz)
-
 LOG_ADD(LOG_UINT32, Quat_BO,        &States_Z.Quat_BO)
-
 LOG_ADD(LOG_UINT32, Omega_BOxy,     &States_Z.Omega_BOxy)
 LOG_ADD(LOG_INT16,  Omega_BOz,      &States_Z.Omega_BOz)
-
 LOG_ADD(LOG_INT16,  dOmega_BOy,     &States_Z.dOmega_BOy)
-
 
 LOG_ADD(LOG_UINT32, VelRel_BP,      &States_Z.VelRel_BP)
 LOG_ADD(LOG_UINT32, r_PBxy,         &States_Z.r_PBxy)
@@ -525,27 +519,15 @@ LOG_ADD(LOG_INT16,  r_PBz,          &States_Z.r_PBz)
 LOG_ADD(LOG_UINT32, D_perp,         &States_Z.D_perp)
 LOG_ADD(LOG_UINT32, Tau,            &States_Z.Tau)
 LOG_ADD(LOG_INT16,  Theta_x,        &States_Z.Theta_x)
-
 LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
 
 LOG_ADD(LOG_UINT32, FMz,            &States_Z.FMz)
 LOG_ADD(LOG_UINT32, Mxy,            &States_Z.Mxy)
-
-LOG_ADD(LOG_UINT32, f_12,       &States_Z.M_thrust12)
-LOG_ADD(LOG_UINT32, f_34,       &States_Z.M_thrust34)
-
-LOG_ADD(LOG_UINT32, PWM12,      &States_Z.MS_PWM12)
-LOG_ADD(LOG_UINT32, PWM34,      &States_Z.MS_PWM34)
+LOG_ADD(LOG_UINT32, f_12,           &States_Z.M_thrust12)
+LOG_ADD(LOG_UINT32, f_34,           &States_Z.M_thrust34)
+LOG_ADD(LOG_UINT32, M_CMD12,        &States_Z.M_CMD12)
+LOG_ADD(LOG_UINT32, M_CMD34,        &States_Z.M_CMD34)
 LOG_GROUP_STOP(Z_States)
-
-
-
-LOG_GROUP_START(Z_Policy)
-// LOG_ADD(LOG_UINT32, Thetaxy_est,    &States_Z.Theta_xy_est)
-// LOG_ADD(LOG_INT16,  Tau_Cam,        &States_Z.Tau_Cam)
-// LOG_ADD(LOG_UINT32, Pol_Actions,    &States_Z.Policy_Actions)
-LOG_GROUP_STOP(Z_Policy)
-
 
 
 LOG_GROUP_START(Z_SetPoints)
@@ -562,30 +544,20 @@ LOG_GROUP_STOP(Z_SetPoints)
 
 
 LOG_GROUP_START(Z_Trg)
-
 LOG_ADD(LOG_UINT8, Trg_Flag, &Trg_Flag)
-
 LOG_ADD(LOG_UINT32, r_BOxy,         &TrgStates_Z.r_BOxy)
 LOG_ADD(LOG_INT16,  r_BOz,          &TrgStates_Z.r_BOz)
-
 LOG_ADD(LOG_UINT32, V_BOxy,         &TrgStates_Z.V_BOxy)
 LOG_ADD(LOG_INT16,  V_BOz,          &TrgStates_Z.V_BOz)
-
 LOG_ADD(LOG_UINT32, Quat_BO,        &TrgStates_Z.Quat_BO)
 LOG_ADD(LOG_INT16, Omega_BOy,       &TrgStates_Z.Omega_BOy)
-
 LOG_ADD(LOG_UINT32, VelRel_BP,      &TrgStates_Z.VelRel_BP)
-
 LOG_ADD(LOG_UINT32, r_PBxy,         &TrgStates_Z.r_PBxy)
 LOG_ADD(LOG_INT16,  r_PBz,          &TrgStates_Z.r_PBz)
-
 LOG_ADD(LOG_UINT32, D_perp,         &TrgStates_Z.D_perp)
 LOG_ADD(LOG_UINT32, Tau,            &TrgStates_Z.Tau)
 LOG_ADD(LOG_INT16,  Theta_x,        &TrgStates_Z.Theta_x)
-
 LOG_ADD(LOG_UINT32, Pol_Actions,    &TrgStates_Z.Policy_Actions)
-
-
 LOG_GROUP_STOP(Z_Trg)
 
 
@@ -605,6 +577,6 @@ LOG_ADD(LOG_UINT8, AngAccel_Flag,   &AngAccel_Flag)
 LOG_ADD(LOG_UINT8, SafeMode_Flag,   &SafeMode_Flag)
 LOG_ADD(LOG_UINT8, Pol_Armed,       &Policy_Armed_Flag)
 LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
-LOG_ADD(LOG_UINT8, CustomPWM,       &CustomPWM_Flag)
+LOG_ADD(LOG_UINT8, CustomM_CMD,       &CustomMotorCMD_Flag)
 LOG_GROUP_STOP(CTRL_Flags)
 #endif

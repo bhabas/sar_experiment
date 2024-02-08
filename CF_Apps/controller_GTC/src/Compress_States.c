@@ -47,9 +47,9 @@ void compressStates(){
     States_Z.M_thrust12 = compressXY(M1_thrust,M2_thrust);
     States_Z.M_thrust34 = compressXY(M3_thrust,M4_thrust);
 
-    // COMPRESS PWM VALUES
-    States_Z.MS_PWM12 = compressXY(M1_pwm*0.5e-3f,M2_pwm*0.5e-3f);
-    States_Z.MS_PWM34 = compressXY(M3_pwm*0.5e-3f,M4_pwm*0.5e-3f);
+    // COMPRESS MS CMD VALUES
+    States_Z.M_CMD12 = compressXY(M1_CMD*0.5e-3f,M2_CMD*0.5e-3f);
+    States_Z.M_CMD34 = compressXY(M3_CMD*0.5e-3f,M4_CMD*0.5e-3f);
 
 
     // COMPRESS POLICY ACTIONS
