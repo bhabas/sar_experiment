@@ -10,8 +10,8 @@
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
-      genericLogTopics: ["States_B_O","States_B_P","TrgState","CTRL_Output","SetPoints"]
-      genericLogTopicFrequencies: [100,100,500,100,100]
+      genericLogTopics: ["States_B_O","States_B_P","TrgState","CTRL_Output","SetPoints","Flags","Misc"]
+      genericLogTopicFrequencies: [100,100,500,100,100,500,500]
 
 
       <!-- Important States -->
@@ -58,18 +58,17 @@
 
 
       <!-- SIZE: (14/26) BYTES -->
-      <!-- genericLogTopic_Flags_Variables: [
-      "CTRL_Flags.Pos_Ctrl",        "CTRL_Flags.Vel_Ctrl",
-      "CTRL_Flags.Motorstop",       "CTRL_Flags.Moment_Flag",
-      "CTRL_Flags.Tumbled",         "CTRL_Flags.Tumble_Detect",
-      "CTRL_Flags.Pol_Armed",       "CTRL_Flags.CamActive",
-      ] -->
+      genericLogTopic_Flags_Variables: [
+      "Misc.Pos_Ctrl",        "Misc.Vel_Ctrl",
+      "Misc.Motorstop",       
+      "Misc.Tumbled_Flag",         "Misc.Tumble_Detect",
+      "Misc.Pol_Armed",       
+      ]
 
       <!-- SIZE: (4/26) BYTES -->
-      <!-- genericLogTopic_Misc_Variables: [
-      "CTRL_Flags.CustomThrust",    "CTRL_Flags.CustomPWM",
-      "CTRL_Flags.SafeModeEnable",  "CTRL_Flags.AttCtrl_Flag",
-      ] -->
+      genericLogTopic_Misc_Variables: [
+      "Misc.Plane_Angle",
+      ]
 
       
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or

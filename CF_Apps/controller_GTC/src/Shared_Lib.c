@@ -535,7 +535,7 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             r_P_O.z = CTRL_Cmd->cmd_val3;
             Plane_Angle_deg = CTRL_Cmd->cmd_flag;
 
-            // updatePlaneNormal(Plane_Angle);
+            updateRotationMatrices();
             
             break;
     }

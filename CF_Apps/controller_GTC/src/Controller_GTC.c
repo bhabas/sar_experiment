@@ -242,6 +242,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         updateRotationMatrices();
     }
 
+    if (RATE_DO_EXECUTE(2, tick))
+    {
+        consolePrintf("Plane Position: %f %f %f\n",(double)r_P_O.x,(double)r_P_O.y,(double)r_P_O.z);
+    }
+
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
@@ -567,7 +572,7 @@ LOG_GROUP_STOP(Z_Impact)
 
 
 
-LOG_GROUP_START(CTRL_Flags)
+LOG_GROUP_START(Misc)
 LOG_ADD(LOG_FLOAT, Pos_Ctrl,        &kp_xf)
 LOG_ADD(LOG_FLOAT, Vel_Ctrl,        &kd_xf)
 LOG_ADD(LOG_UINT8, Motorstop,       &MotorStop_Flag)
@@ -577,6 +582,8 @@ LOG_ADD(LOG_UINT8, AngAccel_Flag,   &AngAccel_Flag)
 LOG_ADD(LOG_UINT8, SafeMode_Flag,   &SafeMode_Flag)
 LOG_ADD(LOG_UINT8, Pol_Armed,       &Policy_Armed_Flag)
 LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
-LOG_ADD(LOG_UINT8, CustomM_CMD,       &CustomMotorCMD_Flag)
-LOG_GROUP_STOP(CTRL_Flags)
+LOG_ADD(LOG_UINT8, CustomM_CMD,     &CustomMotorCMD_Flag)
+LOG_ADD(LOG_FLOAT, Plane_Angle,     &Plane_Angle_deg)
+
+LOG_GROUP_STOP(Misc)
 #endif
