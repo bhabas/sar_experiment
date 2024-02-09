@@ -51,23 +51,24 @@
 
       <!-- SIZE: (18/26) BYTES -->
       genericLogTopic_SetPoints_Variables: [      
-      "Z_SetPoints.xy",    "Z_SetPoints.z",
-      "Z_SetPoints.vxy",   "Z_SetPoints.vz",
-      "Z_SetPoints.axy",   "Z_SetPoints.az",
+      "Z_SetPoints.x_xy",   "Z_SetPoints.x_z",
+      "Z_SetPoints.v_xy",   "Z_SetPoints.v_z",
+      "Z_SetPoints.a_xy",   "Z_SetPoints.a_z",
       ]
 
 
       <!-- SIZE: (14/26) BYTES -->
       genericLogTopic_Flags_Variables: [
       "Misc.Pos_Ctrl",        "Misc.Vel_Ctrl",
-      "Misc.Motorstop",       
-      "Misc.Tumbled_Flag",         "Misc.Tumble_Detect",
-      "Misc.Pol_Armed",       
+      "Misc.Motorstop",       "Misc.SafeMode_Flag",
+      "Misc.Tumbled_Flag",    "Misc.Tumble_Detect",
+      "Misc.Policy_Armed",    "Misc.AngAccel_Flag"
       ]
 
       <!-- SIZE: (4/26) BYTES -->
       genericLogTopic_Misc_Variables: [
-      "Misc.Plane_Angle",
+      "Misc.Plane_Angle", 
+      "Misc.CustomThrust", "Misc.CustomM_CMD"
       ]
 
       

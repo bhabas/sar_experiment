@@ -244,7 +244,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     if (RATE_DO_EXECUTE(2, tick))
     {
-        consolePrintf("Plane Position: %f %f %f\n",(double)r_P_O.x,(double)r_P_O.y,(double)r_P_O.z);
+        consolePrintf("States_Z.FMz: %ld\n", States_Z.FMz);
+
     }
 
     // STATE UPDATES
@@ -536,14 +537,14 @@ LOG_GROUP_STOP(Z_States)
 
 
 LOG_GROUP_START(Z_SetPoints)
-LOG_ADD(LOG_UINT32, xy,         &SetPoints_Z.xy)
-LOG_ADD(LOG_INT16,  z,          &SetPoints_Z.z)
+LOG_ADD(LOG_UINT32, x_xy,         &SetPoints_Z.xy)
+LOG_ADD(LOG_INT16,  x_z,          &SetPoints_Z.z)
 
-LOG_ADD(LOG_UINT32, vxy,        &SetPoints_Z.vxy)
-LOG_ADD(LOG_INT16,  vz,         &SetPoints_Z.vz)
+LOG_ADD(LOG_UINT32, v_xy,        &SetPoints_Z.vxy)
+LOG_ADD(LOG_INT16,  v_z,         &SetPoints_Z.vz)
 
-LOG_ADD(LOG_UINT32, axy,        &SetPoints_Z.axy)
-LOG_ADD(LOG_INT16,  az,         &SetPoints_Z.az)
+LOG_ADD(LOG_UINT32, a_xy,        &SetPoints_Z.axy)
+LOG_ADD(LOG_INT16,  a_z,         &SetPoints_Z.az)
 LOG_GROUP_STOP(Z_SetPoints)
 
 
@@ -580,7 +581,7 @@ LOG_ADD(LOG_UINT8, Tumbled_Flag,    &Tumbled_Flag)
 LOG_ADD(LOG_UINT8, Tumble_Detect,   &TumbleDetect_Flag)
 LOG_ADD(LOG_UINT8, AngAccel_Flag,   &AngAccel_Flag)
 LOG_ADD(LOG_UINT8, SafeMode_Flag,   &SafeMode_Flag)
-LOG_ADD(LOG_UINT8, Pol_Armed,       &Policy_Armed_Flag)
+LOG_ADD(LOG_UINT8, Policy_Armed,    &Policy_Armed_Flag)
 LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
 LOG_ADD(LOG_UINT8, CustomM_CMD,     &CustomMotorCMD_Flag)
 LOG_ADD(LOG_FLOAT, Plane_Angle,     &Plane_Angle_deg)
