@@ -306,7 +306,7 @@ float Policy_Rot_Action_trg = 0.0f;
 bool Impact_Flag_OB = false;
 float Accel_B_O_Mag_impact_OB = 0.0f;                    // Linear Acceleration Magnitude [m/s^2]
 struct vec Pos_B_O_impact_OB = {0.0f,0.0f,0.0f};         // Pos [m]
-struct quat Quat_B_O_impact_OB = {0.0f,0.0f,0.0f,1.0f};  // Orientation\
+struct quat Quat_B_O_impact_OB = {0.0f,0.0f,0.0f,1.0f};  // Orientation
 
 struct vec Vel_B_P_impact_OB = {0.0f,0.0f,0.0f};         // Vel [m/s]
 struct vec Omega_B_P_impact_OB = {0.0f,0.0f,0.0f};       // Angular Rate [rad/s]
@@ -329,6 +329,7 @@ struct mat33 R_PW;                      // Rotation matrix from plane to world
 
 void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 {
+    consolePrintf("Cmd Type: %d | Cmd Val1: %.3f | Cmd Val2: %.3f | Cmd Val3: %.3f | Cmd Flag: %.3f\n",CTRL_Cmd->cmd_type,CTRL_Cmd->cmd_val1,CTRL_Cmd->cmd_val2,CTRL_Cmd->cmd_val3,CTRL_Cmd->cmd_flag);
     switch(CTRL_Cmd->cmd_type){
         case 0: // Reset
             controllerOutOfTreeReset();

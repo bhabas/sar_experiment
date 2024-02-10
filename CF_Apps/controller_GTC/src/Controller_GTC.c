@@ -242,11 +242,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         updateRotationMatrices();
     }
 
-    if (RATE_DO_EXECUTE(2, tick))
-    {
-        consolePrintf("States_Z.FMz: %ld\n", States_Z.FMz);
-
-    }
+    
 
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
@@ -425,10 +421,20 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             M4_CMD = (int32_t)thrust2Motor_CMD(M4_thrust);
         }
 
+
         // COMPRESS STATES
         compressStates();
         compressSetpoints();
         compressTrgStates();
+        
+        if (RATE_DO_EXECUTE(2, tick))
+        {   
+            // F_thrust = 1;
+            // M = mkvec(1.0f,2.0f,3.0f);
+            // consolePrintf("F_thrust: %.3f M.x: %.3f M.y: %.3f M.z: %.3f\n",(double)F_thrust,(double)M.x,(double)M.y,(double)M.z);
+            consolePrintf("States_Z.FMz: %d\n", States_Z.FMz);
+            consolePrintf("States_Z.Mxy: %d\n", States_Z.Mxy);
+        }
 
         #ifdef CONFIG_SAR_EXP
         if(SafeMode_Flag)

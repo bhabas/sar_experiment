@@ -40,6 +40,8 @@ void compressStates(){
 
 
     // COMPRESS THRUST/MOMENT VALUES
+    F_thrust = 1;
+    M = mkvec(0.001f,0.002f,0.003f);
     States_Z.FMz = compressXY(F_thrust,M.z*1000.0f);
     States_Z.Mxy = compressXY(M.x*1000.0f,M.y*1000.0f);
 
