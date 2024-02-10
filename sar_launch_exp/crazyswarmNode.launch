@@ -11,7 +11,7 @@
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["States_B_O","States_B_P","TrgState","CTRL_Output","SetPoints","Flags","Misc"]
-      genericLogTopicFrequencies: [100,100,500,20,100,500,500]
+      genericLogTopicFrequencies: [100,100,500,100,100,500,500]
 
 
       <!-- Important States -->

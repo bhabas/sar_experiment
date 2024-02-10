@@ -40,14 +40,12 @@ void compressStates(){
 
 
     // COMPRESS THRUST/MOMENT VALUES
-    F_thrust = 1;
-    M = mkvec(0.001f,0.002f,0.003f);
     States_Z.FMz = compressXY(F_thrust,M.z*1000.0f);
     States_Z.Mxy = compressXY(M.x*1000.0f,M.y*1000.0f);
 
     // COMPRESS MOTOR THRUST VALUES
-    States_Z.M_thrust12 = compressXY(M1_thrust,M2_thrust);
-    States_Z.M_thrust34 = compressXY(M3_thrust,M4_thrust);
+    States_Z.M_thrust12 = compressXY(M1_thrust*1.0e-2f,M2_thrust*1.0e-2f);
+    States_Z.M_thrust34 = compressXY(M3_thrust*1.0e-2f,M4_thrust*1.0e-2f);
 
     // COMPRESS MS CMD VALUES
     States_Z.M_CMD12 = compressXY(M1_CMD*0.5e-3f,M2_CMD*0.5e-3f);
