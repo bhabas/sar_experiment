@@ -74,7 +74,7 @@ void compressTrgStates(){
 
     TrgStates_Z.Omega_BOy = (int16_t)(Omega_B_O_trg.y * 1000.0f);
 
-    TrgStates_Z.VelRel_BP = compressXY(Vel_mag_B_P_trg, Vel_mag_B_P_trg);
+    TrgStates_Z.VelRel_BP = compressXY(Vel_mag_B_P_trg, Vel_angle_B_P_trg);
 
     TrgStates_Z.D_perp = compressXY(D_perp_trg,D_perp_CR_trg);
     TrgStates_Z.Tau = compressXY(Tau_trg,Tau_CR_trg);
