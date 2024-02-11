@@ -50,11 +50,15 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeTest();
 
     // INIT DEEP RL NN POLICY
-    X_input = nml_mat_new(3,1);
+    X_input = nml_mat_new(4,1);
     Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
+    // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
+
+    
 
     consolePrintf("GTC Controller Initiated\n");
 }
@@ -242,8 +246,18 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         updateRotationMatrices();
     }
 
-    
+    // if (RATE_DO_EXECUTE(100, tick))
+    // {
+    //     NN_forward(X_input,Y_output,&NN_DeepRL);
+    //     NN_forward(X_input,Y_output,&NN_DeepRL);
+    //     NN_forward(X_input,Y_output,&NN_DeepRL);
 
+    //     Policy_Trg_Action = Y_output->data[0][0]+0.00001f*tick;
+    //     // nml_mat_print_CF(Y_output);
+    // }
+
+
+    
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
@@ -314,17 +328,18 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             X_input->data[0][0] = Tau_Cam;
             X_input->data[1][0] = Theta_x_Cam;
             X_input->data[2][0] = D_perp; 
-
+            X_input->data[3][0] = Plane_Angle_deg; 
         }
         else
         {
             // UPDATE AT THE ABOVE FREQUENCY
             isOFUpdated = true;
 
-            // UPDATE POLICY VECTOR
-            X_input->data[0][0] = Tau;
-            X_input->data[1][0] = Theta_x;
-            X_input->data[2][0] = D_perp; 
+            // // UPDATE POLICY VECTOR
+            // X_input->data[0][0] = Tau;
+            // X_input->data[1][0] = Theta_x;
+            // X_input->data[2][0] = D_perp; 
+            // X_input->data[3][0] = Plane_Angle_deg;
         }
     }
     

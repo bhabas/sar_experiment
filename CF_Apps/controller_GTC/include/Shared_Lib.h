@@ -20,6 +20,7 @@ extern "C" {
 #include "ML_Params/NN_Layers_NL_DeepRL.h"
 
 
+
 #define MOTOR_CMD_MAX 60000
 #define g2Newton (9.81f/1000.0f)
 #define Newton2g (1000.0f/9.81f)
@@ -267,6 +268,7 @@ extern float ACTION_MAX;
 // ===============================
 
 extern NN NN_DeepRL;
+extern NN NN_DeepRL2;
 extern float Policy_Rot_threshold;
 
 
