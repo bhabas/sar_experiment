@@ -51,13 +51,6 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
 
         ## SET EXP SETTINGS
-        if rospy.get_param("/CAM_SETTINGS/Cam_Active") == True:
-            self.cf.setParam("System_Params/CamActive",1)
-        else:
-            self.cf.setParam("System_Params/CamActive",0)
-
-
-        ## SET EXP SETTINGS
         if rospy.get_param("/SAR_SETTINGS/Policy_Type") == "PARAM_OPTIM":
             self.cf.setParam("System_Params/PolicyType",0)
 
@@ -102,12 +95,14 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
         temp_str = f"/SAR_Type/{self.SAR_Type}/System_Params"
         SystemParamDict = {
-            "System_Params/Prop_14_x":    rospy.get_param(f"{temp_str}/Prop_Front")[0], 
-            "System_Params/Prop_14_y":    rospy.get_param(f"{temp_str}/Prop_Front")[1], 
-            "System_Params/Prop_23_x":    rospy.get_param(f"{temp_str}/Prop_Rear")[0],
-            "System_Params/Prop_23_y":    rospy.get_param(f"{temp_str}/Prop_Rear")[1],
-            "System_Params/C_tf":         rospy.get_param(f"{temp_str}/C_tf"),
-            "System_Params/f_max":        rospy.get_param(f"{temp_str}/f_max"),
+            "System_Params/Prop_14_x":      rospy.get_param(f"{temp_str}/Prop_Front")[0], 
+            "System_Params/Prop_14_y":      rospy.get_param(f"{temp_str}/Prop_Front")[1], 
+            "System_Params/Prop_23_x":      rospy.get_param(f"{temp_str}/Prop_Rear")[0],
+            "System_Params/Prop_23_y":      rospy.get_param(f"{temp_str}/Prop_Rear")[1],
+            "System_Params/C_tf":           rospy.get_param(f"{temp_str}/C_tf"),
+            "System_Params/Thrust_max":     rospy.get_param(f"{temp_str}/Thrust_max"),
+            "System_Params/Fwd_Reach":      rospy.get_param(f"{temp_str}/Forward_Reach"),
+
         }
         self.cf.setParams(SystemParamDict)
 
@@ -115,14 +110,15 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         ## SET CONTROLLER INERTIA VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}"
         InertiaParamDict = {
-            "System_Params/Mass": rospy.get_param(f"{temp_str}/Mass"),
-            "System_Params/Ixx":     rospy.get_param(f"{temp_str}/Ixx"), 
-            "System_Params/Iyy":     rospy.get_param(f"{temp_str}/Iyy"),
-            "System_Params/Izz":     rospy.get_param(f"{temp_str}/Izz"),
+            "System_Params/Mass":           rospy.get_param(f"{temp_str}/Ref_Mass"),
+            "System_Params/Ixx":            rospy.get_param(f"{temp_str}/Ref_Ixx"), 
+            "System_Params/Iyy":            rospy.get_param(f"{temp_str}/Ref_Iyy"),
+            "System_Params/Izz":            rospy.get_param(f"{temp_str}/Ref_Izz"),
+            "System_Params/L_eff":          rospy.get_param(f"{temp_str}/L_eff"),
         }
         self.cf.setParams(InertiaParamDict)
 
-        self.SendCmd("Load_Params")
+        self.sendCmd("Load_Params")
 
 
     def safeMode(self,status):

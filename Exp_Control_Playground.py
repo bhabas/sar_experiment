@@ -22,7 +22,7 @@ if __name__ == '__main__':
     env.safeMode(True)
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
-    env.SendCmd('Ctrl_Reset')
+    env.sendCmd('Ctrl_Reset')
 
     ## INITIALIALIZE LOGGING DATA
     trial_num = 5
