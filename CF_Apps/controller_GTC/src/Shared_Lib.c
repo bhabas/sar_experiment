@@ -5,14 +5,14 @@
 // =================================
 //    INITIAL SYSTEM PARAMETERS
 // =================================
-float m = 0.0f;             // [kg]
-float Ixx = 0.0f;           // [kg*m^2]
-float Iyy = 0.0f;           // [kg*m^2]
-float Izz = 0.0f;           // [kg*m^2]
+float m = 34.3e-3f;         // [kg]
+float Ixx = 15.83e-6f;      // [kg*m^2]
+float Iyy = 17.00e-6f;      // [kg*m^2]
+float Izz = 31.19e-6f;      // [kg*m^2]
 struct mat33 J;             // Rotational Inertia Matrix [kg*m^2]
 
-float C_tf = 0.0f;          // Moment Coeff [Nm/N]
-float Thrust_max = 0.0f;         // Max thrust per motor [g]
+float C_tf = 6.18e-3f;          // Moment Coeff [Nm/N]
+float Thrust_max = 15.0f;         // Max thrust per motor [g]
 
 const float g = 9.81f;                        // Gravity [m/s^2]
 const struct vec e_3 = {0.0f, 0.0f, 1.0f};    // Global z-axis
@@ -26,10 +26,10 @@ struct CTRL_CmdPacket CTRL_Cmd;
 //       GEOMETRIC PARAMETERS
 // =================================
 
-float Prop_14_x = 0.0f;         // Front Prop Distance - x-axis [m]
-float Prop_14_y = 0.0f;         // Front Prop Distance - y-axis [m]
-float Prop_23_x = 0.0f;         // Rear  Prop Distance - x-axis [m]
-float Prop_23_y = 0.0f;         // Rear  Prop Distance - y-axis [m]
+float Prop_14_x = 33.0e-3f;         // Front Prop Distance - x-axis [m]
+float Prop_14_y = 33.0e-3f;         // Front Prop Distance - y-axis [m]
+float Prop_23_x = 33.0e-3f;         // Rear  Prop Distance - x-axis [m]
+float Prop_23_y = 33.0e-3f;         // Rear  Prop Distance - y-axis [m]
 
 float L_eff = 0.0f;             // Effective Leg Length [m]
 float Forward_Reach = 0.0f;     // Forward Reach [m]
@@ -40,28 +40,28 @@ float Collision_Radius = 0.0f;  // Collision Radius [m]
 //    CONTROL GAIN INITIALIZATION
 // =================================
 // XY POSITION PID
-float P_kp_xy = 0.0f;
-float P_kd_xy = 0.0f;
-float P_ki_xy = 0.0f;
-float i_range_xy = 0.0f;
+float P_kp_xy = 0.4f;
+float P_kd_xy = 0.35f;
+float P_ki_xy = 0.07f;
+float i_range_xy = 0.3f;
 
 // Z POSITION PID
-float P_kp_z = 0.0f;
-float P_kd_z = 0.0f;
-float P_ki_z = 0.0f;
-float i_range_z = 0.0f;
+float P_kp_z = 1.20f;
+float P_kd_z = 0.35f;
+float P_ki_z = 0.1f;
+float i_range_z = 0.25f;
 
 // XY ATTITUDE PID
-float R_kp_xy = 0.0f;
-float R_kd_xy = 0.0f;
+float R_kp_xy = 0.004f;
+float R_kd_xy = 0.0017f;
 float R_ki_xy = 0.0f;
-float i_range_R_xy = 0.0f;
+float i_range_R_xy = 1.0f;
 
 // Z ATTITUDE PID
-float R_kp_z = 0.0f;
-float R_kd_z = 0.0f;
-float R_ki_z = 0.0f;
-float i_range_R_z = 0.0f;
+float R_kp_z = 0.003f;
+float R_kd_z = 0.001f;
+float R_ki_z = 0.000f;
+float i_range_R_z = 0.5f;
 
 
 // INIT CTRL GAIN VECTORS 

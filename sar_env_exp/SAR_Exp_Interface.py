@@ -61,59 +61,59 @@ class SAR_Exp_Interface(SAR_Base_Interface):
             self.cf.setParam("System_Params/PolicyType",2)
 
         
-        ## SET CONTROLLER GAIN VALUES
-        temp_str = f"/SAR_Type/{self.SAR_Type}/CtrlGains"
-        GainsDict = {
-            "CTRL_Params/P_kp_xy":      rospy.get_param(f"{temp_str}/P_kp_xy"),
-            "CTRL_Params/P_kd_xy":      rospy.get_param(f"{temp_str}/P_kd_xy"), 
-            "CTRL_Params/P_ki_xy":      rospy.get_param(f"{temp_str}/P_ki_xy"),
-            "CTRL_Params/i_range_xy":   rospy.get_param(f"{temp_str}/i_range_xy"),
+        # ## SET CONTROLLER GAIN VALUES
+        # temp_str = f"/SAR_Type/{self.SAR_Type}/CtrlGains"
+        # GainsDict = {
+        #     "CTRL_Params/P_kp_xy":      rospy.get_param(f"{temp_str}/P_kp_xy"),
+        #     "CTRL_Params/P_kd_xy":      rospy.get_param(f"{temp_str}/P_kd_xy"), 
+        #     "CTRL_Params/P_ki_xy":      rospy.get_param(f"{temp_str}/P_ki_xy"),
+        #     "CTRL_Params/i_range_xy":   rospy.get_param(f"{temp_str}/i_range_xy"),
 
-            "CTRL_Params/P_kp_z":       rospy.get_param(f"{temp_str}/P_kp_z"),        
-            "CTRL_Params/P_kd_z":       rospy.get_param(f"{temp_str}/P_kd_z"),
-            "CTRL_Params/P_ki_z":       rospy.get_param(f"{temp_str}/P_ki_z"),
-            "CTRL_Params/i_range_z":    rospy.get_param(f"{temp_str}/i_range_z"),
-        }
-        self.cf.setParams(GainsDict)
+        #     "CTRL_Params/P_kp_z":       rospy.get_param(f"{temp_str}/P_kp_z"),        
+        #     "CTRL_Params/P_kd_z":       rospy.get_param(f"{temp_str}/P_kd_z"),
+        #     "CTRL_Params/P_ki_z":       rospy.get_param(f"{temp_str}/P_ki_z"),
+        #     "CTRL_Params/i_range_z":    rospy.get_param(f"{temp_str}/i_range_z"),
+        # }
+        # self.cf.setParams(GainsDict)
 
-        GainsDict = {
-            "CTRL_Params/R_kp_xy":      rospy.get_param(f"{temp_str}/R_kp_xy"),
-            "CTRL_Params/R_kd_xy":      rospy.get_param(f"{temp_str}/R_kd_xy"),
-            "CTRL_Params/R_ki_xy":      rospy.get_param(f"{temp_str}/R_ki_xy"),
-            "CTRL_Params/i_range_xy":   rospy.get_param(f"{temp_str}/i_range_R_xy"),
+        # GainsDict = {
+        #     "CTRL_Params/R_kp_xy":      rospy.get_param(f"{temp_str}/R_kp_xy"),
+        #     "CTRL_Params/R_kd_xy":      rospy.get_param(f"{temp_str}/R_kd_xy"),
+        #     "CTRL_Params/R_ki_xy":      rospy.get_param(f"{temp_str}/R_ki_xy"),
+        #     "CTRL_Params/i_range_xy":   rospy.get_param(f"{temp_str}/i_range_R_xy"),
 
 
-            "CTRL_Params/R_kp_z":       rospy.get_param(f"{temp_str}/R_kp_z"),
-            "CTRL_Params/R_kd_z":       rospy.get_param(f"{temp_str}/R_kd_z"),
-            "CTRL_Params/R_ki_z":       rospy.get_param(f"{temp_str}/R_ki_z"),
-            "CTRL_Params/i_range_R_z":  rospy.get_param(f"{temp_str}/i_range_R_z"),
-        }
-        self.cf.setParams(GainsDict)
+        #     "CTRL_Params/R_kp_z":       rospy.get_param(f"{temp_str}/R_kp_z"),
+        #     "CTRL_Params/R_kd_z":       rospy.get_param(f"{temp_str}/R_kd_z"),
+        #     "CTRL_Params/R_ki_z":       rospy.get_param(f"{temp_str}/R_ki_z"),
+        #     "CTRL_Params/i_range_R_z":  rospy.get_param(f"{temp_str}/i_range_R_z"),
+        # }
+        # self.cf.setParams(GainsDict)
         
         ## SET SYSTEM GEOMETRY PARAMETERS INERTIA VALUES
 
 
-        temp_str = f"/SAR_Type/{self.SAR_Type}/System_Params"
-        SystemParamDict = {
-            "System_Params/Prop_14_x":      rospy.get_param(f"{temp_str}/Prop_Front")[0], 
-            "System_Params/Prop_14_y":      rospy.get_param(f"{temp_str}/Prop_Front")[1], 
-            "System_Params/Prop_23_x":      rospy.get_param(f"{temp_str}/Prop_Rear")[0],
-            "System_Params/Prop_23_y":      rospy.get_param(f"{temp_str}/Prop_Rear")[1],
-            "System_Params/C_tf":           rospy.get_param(f"{temp_str}/C_tf"),
-            "System_Params/Thrust_max":     rospy.get_param(f"{temp_str}/Thrust_max"),
-            "System_Params/Fwd_Reach":      rospy.get_param(f"{temp_str}/Forward_Reach"),
+        # temp_str = f"/SAR_Type/{self.SAR_Type}/System_Params"
+        # SystemParamDict = {
+        #     "System_Params/Prop_14_x":      rospy.get_param(f"{temp_str}/Prop_Front")[0], 
+        #     "System_Params/Prop_14_y":      rospy.get_param(f"{temp_str}/Prop_Front")[1], 
+        #     "System_Params/Prop_23_x":      rospy.get_param(f"{temp_str}/Prop_Rear")[0],
+        #     "System_Params/Prop_23_y":      rospy.get_param(f"{temp_str}/Prop_Rear")[1],
+        #     "System_Params/C_tf":           rospy.get_param(f"{temp_str}/C_tf"),
+        #     "System_Params/Thrust_max":     rospy.get_param(f"{temp_str}/Thrust_max"),
+        #     "System_Params/Fwd_Reach":      rospy.get_param(f"{temp_str}/Forward_Reach"),
 
-        }
-        self.cf.setParams(SystemParamDict)
+        # }
+        # self.cf.setParams(SystemParamDict)
 
 
         ## SET CONTROLLER INERTIA VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}"
         InertiaParamDict = {
-            "System_Params/Mass":           rospy.get_param(f"{temp_str}/Ref_Mass"),
-            "System_Params/Ixx":            rospy.get_param(f"{temp_str}/Ref_Ixx"), 
-            "System_Params/Iyy":            rospy.get_param(f"{temp_str}/Ref_Iyy"),
-            "System_Params/Izz":            rospy.get_param(f"{temp_str}/Ref_Izz"),
+            # "System_Params/Mass":           rospy.get_param(f"{temp_str}/Ref_Mass"),
+            # "System_Params/Ixx":            rospy.get_param(f"{temp_str}/Ref_Ixx"), 
+            # "System_Params/Iyy":            rospy.get_param(f"{temp_str}/Ref_Iyy"),
+            # "System_Params/Izz":            rospy.get_param(f"{temp_str}/Ref_Izz"),
             "System_Params/L_eff":          rospy.get_param(f"{temp_str}/L_eff"),
         }
         self.cf.setParams(InertiaParamDict)

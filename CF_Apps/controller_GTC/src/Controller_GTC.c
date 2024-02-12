@@ -446,7 +446,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         {   
             // F_thrust = 1;
             // M = mkvec(1.0f,2.0f,3.0f);
-            // consolePrintf("F_thrust: %.3f M.x: %.3f M.y: %.3f M.z: %.3f\n",(double)F_thrust,(double)M.x,(double)M.y,(double)M.z);
+            // printvec(Pos_B_O);
+            // consolePrintf("P_kp_xy: %.3f P_kd_xy: %.3f P_ki_xy: %.3f i_range_xy: %.3f\n",(double)P_kp_xy,(double)P_kd_xy,(double)P_ki_xy,(double)i_range_xy);
+            // consolePrintf("F_thrust: %.3f M.x: %.3f M.y: %.3f M.z: %.3f\n",(double)(F_thrust*1000.0f),(double)(M.x*1000.0f),((double)M.y*1000.0f),(double)(M.z*1000.0f));
             // consolePrintf("States_Z.FMz: %d\n", States_Z.FMz);
             // consolePrintf("States_Z.Mxy: %d\n", States_Z.Mxy);
             
