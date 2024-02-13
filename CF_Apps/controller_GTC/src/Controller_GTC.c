@@ -284,8 +284,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         state->attitudeQuaternion.z,
                         state->attitudeQuaternion.w);
 
-        
-
+        struct vec eul = mkvec(0.0f,0.0f,0.0f);
+        Pos_B_O = mkvec(0.2f,0.0f,0.4f);
+        Vel_B_O = mkvec(0.0f,0.0f,0.0f);
+        Omega_B_O = mkvec(0.0f,0.0f,0.0f);
+        Quat_B_O = rpy2quat(eul);
 
         // CALC STATES WRT PLANE
         Pos_P_B = mvmul(R_WP,vsub(r_P_O,Pos_B_O)); 
@@ -367,7 +370,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     }
         
     // CTRL UPDATES
-    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
+    if (RATE_DO_EXECUTE(2, tick)) {
 
 
         controlOutput(state,sensors);
@@ -442,17 +445,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         compressSetpoints();
         compressTrgStates();
         
-        if (RATE_DO_EXECUTE(2, tick))
-        {   
-            // F_thrust = 1;
-            // M = mkvec(1.0f,2.0f,3.0f);
-            // printvec(Pos_B_O);
-            // consolePrintf("P_kp_xy: %.3f P_kd_xy: %.3f P_ki_xy: %.3f i_range_xy: %.3f\n",(double)P_kp_xy,(double)P_kd_xy,(double)P_ki_xy,(double)i_range_xy);
-            // consolePrintf("F_thrust: %.3f M.x: %.3f M.y: %.3f M.z: %.3f\n",(double)(F_thrust*1000.0f),(double)(M.x*1000.0f),((double)M.y*1000.0f),(double)(M.z*1000.0f));
-            // consolePrintf("States_Z.FMz: %d\n", States_Z.FMz);
-            // consolePrintf("States_Z.Mxy: %d\n", States_Z.Mxy);
+        // if (RATE_DO_EXECUTE(2, tick))
+        // {   
+        //     consolePrintf("Mass: %.3f\n",m);
             
-        }
+        // }
 
         #ifdef CONFIG_SAR_EXP
         if(SafeMode_Flag)
