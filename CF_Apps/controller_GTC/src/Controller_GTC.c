@@ -389,34 +389,26 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         M3_thrust = clamp((M3_thrust/2.0f)*Newton2g,0.0f,Thrust_max);
         M4_thrust = clamp((M4_thrust/2.0f)*Newton2g,0.0f,Thrust_max);
 
-
-
         // TUMBLE DETECTION
         if(b3.z <= 0 && TumbleDetect_Flag == true){ // If b3 axis has a negative z-component (Quadrotor is inverted)
             Tumbled_Flag = true;
         }
 
-
-        // UPDATE THRUST COMMANDS
-        if(MotorStop_Flag || Tumbled_Flag) // STOP MOTOR COMMANDS
-        { 
+        if (!Armed_Flag || MotorStop_Flag || Tumbled_Flag)
+        {
             M1_thrust = 0.0f;
             M2_thrust = 0.0f;
             M3_thrust = 0.0f;
             M4_thrust = 0.0f;
-
         }
         else if(CustomThrust_Flag) // REPLACE THRUST VALUES WITH CUSTOM VALUES
         {
-            
             M1_thrust = thrust_override[0];
             M2_thrust = thrust_override[1];
             M3_thrust = thrust_override[2];
             M4_thrust = thrust_override[3];
-
         }
-
-        // UPDATE M_CMD COMMANDS
+        
         if(CustomMotorCMD_Flag)
         {
             M1_CMD = M_CMD_override[0]; 
@@ -438,21 +430,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         compressStates();
         compressSetpoints();
         compressTrgStates();
-        
-        // if (RATE_DO_EXECUTE(2, tick))
-        // {   
-        //     consolePrintf("Mass: %.3f\n",m);
-            
-        // }
 
-        #ifdef CONFIG_SAR_EXP
         if(Armed_Flag)
         {
             // SEND CMD VALUES TO MOTORS
-            motorsSetRatio(MOTOR_M1, M4_CMD);
-            motorsSetRatio(MOTOR_M2, M3_CMD);
-            motorsSetRatio(MOTOR_M3, M2_CMD);
-            motorsSetRatio(MOTOR_M4, M1_CMD);
+            motorsSetRatio(MOTOR_M1, M1_CMD);
+            motorsSetRatio(MOTOR_M2, M2_CMD);
+            motorsSetRatio(MOTOR_M3, M3_CMD);
+            motorsSetRatio(MOTOR_M4, M4_CMD);
         }
         else{
             motorsSetRatio(MOTOR_M1, 0);
@@ -460,7 +445,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             motorsSetRatio(MOTOR_M3, 0);
             motorsSetRatio(MOTOR_M4, 0);
         }
-        #endif
 
 
     }

@@ -223,7 +223,7 @@ bool Tumbled_Flag = false;
 bool TumbleDetect_Flag = true;
 bool MotorStop_Flag = false;
 bool AngAccel_Flag = false;
-bool Armed_Flag = true;
+bool Armed_Flag = false;
 bool CustomThrust_Flag = false;
 bool CustomMotorCMD_Flag = false;
 
@@ -516,6 +516,10 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 
         case 20: // Tumble-Detection
             TumbleDetect_Flag = CTRL_Cmd->cmd_flag;
+            break;
+
+        case 24: // Quad Arming
+            Armed_Flag = CTRL_Cmd->cmd_flag;
             break;
 
         case 30: // Custom Thrust Values

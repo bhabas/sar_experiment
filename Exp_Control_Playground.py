@@ -22,7 +22,7 @@ if __name__ == '__main__':
     env.ArmQuad(False)
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
-    env.sendCmd('Ctrl_Reset')
+    # env.sendCmd('Ctrl_Reset')
     # env.ArmQuad(True)
 
 
@@ -35,7 +35,6 @@ if __name__ == '__main__':
     ## INIT COMMANDER THREAD
     cmd_thread = threading.Thread(target=cmd_send,args=(env,logName))
     cmd_thread.start()   
-    # env.cf.setParam("GTC_Params/ArmedFlag_p", 0)
 
 
     rospy.spin()
