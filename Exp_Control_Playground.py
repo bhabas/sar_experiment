@@ -19,11 +19,11 @@ if __name__ == '__main__':
     env = SAR_Exp_Interface()
 
     ## INITIALIZE CRAZYFLIE
-    env.safeMode(True)
+    env.ArmQuad(False)
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
     env.sendCmd('Ctrl_Reset')
-    env.safeMode(False)
+    # env.ArmQuad(True)
 
 
     ## INITIALIALIZE LOGGING DATA
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     ## INIT COMMANDER THREAD
     cmd_thread = threading.Thread(target=cmd_send,args=(env,logName))
     cmd_thread.start()   
-    # env.cf.setParam("GTC_Params/SafeModeFlag_p", 0)
+    # env.cf.setParam("GTC_Params/ArmedFlag_p", 0)
 
 
     rospy.spin()

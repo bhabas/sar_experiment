@@ -60,7 +60,7 @@
       <!-- SIZE: (14/26) BYTES -->
       genericLogTopic_Flags_Variables: [
       "Misc.Pos_Ctrl",        "Misc.Vel_Ctrl",
-      "Misc.Motorstop",       "Misc.SafeMode_Flag",
+      "Misc.Motorstop",       "Misc.Armed_Flag",
       "Misc.Tumbled_Flag",    "Misc.Tumble_Detect",
       "Misc.Policy_Armed",    "Misc.AngAccel_Flag"
       ]

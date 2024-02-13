@@ -284,12 +284,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         state->attitudeQuaternion.z,
                         state->attitudeQuaternion.w);
 
-        struct vec eul = mkvec(0.0f,0.0f,0.0f);
-        Pos_B_O = mkvec(0.2f,0.0f,0.4f);
-        Vel_B_O = mkvec(0.0f,0.0f,0.0f);
-        Omega_B_O = mkvec(0.0f,0.0f,0.0f);
-        Quat_B_O = rpy2quat(eul);
-
         // CALC STATES WRT PLANE
         Pos_P_B = mvmul(R_WP,vsub(r_P_O,Pos_B_O)); 
         Vel_B_P = mvmul(R_WP,Vel_B_O);
@@ -452,19 +446,19 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         // }
 
         #ifdef CONFIG_SAR_EXP
-        if(SafeMode_Flag)
+        if(Armed_Flag)
         {
-            motorsSetRatio(MOTOR_M1, 0);
-            motorsSetRatio(MOTOR_M2, 0);
-            motorsSetRatio(MOTOR_M3, 0);
-            motorsSetRatio(MOTOR_M4, 0);
-        }
-        else{
-            // SEND M_CMD VALUES TO MOTORS
+            // SEND CMD VALUES TO MOTORS
             motorsSetRatio(MOTOR_M1, M4_CMD);
             motorsSetRatio(MOTOR_M2, M3_CMD);
             motorsSetRatio(MOTOR_M3, M2_CMD);
             motorsSetRatio(MOTOR_M4, M1_CMD);
+        }
+        else{
+            motorsSetRatio(MOTOR_M1, 0);
+            motorsSetRatio(MOTOR_M2, 0);
+            motorsSetRatio(MOTOR_M3, 0);
+            motorsSetRatio(MOTOR_M4, 0);
         }
         #endif
 
@@ -497,7 +491,7 @@ PARAM_ADD(PARAM_FLOAT, L_eff, &L_eff)
 PARAM_ADD(PARAM_FLOAT, Fwd_Reach, &Forward_Reach)
 
 
-PARAM_ADD(PARAM_UINT8, SafeMode, &SafeMode_Flag)
+PARAM_ADD(PARAM_UINT8, Armed, &Armed_Flag)
 PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
 PARAM_GROUP_STOP(System_Params)
 
@@ -601,7 +595,7 @@ LOG_ADD(LOG_UINT8, Motorstop,       &MotorStop_Flag)
 LOG_ADD(LOG_UINT8, Tumbled_Flag,    &Tumbled_Flag)
 LOG_ADD(LOG_UINT8, Tumble_Detect,   &TumbleDetect_Flag)
 LOG_ADD(LOG_UINT8, AngAccel_Flag,   &AngAccel_Flag)
-LOG_ADD(LOG_UINT8, SafeMode_Flag,   &SafeMode_Flag)
+LOG_ADD(LOG_UINT8, Armed_Flag,      &Armed_Flag)
 LOG_ADD(LOG_UINT8, Policy_Armed,    &Policy_Armed_Flag)
 LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
 LOG_ADD(LOG_UINT8, CustomM_CMD,     &CustomMotorCMD_Flag)

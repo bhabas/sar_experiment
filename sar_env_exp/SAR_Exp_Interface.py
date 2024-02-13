@@ -117,15 +117,16 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         }
         self.cf.setParams(InertiaParamDict)
 
-        # self.sendCmd("Load_Params")
+        self.sendCmd("Load_Params")
+        self.sendCmd("Ctrl_Reset")
 
 
-    def safeMode(self,status):
+    def ArmQuad(self,status):
         
         if status == True:
-            self.cf.setParam("System_Params/SafeMode",1)
+            self.cf.setParam("System_Params/Armed",1)
         elif status == False:
-            self.cf.setParam("System_Params/SafeMode",0)
+            self.cf.setParam("System_Params/Armed",0)
 
 
 if __name__ == "__main__":

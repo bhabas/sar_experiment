@@ -223,7 +223,7 @@ bool Tumbled_Flag = false;
 bool TumbleDetect_Flag = true;
 bool MotorStop_Flag = false;
 bool AngAccel_Flag = false;
-bool SafeMode_Flag = true;
+bool Armed_Flag = true;
 bool CustomThrust_Flag = false;
 bool CustomMotorCMD_Flag = false;
 
@@ -737,27 +737,27 @@ bool updateOpticalFlowEst()
         };
 
 
-        // SOLVE Ax=b EQUATION FOR OPTICAL FLOW VECTOR
-        nml_mat* A_mat = nml_mat_from(3,3,9,spatial_Grad_mat);
-        nml_mat* b_vec = nml_mat_from(3,1,3,temp_Grad_vec);
-        nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
-        nml_mat* OF_vec = nml_ls_solve(LUP,b_vec);
+        // // SOLVE Ax=b EQUATION FOR OPTICAL FLOW VECTOR
+        // nml_mat* A_mat = nml_mat_from(3,3,9,spatial_Grad_mat);
+        // nml_mat* b_vec = nml_mat_from(3,1,3,temp_Grad_vec);
+        // nml_mat_lup* LUP = nml_mat_lup_solve(A_mat);
+        // nml_mat* OF_vec = nml_ls_solve(LUP,b_vec);
 
         // CLAMP OPTICAL FLOW VALUES
         // Theta_x_Cam = clamp(OF_vec->data[0][0],-20.0f,20.0f);
         // Theta_y_Cam = clamp(OF_vec->data[1][0],-20.0f,20.0f);
         // Tau_Cam = clamp(1/(OF_vec->data[2][0] + 1.0e-6),0.0f,5.0f);
 
-        Theta_x_Cam = OF_vec->data[0][0];
-        Theta_y_Cam = OF_vec->data[1][0];
-        Tau_Cam = 1/(OF_vec->data[2][0] + 1.0e-6);
+        // Theta_x_Cam = OF_vec->data[0][0];
+        // Theta_y_Cam = OF_vec->data[1][0];
+        // Tau_Cam = 1/(OF_vec->data[2][0] + 1.0e-6);
         // Tau_Cam = (float)UART_arr[0];
 
 
-        nml_mat_lup_free(LUP);
-        nml_mat_free(A_mat);
-        nml_mat_free(b_vec);
-        nml_mat_free(OF_vec);
+        // nml_mat_lup_free(LUP);
+        // nml_mat_free(A_mat);
+        // nml_mat_free(b_vec);
+        // nml_mat_free(OF_vec);
 
 
         return true;
