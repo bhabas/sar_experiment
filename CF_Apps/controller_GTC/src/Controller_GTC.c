@@ -137,7 +137,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     if (RATE_DO_EXECUTE(RATE_25_HZ, tick))
     {
         uint32_t now = xTaskGetTickCount();
-        if (now - PrevCrazyswarmTick > 5000)
+        if (now - PrevCrazyswarmTick > 3000)
         {
             Armed_Flag = false;
         }
