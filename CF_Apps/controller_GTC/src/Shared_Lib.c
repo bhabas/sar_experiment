@@ -655,41 +655,66 @@ void controlOutput(const state_t *state, const sensorData_t *sensors)
 // Converts thrust in grams to their respective M_CMD values
 uint16_t thrust2Motor_CMD(float f) 
 {
-    // VOLTAGE IS WHAT DRIVES THE MOTORS, THEREFORE ADJUST M_CMD TO MEET VOLTAGE NEED
-    // CALCULATE REQUIRED VOLTAGE FOR DESIRED THRUST
 
-    float a,b,c;
+    #ifdef CONFIG_PLATFORM_BOLT
+        float a = 600
+        float b = 9.93e-5f;
+        float c = 2.00e-1f;
 
-    if(f<=5.2f)
-    {
-        a = 1.28533f;
-        b = 1.51239;
-        c = 0.0f;
-    }
-    else
-    {
-        a = 3.23052f;
-        b = -5.46911f;
-        c = 5.97889f;
-    }
-    float voltage_needed = -b/(2*a) + sqrtf(4*a*(f-c) + b*b)/(2*a);
+        // Calculate the command threshold
+        float y0 = b * a * a;
+        
+        // Conditionally calculate the inverse
+        if (x < y0) {
+            float M_CMD = sqrtf(x / b); // Use sqrtf for float
+        } 
+        else {
+            float M_CMD = (x - (b * a * a - c * a)) / c;
+        }
+
+        return M_CMD;
+
+    #elif CONFIG_PLATFORM_CF2
+
+        // VOLTAGE IS WHAT DRIVES THE MOTORS, THEREFORE ADJUST M_CMD TO MEET VOLTAGE NEED
+        // CALCULATE REQUIRED VOLTAGE FOR DESIRED THRUST
+
+        float a,b,c;
+
+        if(f<=5.2f)
+        {
+            a = 1.28533f;
+            b = 1.51239;
+            c = 0.0f;
+        }
+        else
+        {
+            a = 3.23052f;
+            b = -5.46911f;
+            c = 5.97889f;
+        }
+        float voltage_needed = -b/(2*a) + sqrtf(4*a*(f-c) + b*b)/(2*a);
 
 
-    // GET RATIO OF REQUIRED VOLTAGE VS SUPPLY VOLTAGE
-    float supply_voltage = pmGetBatteryVoltage();
-    float percentage = voltage_needed / supply_voltage;
-    percentage = percentage > 1.0f ? 1.0f : percentage; // If % > 100%, then cap at 100% else keep same
+        // GET RATIO OF REQUIRED VOLTAGE VS SUPPLY VOLTAGE
+        float supply_voltage = pmGetBatteryVoltage();
+        float percentage = voltage_needed / supply_voltage;
+        percentage = percentage > 1.0f ? 1.0f : percentage; // If % > 100%, then cap at 100% else keep same
 
-    // CONVERT RATIO TO M_CMD OF MOTOR_CMD_MAX
-    float M_CMD = percentage * (float)UINT16_MAX; // Remap percentage back to M_CMD range
+        // CONVERT RATIO TO M_CMD OF MOTOR_CMD_MAX
+        float M_CMD = percentage * (float)UINT16_MAX; // Remap percentage back to M_CMD range
 
-    // IF MINIMAL THRUST ENSURE M_CMD = 0
-    if(f <= 0.25f)
-    {
-        M_CMD = 0.0f;
-    }
+        // IF MINIMAL THRUST ENSURE M_CMD = 0
+        if(f <= 0.25f)
+        {
+            M_CMD = 0.0f;
+        }
+        return M_CMD;
+    
+    #endif
+    
 
-    return M_CMD;
+    
 }
 
 
