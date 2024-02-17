@@ -18,6 +18,7 @@ const float g = 9.81f;                        // Gravity [m/s^2]
 const struct vec e_3 = {0.0f, 0.0f, 1.0f};    // Global z-axis
 
 float dt = (float)(1.0f/RATE_100_HZ);
+uint32_t PrevCrazyswarmTick = 0;
 uint32_t prev_tick = 0;
 struct CTRL_CmdPacket CTRL_Cmd;
 
@@ -540,6 +541,11 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             M_CMD_override[2] = CTRL_Cmd->cmd_val3;
             M_CMD_override[3] = CTRL_Cmd->cmd_flag;
 
+            break;
+
+        case 99: // Crazyswarm Check
+
+            PrevCrazyswarmTick = xTaskGetTickCount(); 
             break;
 
     }

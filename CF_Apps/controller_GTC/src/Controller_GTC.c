@@ -42,8 +42,7 @@ bool controllerOutOfTreeTest() {
 void controllerOutOfTreeInit() {
 
     #ifdef CONFIG_SAR_EXP
-    ledSet(LED_BLUE_L, 0);
-    ledSet(LED_BLUE_NRF, 0);
+    
     #endif
 
     controllerOutOfTreeReset();
@@ -132,6 +131,19 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                                             const state_t *state, 
                                             const uint32_t tick) 
 {
+
+    // CHECK FOR CRAZYSWARM SIGNAL
+    #ifdef CONFIG_SAR_EXP
+    if (RATE_DO_EXECUTE(RATE_25_HZ, tick))
+    {
+        uint32_t now = xTaskGetTickCount();
+        if (now - PrevCrazyswarmTick > 5000)
+        {
+            Armed_Flag = false;
+        }
+    }
+    #endif
+
     // POLICY UPDATES
     if (isOFUpdated == true) {
 
@@ -255,6 +267,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     //     Policy_Trg_Action = Y_output->data[0][0]+0.00001f*tick;
     //     // nml_mat_print_CF(Y_output);
     // }
+
+    
 
 
     
@@ -438,16 +452,26 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             motorsSetRatio(MOTOR_M2, M2_CMD);
             motorsSetRatio(MOTOR_M3, M3_CMD);
             motorsSetRatio(MOTOR_M4, M4_CMD);
+            
+            // TURN ON ARMING LEDS
+            ledSet(LED_BLUE_L, 1);
+            ledSet(LED_BLUE_NRF, 1);
         }
         else{
             motorsSetRatio(MOTOR_M1, 0);
             motorsSetRatio(MOTOR_M2, 0);
             motorsSetRatio(MOTOR_M3, 0);
             motorsSetRatio(MOTOR_M4, 0);
+            
+            // TURN OFF ARMING LEDS
+            ledSet(LED_BLUE_L, 0);
+            ledSet(LED_BLUE_NRF, 0);
         }
 
 
     }
+
+    
  
 
 }
