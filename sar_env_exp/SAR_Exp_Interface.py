@@ -36,8 +36,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         ## SAR PARAMETERS
         self.Done = False
         self.setParams()
-
-        self.logDir = "/home/bhabas/catkin_ws/src/sar_experiment/sar_logging_exp/local_logs"
+        self.Log_Dir = f"/home/{self.Username}/catkin_ws/src/sar_experiment/sar_logging_exp/local_logs"
 
     def setParams(self):
 

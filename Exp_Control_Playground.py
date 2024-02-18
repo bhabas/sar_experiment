@@ -24,9 +24,8 @@ if __name__ == '__main__':
 
 
     ## INITIALIALIZE LOGGING DATA
-    trial_num = 5
-    logName = f"Ixx_Log_{trial_num:02d}.csv"
-    # env.createCSV(logName)
+    logName = f"Test_Log.csv"
+    env.createCSV(logName)
 
 
     ## INIT COMMANDER THREAD
