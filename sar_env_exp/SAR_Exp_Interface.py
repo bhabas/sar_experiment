@@ -24,11 +24,7 @@ np.set_printoptions(suppress=True)
 class SAR_Exp_Interface(SAR_Base_Interface):
     def __init__(self):
         print("[STARTING] SAR_Exp is starting...")
-
-        os.system("roslaunch sar_launch Load_Params.launch")
-        os.system("roslaunch sar_launch_exp Load_Params.launch")
-
-        SAR_Base_Interface.__init__(self,Exp_Flag=True)
+        SAR_Base_Interface.__init__(self,Experiment_Setup=True)
 
         ## CRAZYSWARM INITIALIZATION
         cf_yaml = f"{crazyswarm_path}/launch/crazyflies.yaml"
@@ -38,17 +34,26 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
 
         ## SAR PARAMETERS
-        self.SAR_Type = rospy.get_param('/SAR_SETTINGS/SAR_Type')
-        self.SAR_Config = rospy.get_param('/SAR_SETTINGS/SAR_Config')
         self.Done = False
         self.setParams()
 
-        self.logDir = "/home/bhabas/catkin_ws/src/sar_experiment/"
+        self.logDir = "/home/bhabas/catkin_ws/src/sar_experiment/sar_logging_exp/local_logs"
 
     def setParams(self):
 
         os.system("roslaunch sar_launch_exp Load_Params.launch")
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
+
+        ## SET SAR TYPE
+        if self.SAR_Type == "Crazyflie":
+            self.cf.setParam("System_Params/SAR_Type",1)
+        elif self.SAR_Type == "Impulse_Micro":
+            self.cf.setParam("System_Params/SAR_Type",2)
+        elif self.SAR_Type == "Source_One_V5":
+            self.cf.setParam("System_Params/SAR_Type",3)
+        else:
+            self.cf.setParam("System_Params/SAR_Type",0)
+
 
         ## SET EXP SETTINGS
         if rospy.get_param("/SAR_SETTINGS/Policy_Type") == "PARAM_OPTIM":
@@ -60,14 +65,6 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         elif rospy.get_param("/SAR_SETTINGS/Policy_Type") == "DEEP_RL_ONBOARD":
             self.cf.setParam("System_Params/PolicyType",2)
 
-        if self.SAR_Type == "Crazyflie":
-            self.cf.setParam("System_Params/SAR_Type",1)
-        elif self.SAR_Type == "Impulse_Micro":
-            self.cf.setParam("System_Params/SAR_Type",2)
-        elif self.SAR_Type == "Source_One_V5":
-            self.cf.setParam("System_Params/SAR_Type",3)
-        else:
-            self.cf.setParam("System_Params/SAR_Type",0)
         
         ## SET CONTROLLER GAIN VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/CtrlGains"

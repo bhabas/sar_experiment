@@ -1,3 +1,6 @@
 <launch>
+    <rosparam file="$(find sar_config)/Sim_Settings.yaml" />
+    <rosparam file="$(find sar_config)/Model_Types.yaml" />
+    <rosparam file="$(find sar_config)/Cam_Types.yaml" />
     <rosparam file="$(find sar_config_exp)/Exp_Settings.yaml" />
 </launch>

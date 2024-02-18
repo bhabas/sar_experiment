@@ -19,7 +19,6 @@ if __name__ == '__main__':
     env = SAR_Exp_Interface()
 
     ## INITIALIZE CRAZYFLIE
-    env.ArmQuad(False)
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
 
@@ -27,7 +26,7 @@ if __name__ == '__main__':
     ## INITIALIALIZE LOGGING DATA
     trial_num = 5
     logName = f"Ixx_Log_{trial_num:02d}.csv"
-    env.createCSV(logName)
+    # env.createCSV(logName)
 
 
     ## INIT COMMANDER THREAD
