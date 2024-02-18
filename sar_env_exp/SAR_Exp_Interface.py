@@ -60,6 +60,14 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         elif rospy.get_param("/SAR_SETTINGS/Policy_Type") == "DEEP_RL_ONBOARD":
             self.cf.setParam("System_Params/PolicyType",2)
 
+        if self.SAR_Type == "Crazyflie":
+            self.cf.setParam("System_Params/SAR_Type",1)
+        elif self.SAR_Type == "Impulse_Micro":
+            self.cf.setParam("System_Params/SAR_Type",2)
+        elif self.SAR_Type == "Source_One_V5":
+            self.cf.setParam("System_Params/SAR_Type",3)
+        else:
+            self.cf.setParam("System_Params/SAR_Type",0)
         
         ## SET CONTROLLER GAIN VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/CtrlGains"

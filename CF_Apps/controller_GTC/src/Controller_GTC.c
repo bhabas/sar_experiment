@@ -66,6 +66,7 @@ void controllerOutOfTreeInit() {
 void controllerOutOfTreeReset() {
 
     consolePrintf("GTC Controller Reset\n");
+    consolePrintf("SAR_Type: %d\n",SAR_Type);
     consolePrintf("Policy_Type: %d\n",Policy);
     J = mdiag(Ixx,Iyy,Izz);
 
@@ -378,7 +379,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     }
         
     // CTRL UPDATES
-    if (RATE_DO_EXECUTE(2, tick)) {
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
 
         controlOutput(state,sensors);
@@ -501,6 +502,7 @@ PARAM_ADD(PARAM_FLOAT, Fwd_Reach, &Forward_Reach)
 
 PARAM_ADD(PARAM_UINT8, Armed, &Armed_Flag)
 PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
+PARAM_ADD(PARAM_UINT8, SAR_Type, &SAR_Type)
 PARAM_GROUP_STOP(System_Params)
 
 

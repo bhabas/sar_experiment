@@ -22,8 +22,6 @@ if __name__ == '__main__':
     env.ArmQuad(False)
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
-    # env.sendCmd('Ctrl_Reset')
-    # env.ArmQuad(True)
 
 
     ## INITIALIALIZE LOGGING DATA

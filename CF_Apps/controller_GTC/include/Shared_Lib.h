@@ -45,6 +45,14 @@ extern float dt;                // Controller cycle time
 extern uint32_t PrevCrazyswarmTick;
 extern uint32_t prev_tick;
 
+typedef enum {
+    SAR_NONE = 0,
+    CRAZYFLIE = 1,
+    IMPULSE_MICRO = 2,
+    SO_V5 = 3,
+}SAR_Types;
+extern SAR_Types SAR_Type;
+
 
 // =================================
 //       GEOMETRIC PARAMETERS
