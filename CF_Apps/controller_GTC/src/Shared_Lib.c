@@ -545,8 +545,10 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             break;
 
         case 99: // Crazyswarm Check
-
+            
+            #ifdef CONFIG_SAR_EXP
             PrevCrazyswarmTick = xTaskGetTickCount(); 
+            #endif
             break;
 
     }

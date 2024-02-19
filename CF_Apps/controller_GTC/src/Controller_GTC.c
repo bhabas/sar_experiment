@@ -446,6 +446,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         compressSetpoints();
         compressTrgStates();
 
+        #ifdef CONFIG_SAR_EXP
         if(Armed_Flag)
         {
             // SEND CMD VALUES TO MOTORS
@@ -468,6 +469,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             ledSet(LED_BLUE_L, 0);
             ledSet(LED_BLUE_NRF, 0);
         }
+        #endif
 
 
     }
