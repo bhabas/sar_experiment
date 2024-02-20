@@ -45,10 +45,8 @@ y = 1024/2*0.001
 compressed_value = compressXY(x, y)
 print(f"Compressed Value: {compressed_value}")
 
-
+compressed_value = -2146664425
 x, y = decompressXY(compressed_value)
-x=x*2/0.001
-y=y*2/0.001
 print(f"Decompressed X: {x}, Y: {y}")
 
 

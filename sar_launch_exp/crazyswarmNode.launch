@@ -11,13 +11,13 @@
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["States_B_O","States_B_P","TrgState","CTRL_Output","SetPoints","Flags","Misc"]
-      genericLogTopicFrequencies: [100,100,500,100,100,500,500]
+      genericLogTopicFrequencies: [50,100,500,100,100,500,100]
 
 
       <!-- Important States -->
       <!-- SIZE: (24/26) BYTES -->
       genericLogTopic_States_B_O_Variables: [
-      "Z_States.r_BOxy","Z_States.r_BOz",
+      "Z_States.r_BO","Z_States.r_BOz",
       "Z_States.V_BOxy","Z_States.V_BOz",
       "Z_States.Quat_BO",
       "Z_States.Omega_BOxy","Z_States.Omega_BOz",
@@ -68,7 +68,7 @@
       <!-- SIZE: (4/26) BYTES -->
       genericLogTopic_Misc_Variables: [
       "Misc.Plane_Angle", 
-      "Misc.CustomThrust", "Misc.CustomM_CMD"
+      "Misc.CustomThrust", "Misc.CustomM_CMD",
       ]
 
       
@@ -84,7 +84,7 @@
           resetEstimation: 0
 
 
-      motion_capture_type: "none" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
+      motion_capture_type: "vicon" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
       motion_capture_host_name: "192.168.1.100:801"
       object_tracking_type: "libobjecttracker" # one of motionCapture, libobjecttracker
       send_position_only: True # True: position only; False: position+orientation 

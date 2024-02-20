@@ -64,6 +64,15 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         elif rospy.get_param("/SAR_SETTINGS/Policy_Type") == "DEEP_RL_ONBOARD":
             self.cf.setParam("System_Params/PolicyType",2)
 
+        ## SET CONTROLLER INERTIA VALUES
+        InertiaParamDict = {
+            "System_Params/Mass":               self.Ref_Mass,
+            "System_Params/I_xx":                self.Ref_Ixx, 
+            "System_Params/Iyy":                self.Ref_Iyy,
+            "System_Params/Izz":                self.Ref_Izz,
+            "System_Params/L_eff":              self.L_eff,
+        }
+        self.cf.setParams(InertiaParamDict)
         
         ## SET CONTROLLER GAIN VALUES
         temp_str = f"/SAR_Type/{self.SAR_Type}/CtrlGains"
@@ -74,7 +83,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
             "CTRL_Params/i_range_xy":   rospy.get_param(f"{temp_str}/i_range_xy"),
 
             "CTRL_Params/P_kp_z":       rospy.get_param(f"{temp_str}/P_kp_z"),        
-            "CTRL_Params/P_kd_z":       rospy.get_param(f"{temp_str}/P_kd_z"),
+            "CTRL_Params/P_Kd_z":       rospy.get_param(f"{temp_str}/P_kd_z"),
             "CTRL_Params/P_ki_z":       rospy.get_param(f"{temp_str}/P_ki_z"),
             "CTRL_Params/i_range_z":    rospy.get_param(f"{temp_str}/i_range_z"),
         }
@@ -104,22 +113,14 @@ class SAR_Exp_Interface(SAR_Base_Interface):
             "System_Params/Prop_23_x":      self.Prop_Rear[0],
             "System_Params/Prop_23_y":      self.Prop_Rear[1],
             "System_Params/C_tf":           self.C_tf,
-            "System_Params/Thrust_max":     self.Thrust_max,
+            "System_Params/THrust_max":     self.Thrust_max,
             "System_Params/Fwd_Reach":      self.Forward_Reach,
 
         }
         self.cf.setParams(SystemParamDict)
 
 
-        ## SET CONTROLLER INERTIA VALUES
-        InertiaParamDict = {
-            "System_Params/Mass":               self.Ref_Mass,
-            "System_Params/Ixx":                self.Ref_Ixx, 
-            "System_Params/Iyy":                self.Ref_Iyy,
-            "System_Params/Izz":                self.Ref_Izz,
-            "System_Params/L_eff":              self.L_eff,
-        }
-        self.cf.setParams(InertiaParamDict)
+        
 
         self.sendCmd("Load_Params")
         self.sendCmd("Ctrl_Reset")

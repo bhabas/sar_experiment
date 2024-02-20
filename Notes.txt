@@ -27,3 +27,7 @@
 - Log entries marked with 'Z' are compressed to int or combined together and compressed
 - If crazyswarm acts up then use 'rm ~/.ros/*.csv' to clear stuff. It might help for some reason.
 - If you make changes in the crazyswarm package, make sure you compile with catkin_make inside ros_ws and not just in catkin_ws. They are seperate things and both need to be compiled seperately.
+
+
+
+pip install --upgrade pip setuptools wheel
