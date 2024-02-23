@@ -371,6 +371,7 @@ void updateRotationMatrices();
 bool updateOpticalFlowEst();
 bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 float firstOrderFilter(float newValue, float prevValue, float alpha);
+void cause_segfault();
 
 
 

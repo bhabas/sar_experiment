@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     ## INITIALIALIZE LOGGING DATA
     logName = f"Test_Log.csv"
-    env.createCSV(logName)
+    # env.createCSV(logName)
 
 
     ## INIT COMMANDER THREAD
