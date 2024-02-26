@@ -6,7 +6,7 @@ CONFIG_CROSS_COMPILE="arm-none-eabi-"
 #
 # Platform configuration
 #
-# CONFIG_PLATFORM_CF2 is not set
+# CONFIG_PLATFORM_CF2=y
 CONFIG_PLATFORM_BOLT=y
 
 #

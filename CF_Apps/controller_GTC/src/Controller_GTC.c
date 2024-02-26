@@ -390,7 +390,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         }
 
         // MOTOR MIXING (GTC_Derivation_V2.pdf) (Assume Symmetric Quadrotor)
-        // F_thrust = clamp(F_thrust,0.0f,(Thrust_max*4.0f*g2Newton)*0.85f);
         M1_thrust = (F_thrust - 1/Prop_14_y * M.x - 1/Prop_14_x * M.y - 1/C_tf * M.z) * 1/4.0f;
         M2_thrust = (F_thrust - 1/Prop_14_y * M.x + 1/Prop_14_x * M.y + 1/C_tf * M.z) * 1/4.0f;
         M3_thrust = (F_thrust + 1/Prop_14_y * M.x + 1/Prop_14_x * M.y - 1/C_tf * M.z) * 1/4.0f;
@@ -491,9 +490,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     // if (RATE_DO_EXECUTE(2, tick))
     // {
-    //     printvec(e_v);
-    //     // consolePrintf("%d\n",States_Z.r_BOxy);
-    // }
+    //     consolePrintf("F_thrust: %f\n",F_thrust);
+    // }   
     
  
 
@@ -505,10 +503,10 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 // NOTE: PARAM GROUP + NAME + 1 CANNOT EXCEED 26 CHARACTERS (WHY? IDK.)
 // NOTE: CANNOT HAVE A LOG AND A PARAM ACCESS THE SAME VALUE
-PARAM_GROUP_START(System_Params)
+PARAM_GROUP_START(P1)
 PARAM_ADD(PARAM_FLOAT, Mass, &m)
 PARAM_ADD(PARAM_FLOAT, I_xx, &Ixx)
-PARAM_ADD(PARAM_FLOAT, Iyy, &Iyy)
+PARAM_ADD(PARAM_FLOAT, I_yy, &Iyy)
 PARAM_ADD(PARAM_FLOAT, Izz, &Izz)
 
 PARAM_ADD(PARAM_FLOAT, Prop_14_x, &Prop_14_x)
@@ -517,7 +515,7 @@ PARAM_ADD(PARAM_FLOAT, Prop_23_x, &Prop_23_x)
 PARAM_ADD(PARAM_FLOAT, Prop_23_y, &Prop_23_y)
 
 PARAM_ADD(PARAM_FLOAT, C_tf, &C_tf)
-PARAM_ADD(PARAM_FLOAT, THrust_max, &Thrust_max)
+PARAM_ADD(PARAM_FLOAT, Tust_max, &Thrust_max)
 PARAM_ADD(PARAM_FLOAT, L_eff, &L_eff)
 PARAM_ADD(PARAM_FLOAT, Fwd_Reach, &Forward_Reach)
 
@@ -525,10 +523,10 @@ PARAM_ADD(PARAM_FLOAT, Fwd_Reach, &Forward_Reach)
 PARAM_ADD(PARAM_UINT8, Armed, &Armed_Flag)
 PARAM_ADD(PARAM_UINT8, PolicyType, &Policy)
 PARAM_ADD(PARAM_UINT8, SAR_Type, &SAR_Type)
-PARAM_GROUP_STOP(System_Params)
+PARAM_GROUP_STOP(P1)
 
 
-PARAM_GROUP_START(CTRL_Params)
+PARAM_GROUP_START(P2)
 PARAM_ADD(PARAM_FLOAT, P_kp_xy, &P_kp_xy)
 PARAM_ADD(PARAM_FLOAT, P_kd_xy, &P_kd_xy) 
 PARAM_ADD(PARAM_FLOAT, P_ki_xy, &P_ki_xy)
@@ -544,11 +542,11 @@ PARAM_ADD(PARAM_FLOAT, R_kd_xy, &R_kd_xy)
 PARAM_ADD(PARAM_FLOAT, R_ki_xy, &R_ki_xy)
 PARAM_ADD(PARAM_FLOAT, i_range_R_xy, &i_range_R_xy)
 
-PARAM_ADD(PARAM_FLOAT, R_kp_z,  &R_kp_z)
-PARAM_ADD(PARAM_FLOAT, R_kd_z,  &R_kd_z)
+PARAM_ADD(PARAM_FLOAT, R_kpz,  &R_kp_z)
+PARAM_ADD(PARAM_FLOAT, R_kdz,  &R_kd_z)
 PARAM_ADD(PARAM_FLOAT, R_ki_z,  &R_ki_z)
 PARAM_ADD(PARAM_FLOAT, i_range_R_z, &i_range_R_z)
-PARAM_GROUP_STOP(CTRL_Params)
+PARAM_GROUP_STOP(P2)
 
 
 

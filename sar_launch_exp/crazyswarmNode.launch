@@ -84,10 +84,10 @@
           resetEstimation: 0
 
 
-      motion_capture_type: "none" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
+      motion_capture_type: "vicon" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
       motion_capture_host_name: "192.168.1.100:801"
-      object_tracking_type: "libobjecttracker" # one of motionCapture, libobjecttracker
-      send_position_only: True # True: position only; False: position+orientation 
+      object_tracking_type: "motionCapture" # one of motionCapture, libobjecttracker
+      send_position_only: False # True: position only; False: position+orientation 
       
 
       # motion_capture_interface_ip: "" # optional for optitrack with multiple interfaces
