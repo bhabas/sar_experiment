@@ -52,9 +52,16 @@ void controllerOutOfTreeInit() {
     X_input = nml_mat_new(4,1);
     Y_output = nml_mat_new(4,1);
 
+    X_input->data[0][0] = -0.3f;
+    X_input->data[1][0] = -0.1f;
+    X_input->data[2][0] = 0.1f;
+    X_input->data[3][0] = 0.3f;
+
     // INIT DEEP RL NN POLICY
     // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    // NN_forward(X_input,Y_output,&NN_DeepRL);
+    // nml_mat_print(Y_output);
     // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
 
     
@@ -131,6 +138,12 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                                             const state_t *state, 
                                             const uint32_t tick) 
 {
+
+    if (RATE_DO_EXECUTE(1, tick))
+    {
+        NN_forward(X_input,Y_output,&NN_DeepRL);
+        // nml_mat_print_CF(Y_output);
+    }
 
     // CHECK FOR CRAZYSWARM SIGNAL
     #ifdef CONFIG_SAR_EXP

@@ -17,7 +17,7 @@ void NN_init(NN* NN, char str[])
     NN->scaler_std = nml_mat_fromstr(array_str);
 
     // INITIALIZE NETWORK WEIGHTS AND BIASES FROM HEADER FILE VALUES
-    for (int i = 0; i < NN->num_layers; i++)
+    for (int i = 0; i <= NN->num_layers; i++)
     {
         array_str = strtok_r(NULL,"*",&save_ptr);
         NN->W[i] = nml_mat_fromstr(array_str); // Weights
@@ -30,17 +30,10 @@ void NN_init(NN* NN, char str[])
 
 void NN_forward(nml_mat* X_input, nml_mat* Y_output, NN* NN)
 {
-    // SCALE INPUT DATA
-    nml_mat* X_copy = nml_mat_cp(X_input);
-    for(int i=0;i<3;i++)
-    {
-        // Scale data to zero-mean and unit variance
-        X_copy->data[i][0] = (X_input->data[i][0] - NN->scaler_mean->data[i][0]) / NN->scaler_std->data[i][0];
-    }
 
     // LAYER 1
     // a = Leaky_Relu(W*X+b)
-    nml_mat *WX1 = nml_mat_dot(NN->W[0],X_copy); 
+    nml_mat *WX1 = nml_mat_dot(NN->W[0],X_input); 
     nml_mat_add_r(WX1,NN->b[0]);
     nml_mat *a1 = nml_mat_funcElement(WX1,Leaky_Relu);
 
@@ -51,25 +44,37 @@ void NN_forward(nml_mat* X_input, nml_mat* Y_output, NN* NN)
     nml_mat *a2 = nml_mat_funcElement(WX2,Leaky_Relu);
 
     // LAYER 3
-    // a = W*X+b
+    // a = Leaky_Relu(W*X+b)
     nml_mat *WX3 = nml_mat_dot(NN->W[2],a2); 
     nml_mat_add_r(WX3,NN->b[2]);
-    nml_mat *a3 = nml_mat_cp(WX3);
+    nml_mat *a3 = nml_mat_funcElement(WX3,Leaky_Relu);
+
+    // LAYER 4
+    // a = W*X+b
+    nml_mat *WX4 = nml_mat_dot(NN->W[3],a3); 
+    nml_mat_add_r(WX4,NN->b[3]);
+    nml_mat *a4 = nml_mat_cp(WX4);
+
+    consolePrintf("a4: %f\n",a4->data[0][0]);
+    consolePrintf("a4: %f\n",a4->data[1][0]);
+    consolePrintf("a4: %f\n",a4->data[2][0]);
+    consolePrintf("a4: %f\n",a4->data[3][0]);
 
 
     // SAVE NN OUTPUT
-    nml_mat_cp_r(a3,Y_output);
+    // nml_mat_cp_r(WX1,Y_output);
 
 
     // FREE MATRICES FROM HEAP
-    nml_mat_free(X_copy);
     nml_mat_free(WX1);
     nml_mat_free(WX2);
     nml_mat_free(WX3);
+    // nml_mat_free(WX4);
 
     nml_mat_free(a1);
     nml_mat_free(a2);
     nml_mat_free(a3);
+    // nml_mat_free(a4);
 
 }
 
