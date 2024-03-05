@@ -52,6 +52,7 @@ void controllerOutOfTreeInit() {
     X_input = nml_mat_new(4,1);
     Y_output = nml_mat_new(4,1);
 
+ 
     X_input->data[0][0] = -0.3f;
     X_input->data[1][0] = -0.1f;
     X_input->data[2][0] = 0.1f;
@@ -138,12 +139,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                                             const state_t *state, 
                                             const uint32_t tick) 
 {
-
-    if (RATE_DO_EXECUTE(1, tick))
-    {
-        NN_forward(X_input,Y_output,&NN_DeepRL);
-        // nml_mat_print_CF(Y_output);
-    }
 
     // CHECK FOR CRAZYSWARM SIGNAL
     #ifdef CONFIG_SAR_EXP
@@ -274,10 +269,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     // if (RATE_DO_EXECUTE(100, tick))
     // {
     //     NN_forward(X_input,Y_output,&NN_DeepRL);
-    //     NN_forward(X_input,Y_output,&NN_DeepRL);
-    //     NN_forward(X_input,Y_output,&NN_DeepRL);
 
-    //     Policy_Trg_Action = Y_output->data[0][0]+0.00001f*tick;
+    //     // Policy_Trg_Action = Y_output->data[0][0]+0.00001f*tick;
     //     // nml_mat_print_CF(Y_output);
     // }
 

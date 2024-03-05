@@ -30,7 +30,6 @@ void NN_init(NN* NN, char str[])
 
 void NN_forward(nml_mat* X_input, nml_mat* Y_output, NN* NN)
 {
-
     // LAYER 1
     // a = Leaky_Relu(W*X+b)
     nml_mat *WX1 = nml_mat_dot(NN->W[0],X_input); 
@@ -55,26 +54,24 @@ void NN_forward(nml_mat* X_input, nml_mat* Y_output, NN* NN)
     nml_mat_add_r(WX4,NN->b[3]);
     nml_mat *a4 = nml_mat_cp(WX4);
 
-    consolePrintf("a4: %f\n",a4->data[0][0]);
-    consolePrintf("a4: %f\n",a4->data[1][0]);
-    consolePrintf("a4: %f\n",a4->data[2][0]);
-    consolePrintf("a4: %f\n",a4->data[3][0]);
-
 
     // SAVE NN OUTPUT
-    // nml_mat_cp_r(WX1,Y_output);
+    Y_output->data[0][0] = a4->data[0][0];
+    Y_output->data[1][0] = a4->data[1][0];
+    Y_output->data[2][0] = a4->data[2][0];
+    Y_output->data[3][0] = a4->data[3][0];
 
 
     // FREE MATRICES FROM HEAP
     nml_mat_free(WX1);
     nml_mat_free(WX2);
     nml_mat_free(WX3);
-    // nml_mat_free(WX4);
+    nml_mat_free(WX4);
 
     nml_mat_free(a1);
     nml_mat_free(a2);
     nml_mat_free(a3);
-    // nml_mat_free(a4);
+    nml_mat_free(a4);
 
 }
 
