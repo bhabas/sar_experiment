@@ -134,6 +134,13 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         elif status == False:
             self.cf.setParam("System_Params/Armed",0)
 
+    def handle_Load_Params(self):
+
+        print("Reset ROS Parameters\n")
+        os.system("roslaunch sar_launch_exp Load_Params.launch")
+        self.sendCmd("Load_Params")
+        self.setParams()
+
 
 if __name__ == "__main__":
     env = SAR_Exp_Interface()

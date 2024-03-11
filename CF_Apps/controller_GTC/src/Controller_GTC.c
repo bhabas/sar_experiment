@@ -52,20 +52,8 @@ void controllerOutOfTreeInit() {
     X_input = nml_mat_new(4,1);
     Y_output = nml_mat_new(4,1);
 
- 
-    X_input->data[0][0] = -0.3f;
-    X_input->data[1][0] = -0.1f;
-    X_input->data[2][0] = 0.1f;
-    X_input->data[3][0] = 0.3f;
-
     // INIT DEEP RL NN POLICY
-    // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
     NN_init(&NN_DeepRL,NN_Params_DeepRL);
-    // NN_forward(X_input,Y_output,&NN_DeepRL);
-    // nml_mat_print(Y_output);
-    // DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());
-
-    
 
     consolePrintf("GTC Controller Initiated\n");
 }
@@ -122,14 +110,21 @@ void controllerOutOfTreeReset() {
     Quat_P_B_trg = mkquat(0.0f,0.0f,0.0f,1.0f);
     Omega_B_P_trg = vzero();
 
+    D_perp_trg = 0.0f;
+    D_perp_CR_trg = 0.0f;
+
     Theta_x_trg = 0.0f;
     Theta_y_trg = 0.0f;
     Tau_trg = 0.0f;
     Tau_CR_trg = 0.0f;
 
-    Policy_Trg_Action_trg = 0.0f;
-    Policy_Rot_Action_trg = 0.0f;
+    Y_output_trg[0] = 0.0f;
+    Y_output_trg[1] = 0.0f;
+    Y_output_trg[2] = 0.0f;
+    Y_output_trg[3] = 0.0f;
 
+    a_Trg_trg = 0.0f;
+    a_Rot_trg = 0.0f;
 
 }
 
@@ -165,7 +160,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                 case PARAM_OPTIM:
 
                     // EXECUTE POLICY IF TRIGGERED
-                    if(Tau_CR <= Policy_Trg_Action && onceFlag == false && abs(Tau_CR) <= 3.0f){
+                    if(Tau_CR <= a_Trg && onceFlag == false && abs(Tau_CR) <= 3.0f){
 
                         onceFlag = true;
 
@@ -181,7 +176,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Quat_P_B_trg = Quat_P_B;
                         Omega_B_P_trg = Omega_B_P;
 
-                        D_perp_trg = D_perp;
                         Vel_mag_B_P_trg = Vel_mag_B_P;
                         Vel_angle_B_P_trg = Vel_angle_B_P;
 
@@ -189,12 +183,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Tau_CR_trg = Tau_CR;
                         Theta_x_trg = Theta_x;
                         Theta_y_trg = Theta_y;
+                        D_perp_trg = D_perp;
+                        D_perp_CR_trg = D_perp_CR;
 
-                        Policy_Trg_Action_trg = Policy_Trg_Action;
-                        Policy_Rot_Action_trg = Policy_Rot_Action;
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
 
                         M_d.x = 0.0f;
-                        M_d.y = Policy_Rot_Action*Iyy;
+                        M_d.y = a_Rot*Iyy;
                         M_d.z = 0.0f;
                         }
                         
@@ -227,11 +223,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         D_perp_CR_trg = D_perp_CR;
 
 
-                        Policy_Trg_Action_trg = Policy_Trg_Action;
-                        Policy_Rot_Action_trg = Policy_Rot_Action;
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
 
                         M_d.x = 0.0f;
-                        M_d.y = Policy_Rot_Action*Iyy;
+                        M_d.y = a_Rot*Iyy;
                         M_d.z = 0.0f;
                     }
 
@@ -239,14 +235,57 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                 case DEEP_RL_ONBOARD:
 
-                    // // PASS OBSERVATION THROUGH POLICY NN
-                    // NN_forward(X_input,Y_output,&NN_DeepRL);
+                    // PASS OBSERVATION THROUGH POLICY NN
+                    NN_forward(X_input,Y_output,&NN_DeepRL);
 
-                    // // SAMPLE POLICY TRIGGER ACTION
-                    // Policy_Trg_Action = GaussianSample(Y_output->data[0][0],exp(Y_output->data[2][0]));
+                    // printf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
+                    // printf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
 
-             
-                    //     }
+
+                    // SAMPLE POLICY TRIGGER ACTION
+                    a_Trg = GaussianSample(Y_output->data[0][0],Y_output->data[2][0]);
+                    a_Rot = GaussianSample(Y_output->data[1][0],Y_output->data[3][0]);
+
+                    // SCALE ACTIONS
+                    a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
+                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
+
+                    // EXECUTE POLICY IF TRIGGERED
+                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
+                    {
+                        onceFlag = true;
+
+                        // UPDATE AND RECORD TRIGGER VALUES
+                        Trg_Flag = true;  
+                        Pos_B_O_trg = Pos_B_O;
+                        Vel_B_O_trg = Vel_B_O;
+                        Quat_B_O_trg = Quat_B_O;
+                        Omega_B_O_trg = Omega_B_O;
+
+                        Pos_P_B_trg = Pos_P_B;
+                        Vel_B_P_trg = Vel_B_P;
+                        Quat_P_B_trg = Quat_P_B;
+                        Omega_B_P_trg = Omega_B_P;
+
+                        Tau_trg = Tau;
+                        Tau_CR_trg = Tau_CR;
+                        Theta_x_trg = Theta_x;
+                        Theta_y_trg = Theta_y;
+                        D_perp_trg = D_perp;
+                        D_perp_CR_trg = D_perp_CR;
+
+                        Y_output_trg[0] = Y_output->data[0][0];
+                        Y_output_trg[1] = Y_output->data[1][0];
+                        Y_output_trg[2] = Y_output->data[2][0];
+                        Y_output_trg[3] = Y_output->data[3][0];
+
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
+
+                        M_d.x = 0.0f;
+                        M_d.y = a_Rot*Iyy;
+                        M_d.z = 0.0f;
+                    }
                         
                     break;
 
@@ -266,12 +305,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         updateRotationMatrices();
     }
 
-    // if (RATE_DO_EXECUTE(100, tick))
+    // if (RATE_DO_EXECUTE(1, tick))
     // {
+    //     // PASS OBSERVATION THROUGH POLICY NN
     //     NN_forward(X_input,Y_output,&NN_DeepRL);
 
-    //     // Policy_Trg_Action = Y_output->data[0][0]+0.00001f*tick;
-    //     // nml_mat_print_CF(Y_output);
+    //     consolePrintf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
+    //     consolePrintf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
+
     // }
 
     
@@ -337,24 +378,24 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         if (CamActive_Flag == true)
         {
             // ONLY UPDATE WITH NEW OPTICAL FLOW DATA
-            isOFUpdated = updateOpticalFlowEst();
+            // isOFUpdated = updateOpticalFlowEst();
 
             // UPDATE POLICY VECTOR
-            X_input->data[0][0] = Tau_Cam;
-            X_input->data[1][0] = Theta_x_Cam;
-            X_input->data[2][0] = D_perp; 
-            X_input->data[3][0] = Plane_Angle_deg; 
+            // X_input->data[0][0] = Tau_Cam;
+            // X_input->data[1][0] = Theta_x_Cam;
+            // X_input->data[2][0] = D_perp; 
+            // X_input->data[3][0] = Plane_Angle_deg; 
         }
         else
         {
             // UPDATE AT THE ABOVE FREQUENCY
             isOFUpdated = true;
 
-            // // UPDATE POLICY VECTOR
-            // X_input->data[0][0] = Tau;
-            // X_input->data[1][0] = Theta_x;
-            // X_input->data[2][0] = D_perp; 
-            // X_input->data[3][0] = Plane_Angle_deg;
+            // UPDATE POLICY VECTOR
+            X_input->data[0][0] = scaleValue(Tau_CR,-5.0f,5.0f,-1.0f,1.0f);
+            X_input->data[1][0] = scaleValue(Theta_x,-20.0f,20.0f,-1.0f,1.0f);
+            X_input->data[2][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
+            X_input->data[3][0] = scaleValue(Plane_Angle_deg,0.0f,180.0f,-1.0f,1.0f);
         }
     }
     

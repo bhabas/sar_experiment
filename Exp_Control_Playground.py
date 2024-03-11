@@ -11,7 +11,7 @@ import sys
 
 from sar_env_exp import SAR_Exp_Interface
 
-def cmd_send(env,logName):
+def cmd_send_exp(env,logName):
 
     while True:
         # Converts input number into action name
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
 
     ## INIT COMMANDER THREAD
-    cmd_thread = threading.Thread(target=cmd_send,args=(env,logName))
+    cmd_thread = threading.Thread(target=cmd_send_exp,args=(env,logName))
     cmd_thread.start()   
 
 

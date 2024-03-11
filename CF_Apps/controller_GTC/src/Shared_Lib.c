@@ -240,8 +240,9 @@ bool CamActive_Flag = false;
 
 // DEFINE POLICY TYPE ACTIVATED
 PolicyType Policy = PARAM_OPTIM;
-nml_mat* X_input;   // STATE MATRIX TO BE INPUT INTO POLICY
-nml_mat* Y_output;  // POLICY OUTPUT MATRIX
+nml_mat* X_input;       // STATE MATRIX TO BE INPUT INTO POLICY
+nml_mat* Y_output;      // POLICY OUTPUT MATRIX
+float Y_output_trg[4];  // POLICY OUTPUT MATRIX
 
 // POLICY FLAGS
 bool Policy_Armed_Flag = false;
@@ -249,19 +250,15 @@ bool Trg_Flag = false;
 bool onceFlag = false;
 
 // POLICY TRIGGER/ACTION VALUES
-float Policy_Trg_Action = 0.0f;  
-float Policy_Rot_Action = 0.0f;
-
-float ACTION_MIN = 0.0f;
-float ACTION_MAX = 8.0f;
+float a_Trg = 0.0f;  
+float a_Rot = 0.0f;
+float a_Rot_bounds[2] = {-1.0f,1.0f};
 
 // ===============================
 //  DEEP RL POLICY INITIALIZATION
 // ===============================
 
 NN NN_DeepRL;
-float Policy_Rot_threshold = 1.50f;
-
 
 
 // ==========================================
@@ -299,8 +296,8 @@ float Theta_x_Cam_trg = 0.0f;       // [rad/s]
 float Theta_y_Cam_trg = 0.0f;       // [rad/s]
 
 // POLICY TRIGGER/ACTION VALUES
-float Policy_Trg_Action_trg = 0.0f;    
-float Policy_Rot_Action_trg = 0.0f;
+float a_Trg_trg = 0.0f;    
+float a_Rot_trg = 0.0f;
 
 // =================================
 //  RECORD SYSTEM STATES AT IMPACT
@@ -318,6 +315,7 @@ struct vec Omega_B_P_impact_OB = {0.0f,0.0f,0.0f};       // Angular Rate [rad/s]
 // =================================
 float Plane_Angle_deg = 0.0f;           // Plane Angle [deg]
 struct vec r_P_O = {0.0f,0.0f,0.0f};    // Plane Position Vector        [m]
+
 
 
 // =================================
@@ -376,10 +374,12 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             break;
 
         case 8: // Arm Policy Maneuver
-            Policy_Trg_Action = CTRL_Cmd->cmd_val1;
-            Policy_Rot_Action = CTRL_Cmd->cmd_val2;
+            a_Trg = CTRL_Cmd->cmd_val1;
+            a_Rot = CTRL_Cmd->cmd_val2;
+            a_Rot_bounds[0] = CTRL_Cmd->cmd_val3;
+            a_Rot_bounds[1] = CTRL_Cmd->cmd_flag;
 
-            Policy_Armed_Flag = (bool)CTRL_Cmd->cmd_flag;
+            Policy_Armed_Flag = !Policy_Armed_Flag;
             break;
 
         case 9: // UPDATE PLANE POSITION
@@ -546,20 +546,9 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             #endif
             break;
 
-        case 100:
-
-            cause_segfault();
-            break;
     }
 
 }
-
-void cause_segfault() {
-    int array[100000]; // Large array to consume stack space quickly
-    consolePrintf("Increasing stack usage...\n");
-    cause_segfault();
-}
-
 
 void controlOutput(const state_t *state, const sensorData_t *sensors)
 {

@@ -256,8 +256,10 @@ typedef enum {
 }PolicyType;
 extern PolicyType Policy;
 
-extern nml_mat* X_input;    // STATE MATRIX TO BE INPUT INTO POLICY
-extern nml_mat* Y_output;   // POLICY OUTPUT MATRIX
+extern nml_mat* X_input;        // STATE MATRIX TO BE INPUT INTO POLICY
+extern nml_mat* Y_output;       // POLICY OUTPUT MATRIX
+extern float Y_output_trg[4];   // POLICY OUTPUT ARRAY
+
 
 // POLICY FLAGS
 extern bool Policy_Armed_Flag;
@@ -265,11 +267,9 @@ extern bool Trg_Flag;
 extern bool onceFlag;
 
 // POLICY TRIGGER/ACTION VALUES
-extern float Policy_Trg_Action;  
-extern float Policy_Rot_Action;
-
-extern float ACTION_MIN;
-extern float ACTION_MAX;
+extern float a_Trg;  
+extern float a_Rot;
+extern float a_Rot_bounds[2];
 
 
 // ===============================
@@ -277,10 +277,6 @@ extern float ACTION_MAX;
 // ===============================
 
 extern NN NN_DeepRL;
-extern NN NN_DeepRL2;
-extern float Policy_Rot_threshold;
-
-
 
 
 // ==========================================
@@ -319,8 +315,8 @@ extern float Theta_x_Cam_trg;           // [rad/s]
 extern float Theta_y_Cam_trg;           // [rad/s]
 
 // POLICY TRIGGER/ACTION VALUES
-extern float Policy_Trg_Action_trg;    
-extern float Policy_Rot_Action_trg;
+extern float a_Trg_trg;    
+extern float a_Rot_trg;
 
 // =================================
 //  RECORD SYSTEM STATES AT IMPACT
@@ -371,7 +367,6 @@ void updateRotationMatrices();
 bool updateOpticalFlowEst();
 bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 float firstOrderFilter(float newValue, float prevValue, float alpha);
-void cause_segfault();
 
 
 
