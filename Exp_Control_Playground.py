@@ -17,24 +17,25 @@ def cmd_send_exp(env,logName):
         # Converts input number into action name
 
         command_handlers = {
-            'Ctrl_Reset': env.handle_Ctrl_Reset,
-            'Pos': env.handle_Pos_Cmd,
-            'Vel': env.handle_Vel_Cmd,
-            'Stop': env.handle_Stop,
-            'Ang_Accel': env.handle_Ang_Accel,
-            'Policy': env.handle_Policy,
-            'Plane_Pose': env.handle_Plane_Pose,
-            'P2P_traj': env.handle_P2P_traj,
-            'Global_Vel_traj': env.handle_Global_Vel_traj,
-            'Rel_Vel_traj': env.handle_Rel_Vel_traj,
-            'Impact_traj': env.handle_Impact_traj,
-            'Tumble_Detect': env.handle_Tumble_Detect,
-            'Arm_Quad': env.handle_Arm_Quad,
-            'Load_Params': env.handle_Load_Params,
-            'Start_Logging': env.handle_Start_Logging,
-            'Cap_Logging': env.handle_Cap_Logging,
-            'Thrust_CMD': env.handle_Thrust_CMD,
-            'Motor_CMD': env.handle_Motor_CMD,
+            0: env.handle_Ctrl_Reset,
+            1: env.handle_Pos_Cmd,
+            2: env.handle_Vel_Cmd,
+            5: env.handle_Stop,
+            7: env.handle_Ang_Accel,
+            8: env.handle_Policy,
+            9: env.handle_Plane_Pose,
+            10: env.handle_P2P_traj,
+            11: env.handle_Global_Vel_traj,
+            12: env.handle_Rel_Vel_traj,
+            13: env.handle_Impact_traj,
+            20: env.handle_Tumble_Detect,
+            21: env.handle_Load_Params,
+            22: env.handle_Start_Logging,
+            23: env.handle_Cap_Logging,
+            24: env.handle_Arm_Quad,
+            30: env.handle_Thrust_CMD,
+            31: env.handle_Motor_CMD,
+
         }
         
         try:
@@ -45,10 +46,9 @@ def cmd_send_exp(env,logName):
             print("5: Stop                        13: Impact_traj       23: Cap_Logging")
 
 
-            val = env.userInput("\nCmd: ",int)
-            cmd_action = env.inv_cmd_dict[val]
-            if cmd_action in command_handlers:
-                command_handlers[cmd_action]()
+            cmd = env.userInput("\nCmd: ",int)
+            if cmd in command_handlers:
+                command_handlers[cmd]()
             else:
                 print("Invalid Command: Try again")
         
@@ -57,7 +57,7 @@ def cmd_send_exp(env,logName):
             print('\033[93m' + "INVALID INPUT: Try again" + '\x1b[ 0m')
             continue
 
-
+# 1.38,0.93
 
 if __name__ == '__main__':
 

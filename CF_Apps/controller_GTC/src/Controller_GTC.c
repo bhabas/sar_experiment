@@ -88,6 +88,9 @@ void controllerOutOfTreeReset() {
 
     // RESET TRAJECTORY FLAGS
     Traj_Type = NONE;
+    resetTraj_Vals(0);
+    resetTraj_Vals(1);
+    resetTraj_Vals(2);
 
     // RESET POLICY FLAGS
     Policy_Armed_Flag = false;
