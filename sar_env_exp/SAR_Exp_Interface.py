@@ -121,7 +121,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
 
 
-        
+        self.sendCmd("Plane_Pose",cmd_vals=[self.Plane_Pos_x_init,self.Plane_Pos_y_init,self.Plane_Pos_z_init],cmd_flag=self.Plane_Angle_deg_init)
 
         self.sendCmd("Load_Params")
         self.sendCmd("Ctrl_Reset")

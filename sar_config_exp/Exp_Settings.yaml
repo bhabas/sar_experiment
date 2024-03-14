@@ -19,7 +19,7 @@ PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
   Plane_Angle: 0  # [deg]
   Pos_X: 5.74    # [m]
   Pos_Y: 0.0    # [m]
-  Pos_Z: 2.54    # [m]
+  Pos_Z: 2.30   # [m]
 
 
 SAR_DC_SETTINGS:
