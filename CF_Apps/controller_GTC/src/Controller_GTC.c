@@ -677,5 +677,6 @@ LOG_ADD(LOG_UINT8, Policy_Armed,    &Policy_Armed_Flag)
 LOG_ADD(LOG_UINT8, CustomThrust,    &CustomThrust_Flag)
 LOG_ADD(LOG_UINT8, CustomM_CMD,     &CustomMotorCMD_Flag)
 LOG_ADD(LOG_FLOAT, Plane_Angle,     &Plane_Angle_deg)
+LOG_ADD(LOG_UINT16,CMD_ID,          &CMD_ID)
 LOG_GROUP_STOP(Misc)
 #endif

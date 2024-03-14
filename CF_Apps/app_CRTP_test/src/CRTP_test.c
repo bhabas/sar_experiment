@@ -7,6 +7,7 @@
 
 
 struct testPacketRX{
+    uint16_t cmd_id;
     uint8_t cmd_type; 
     float cmd_val1;
     float cmd_val2;

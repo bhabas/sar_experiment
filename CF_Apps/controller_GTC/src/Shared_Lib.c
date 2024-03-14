@@ -228,6 +228,7 @@ bool AngAccel_Flag = false;
 bool Armed_Flag = false;
 bool CustomThrust_Flag = false;
 bool CustomMotorCMD_Flag = false;
+uint16_t CMD_ID = 0;
 
 
 // SENSOR FLAGS
@@ -328,7 +329,8 @@ struct mat33 R_PW;                      // Rotation matrix from plane to world
 
 void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 {
-    // consolePrintf("Cmd Type: %d | Cmd Val1: %.3f | Cmd Val2: %.3f | Cmd Val3: %.3f | Cmd Flag: %.3f\n",CTRL_Cmd->cmd_type,CTRL_Cmd->cmd_val1,CTRL_Cmd->cmd_val2,CTRL_Cmd->cmd_val3,CTRL_Cmd->cmd_flag);
+    consolePrintf("Cmd ID: %d | Cmd Type: %d | Cmd Val1: %.3f | Cmd Val2: %.3f | Cmd Val3: %.3f | Cmd Flag: %.3f\n",CTRL_Cmd->cmd_ID,CTRL_Cmd->cmd_type,CTRL_Cmd->cmd_val1,CTRL_Cmd->cmd_val2,CTRL_Cmd->cmd_val3,CTRL_Cmd->cmd_flag);
+    CMD_ID = CTRL_Cmd->cmd_ID;
     switch(CTRL_Cmd->cmd_type){
         case 0: // Reset
             controllerOutOfTreeReset();
