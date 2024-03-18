@@ -94,7 +94,7 @@ void compressTrgStates(){
 void compressImpactOBStates()
 {
 
-    ImpactOB_States_Z.VelRel_BP = compressXY(Vel_mag_B_P_impact_OB, Vel_angle_B_P_impact_OB);
+    ImpactOB_States_Z.VelRel_BP = compressXY(Vel_mag_B_P_impact_OB, Vel_angle_B_P_impact_OB/10.0f);
 
     float const q[4] = {
         Quat_B_O_impact_OB.x,
@@ -103,7 +103,7 @@ void compressImpactOBStates()
         Quat_B_O_impact_OB.w};
     ImpactOB_States_Z.Quat_BO = quatcompress(q);
 
-    ImpactOB_States_Z.Omega_BOy = (int16_t)Omega_B_O_impact_OB.y * 1000.0f;
+    ImpactOB_States_Z.Omega_BOy = (int16_t)Omega_B_O_impact_OB.y * 100.0f;
 
     ImpactOB_States_Z.dOmega_BOy = (int16_t)dOmega_B_O_impact_OB.y * 10.0f;
 }

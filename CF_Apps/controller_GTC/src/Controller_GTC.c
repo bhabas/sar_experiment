@@ -352,29 +352,20 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         Vel_angle_B_P = atan2f(Vel_B_P.z,Vel_B_P.x)*Rad2Deg;
         Omega_B_P = Omega_B_O;
 
-        Impact_Flag_OB = true;
-        Vel_mag_B_P_impact_OB = 1.0f;
-        Vel_angle_B_P_impact_OB = 2.0f;
-        Quat_B_O_impact_OB = mkquat(0.0f,0.0f,0.0f,1.0f);
-        Omega_B_O_impact_OB = mkvec(0.0f, 3.0f, 0.0f);
-        dOmega_B_O_impact_OB.y = mkvec(0.0f, 4.0f, 0.0f).y;
-
 
         // ONBOARD IMPACT DETECTION
         if (dOmega_B_O.y > 400.0f && Impact_Flag_OB == false)
         {
-            // Impact_Flag_OB = true;
-            // Vel_mag_B_P_impact_OB = Vel_mag_B_P;
-            // Vel_angle_B_P_impact_OB = Vel_angle_B_P;
-            // Quat_B_O_impact_OB = Quat_B_O;
-            // Omega_B_O_impact_OB = Omega_B_O;
-            // dOmega_B_O_impact_OB.y = dOmega_B_O.y;
-
+            Impact_Flag_OB = true;
+            Vel_mag_B_P_impact_OB = Vel_mag_B_P;
+            Vel_angle_B_P_impact_OB = Vel_angle_B_P;
+            Quat_B_O_impact_OB = Quat_B_O;
+            Omega_B_O_impact_OB = Omega_B_O;
+            dOmega_B_O_impact_OB.y = dOmega_B_O.y;
 
             // TURN ON IMPACT LEDS
             ledSet(LED_GREEN_R, 1);
             ledSet(LED_BLUE_NRF, 1);
-
         }
 
         // SAVE PREVIOUS VALUES
@@ -668,10 +659,10 @@ LOG_GROUP_STOP(Z_Trg)
 
 
 LOG_GROUP_START(Z_Impact)
-LOG_ADD(LOG_UINT8,  Impact_OB,      &Impact_Flag_OB)
+LOG_ADD(LOG_UINT8,  ImpaOB,         &Impact_Flag_OB)
 LOG_ADD(LOG_UINT32, VelRel_BP,      &ImpactOB_States_Z.VelRel_BP)
 LOG_ADD(LOG_UINT32, Quat_BO,        &ImpactOB_States_Z.Quat_BO)
-LOG_ADD(LOG_INT16,  OmegaBOy,       &ImpactOB_States_Z.dOmega_BOy)
+LOG_ADD(LOG_INT16,  OmegaBOy,       &ImpactOB_States_Z.Omega_BOy)
 LOG_ADD(LOG_INT16,  dOmega_BOy,     &ImpactOB_States_Z.dOmega_BOy)
 LOG_GROUP_STOP(Z_Impact)
 

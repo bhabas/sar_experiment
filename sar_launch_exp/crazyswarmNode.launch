@@ -9,7 +9,7 @@
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["CMD_RX","States_B_O","States_B_P","TrgState","ImpactOBState","CTRL_Output","SetPoints","Flags","Misc"]
-      genericLogTopicFrequencies: [500,20,100,500,500,100,100,500,500]
+      genericLogTopicFrequencies: [500,20,100,200,200,100,100,500,500]
 
       genericLogTopic_CMD_RX_Variables: [
       "Misc.CMD_ID"
@@ -44,7 +44,7 @@
       ]
 
       genericLogTopic_ImpactOBState_Variables: [
-      "Z_Impact.Impact_OB",   "Z_Impact.VelRel_BP",
+      "Z_Impact.ImpaOB",   "Z_Impact.VelRel_BP",
       "Z_Impact.Quat_BO",     "Z_Impact.OmegaBOy",
       "Z_Impact.dOmega_BOy",
       ]
