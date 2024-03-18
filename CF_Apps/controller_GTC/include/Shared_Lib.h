@@ -329,6 +329,13 @@ extern float Vel_angle_B_P_impact_OB;      // Velocity angle relative [deg]
 extern struct vec Omega_B_O_impact_OB;     // Angular Rate [rad/s]
 extern struct vec dOmega_B_O_impact_OB;    // Angular Accel [rad/s^2]
 
+extern uint16_t cycleCounter;               // Cycle counter to delay recorded impact states   
+extern float Vel_mag_B_P_prev_N;            // Velocity magnitude relative [m/s]
+extern float Vel_angle_B_P_prev_N;          // Velocity angle relative [deg]
+extern struct quat Quat_B_O_prev_N;         // Orientation
+extern struct vec Omega_B_O_prev_N;         // Angular Rate [rad/s]
+extern struct vec dOmega_B_O_prev_N;        // Angular Accel [rad/s^2]
+
 // =================================
 //    LANDING SURFACE PARAMETERS
 // =================================
