@@ -3,6 +3,7 @@
 // Definition of the global instances
 States_Z_Struct States_Z;
 TrgStates_Z_Struct TrgStates_Z;
+ImpactOB_States_Z_Struct ImpactOB_States_Z;
 SetPoints_Z_Struct SetPoints_Z;
 
 void compressStates(){
@@ -88,6 +89,23 @@ void compressTrgStates(){
     // COMPRESS POLICY ACTIONS
     TrgStates_Z.Policy_Actions = compressXY(a_Trg_trg,a_Rot_trg/10.0f);
 
+}
+
+void compressImpactOBStates()
+{
+
+    ImpactOB_States_Z.VelRel_BP = compressXY(Vel_mag_B_P_impact_OB, Vel_angle_B_P_impact_OB);
+
+    float const q[4] = {
+        Quat_B_O_impact_OB.x,
+        Quat_B_O_impact_OB.y,
+        Quat_B_O_impact_OB.z,
+        Quat_B_O_impact_OB.w};
+    ImpactOB_States_Z.Quat_BO = quatcompress(q);
+
+    ImpactOB_States_Z.Omega_BOy = (int16_t)Omega_B_O_impact_OB.y * 1000.0f;
+
+    ImpactOB_States_Z.dOmega_BOy = (int16_t)dOmega_B_O_impact_OB.y * 10.0f;
 }
 
 void compressSetpoints(){
