@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find sar_launch)/Load_Params.launch"/>
   <include file="$(find sar_launch_exp)/Load_Params.launch"/>
-
 
   <rosparam command="load" file="$(find sar_config_exp)/crazyflieTypes.yaml" />
   <rosparam command="load" file="$(find sar_config_exp)/crazyflies.yaml" />
@@ -88,7 +86,7 @@
           resetEstimation: 0
 
 
-      motion_capture_type: "vicon" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
+      motion_capture_type: "none" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
       motion_capture_host_name: "192.168.1.100:801"
       object_tracking_type: "motionCapture" # one of motionCapture, libobjecttracker
       send_position_only: False # True: position only; False: position+orientation 

@@ -6,10 +6,10 @@ from sar_env.SAR_Base_Interface import SAR_Base_Interface
 import numpy as np
 import rospy
 import time
-import getpass
 import sys
 import rospkg
 import os
+import yaml
 
 ## LOCAL IMPORTS
 crazyswarm_path = rospkg.RosPack().get_path('crazyswarm')
@@ -25,6 +25,8 @@ class SAR_Exp_Interface(SAR_Base_Interface):
     def __init__(self):
         print("[STARTING] SAR_Exp is starting...")
         SAR_Base_Interface.__init__(self,Experiment_Setup=True)
+        self.EXP_PATH = os.path.dirname(rospkg.RosPack().get_path('sar_env_exp'))
+        self.loadExpParams()
 
         ## CRAZYSWARM INITIALIZATION
         cf_yaml = f"{crazyswarm_path}/launch/crazyflies.yaml"
@@ -36,7 +38,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         ## SAR PARAMETERS
         self.Done = False
         self.setParams()
-        self.Log_Dir = f"/home/{self.Username}/catkin_ws/src/sar_experiment/sar_logging_exp/local_logs"
+        self.Log_Dir =  f"{self.EXP_PATH}/sar_logging_exp/local_logs"
 
     def setParams(self):
 
@@ -126,18 +128,23 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         self.sendCmd("Load_Params")
         self.sendCmd("Ctrl_Reset")
 
+    def loadExpParams(self):
 
-    def ArmQuad(self,status):
-        
-        if status == True:
-            self.cf.setParam("System_Params/Armed",1)
-        elif status == False:
-            self.cf.setParam("System_Params/Armed",0)
+        ## LOAD BASE PARAMETERS
+        param_path = f"{self.EXP_PATH}/sar_config_exp/Exp_Settings.yaml"
+                    
+        with open(param_path, 'r') as file:
+            loaded_parameters = yaml.safe_load(file)
+
+        # Load parameters into the ROS Parameter Server
+        for param_name, param_value in loaded_parameters.items():
+            rospy.set_param(param_name, param_value)
 
     def handle_Load_Params(self):
 
         print("Reset ROS Parameters\n")
-        os.system("roslaunch sar_launch_exp Load_Params.launch")
+        self.loadBaseParams()
+        self.loadExpParams()
         self.sendCmd("Load_Params")
         self.setParams()
 
