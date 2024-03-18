@@ -328,7 +328,8 @@ extern struct vec Pos_B_O_impact_OB;       // Pos [m]
 extern struct quat Quat_B_O_impact_OB;     // Orientation
 
 extern struct vec Vel_B_P_impact_OB;       // Vel [m/s]
-extern struct vec Omega_B_P_impact_OB;     // Angular Rate [rad/s]
+extern struct vec Omega_B_O_impact_OB;     // Angular Rate [rad/s]
+extern struct vec dOmega_B_O_impact_OB;    // Angular Accel [rad/s^2]
 
 // =================================
 //    LANDING SURFACE PARAMETERS

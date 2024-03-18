@@ -29,6 +29,7 @@ typedef struct {
     // Compressed accelerations [mm/s^2]
     uint32_t Acc_BOxy; 
     int16_t Acc_BOz;
+    int16_t Accel_BO_Mag;
 
     // compressed quaternion, see quatcompress.h
     int32_t Quat_BO; 

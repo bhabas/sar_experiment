@@ -129,6 +129,19 @@ void controllerOutOfTreeReset() {
     a_Trg_trg = 0.0f;
     a_Rot_trg = 0.0f;
 
+    // RESET LOGGED IMPACT VALUES -- ONBOARD
+    Impact_Flag_OB = true;
+    Pos_B_O_impact_OB = vzero();
+    Vel_B_P_impact_OB = vzero();
+    Quat_B_O_impact_OB = mkquat(0.0f,0.0f,0.0f,1.0f);
+    Omega_B_O_impact_OB = vzero();
+    dOmega_B_O_impact_OB = vzero();
+
+    // TURN OFF IMPACT LEDS
+    Impact_Flag_OB = false;
+    ledSet(LED_GREEN_L, 0);
+    ledSet(LED_BLUE_NRF, 0);
+
 }
 
 
@@ -308,19 +321,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         updateRotationMatrices();
     }
 
-    // if (RATE_DO_EXECUTE(1, tick))
-    // {
-    //     // PASS OBSERVATION THROUGH POLICY NN
-    //     NN_forward(X_input,Y_output,&NN_DeepRL);
-
-    //     consolePrintf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
-    //     consolePrintf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
-
-    // }
-
-    
-
-
     
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
@@ -331,15 +331,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         Pos_B_O = mkvec(state->position.x, state->position.y, state->position.z);          // [m]
         Vel_B_O = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);          // [m/s]
         Accel_B_O = mkvec(sensors->acc.x*9.81f, sensors->acc.y*9.81f, sensors->acc.z*9.81f); // [m/s^2]
-        Accel_B_O_Mag = firstOrderFilter(vmag(Accel_B_O),Accel_B_O_Mag,0.5f);
+        Accel_B_O_Mag = firstOrderFilter(vmag(Accel_B_O),Accel_B_O_Mag,1.0f) - 9.81f;
 
         Omega_B_O = mkvec(radians(sensors->gyro.x), radians(sensors->gyro.y), radians(sensors->gyro.z));   // [rad/s]
 
         // CALC AND FILTER ANGULAR ACCELERATION
-        dOmega_B_O.x = firstOrderFilter((Omega_B_O.x - Omega_B_O_prev.x)/time_delta,dOmega_B_O.x,0.90f); // [rad/s^2]
-        dOmega_B_O.y = firstOrderFilter((Omega_B_O.y - Omega_B_O_prev.y)/time_delta,dOmega_B_O.y,0.90f); // [rad/s^2]
-        dOmega_B_O.z = firstOrderFilter((Omega_B_O.z - Omega_B_O_prev.z)/time_delta,dOmega_B_O.z,0.90f); // [rad/s^2]
-
+        dOmega_B_O.x = firstOrderFilter((Omega_B_O.x - Omega_B_O_prev.x)/time_delta,dOmega_B_O.x,1.0f); // [rad/s^2]
+        dOmega_B_O.y = firstOrderFilter((Omega_B_O.y - Omega_B_O_prev.y)/time_delta,dOmega_B_O.y,1.0f); // [rad/s^2]
+        dOmega_B_O.z = firstOrderFilter((Omega_B_O.z - Omega_B_O_prev.z)/time_delta,dOmega_B_O.z,1.0f); // [rad/s^2]
 
         Quat_B_O = mkquat(state->attitudeQuaternion.x,
                         state->attitudeQuaternion.y,
@@ -354,17 +353,22 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         Omega_B_P = Omega_B_O;
 
 
+        // ONBOARD IMPACT DETECTION
+        if (dOmega_B_O.y > 400.0f && Impact_Flag_OB == false)
+        {
+            Impact_Flag_OB = true;
+            Pos_B_O_impact_OB = Pos_B_O;
+            Vel_B_P_impact_OB = Vel_B_P;
+            Quat_B_O_impact_OB = Quat_B_O;
+            Omega_B_O_impact_OB = Omega_B_O;
+            dOmega_B_O_impact_OB.y = dOmega_B_O.y;
 
-        // if (Accel_B_O_Mag > 10.0f && Impact_Flag_OB == false)
-        // {
-        //     Impact_Flag_OB = true;
-        //     Pos_B_O_impact_OB = Pos_B_O;
-        //     Vel_B_P_impact_OB = Vel_B_P;
-        //     Quat_B_O_impact_OB = Quat_B_O;
-        //     Omega_B_P_impact_OB = Omega_B_P;
-        //     Accel_B_O_Mag_impact_OB = Accel_B_O_Mag;
-        // }
 
+            // TURN ON IMPACT LEDS
+            ledSet(LED_GREEN_R, 1);
+            ledSet(LED_BLUE_NRF, 1);
+
+        }
 
         // SAVE PREVIOUS VALUES
         Omega_B_O_prev = Omega_B_O;
@@ -487,7 +491,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             M4_CMD = (int32_t)thrust2Motor_CMD(M4_thrust);
         }
 
-        if (!Armed_Flag || MotorStop_Flag || Tumbled_Flag)
+        if (!Armed_Flag || MotorStop_Flag || Tumbled_Flag || Impact_Flag_OB)
         {
             #ifndef CONFIG_SAR_EXP
             M1_thrust = 0.0f;
@@ -516,7 +520,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             
             // TURN ON ARMING LEDS
             ledSet(LED_BLUE_L, 1);
-            ledSet(LED_BLUE_NRF, 1);
         }
         else{
             motorsSetRatio(MOTOR_M1, 0);
@@ -526,7 +529,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             
             // TURN OFF ARMING LEDS
             ledSet(LED_BLUE_L, 0);
-            ledSet(LED_BLUE_NRF, 0);
         }
         #endif
 
@@ -538,12 +540,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
     }
 
-    // if (RATE_DO_EXECUTE(2, tick))
-    // {
-    //     consolePrintf("F_thrust: %f\n",F_thrust);
-    // }   
-    
- 
 
 }
 
@@ -611,7 +607,8 @@ LOG_ADD(LOG_INT16,  Acc_BOz,        &States_Z.Acc_BOz)
 LOG_ADD(LOG_UINT32, Quat_BO,        &States_Z.Quat_BO)
 LOG_ADD(LOG_UINT32, Omega_BOxy,     &States_Z.Omega_BOxy)
 LOG_ADD(LOG_INT16,  Omega_BOz,      &States_Z.Omega_BOz)
-LOG_ADD(LOG_INT16,  dOmega_BOy,     &States_Z.dOmega_BOy)
+LOG_ADD(LOG_INT16,  dOmegaBOy,      &States_Z.dOmega_BOy)
+LOG_ADD(LOG_INT16,  Acc_BO_Mag,     &States_Z.Accel_BO_Mag)
 
 LOG_ADD(LOG_UINT32, VelRel_BP,      &States_Z.VelRel_BP)
 LOG_ADD(LOG_UINT32, r_PBxy,         &States_Z.r_PBxy)

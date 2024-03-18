@@ -21,8 +21,8 @@
       "Z_States.r_BO","Z_States.r_BOz",
       "Z_States.V_BOxy","Z_States.V_BOz",
       "Z_States.Quat_BO",
-      "Z_States.Omega_BOxy","Z_States.Omega_BOz",
-      "Z_States.dOmega_BOy",
+      "Z_States.Omega_BOxy","Z_States.Acc_BO_Mag",
+      "Z_States.dOmegaBOy",
       ]
 
       <!-- SIZE: (0/26) BYTES -->
