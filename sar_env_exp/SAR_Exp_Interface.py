@@ -26,6 +26,7 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         print("[STARTING] SAR_Exp is starting...")
         SAR_Base_Interface.__init__(self,Experiment_Setup=True)
         self.EXP_PATH = os.path.dirname(rospkg.RosPack().get_path('sar_env_exp'))
+        self.loadBaseParams()
         self.loadExpParams()
 
         ## CRAZYSWARM INITIALIZATION
@@ -42,7 +43,6 @@ class SAR_Exp_Interface(SAR_Base_Interface):
 
     def setParams(self):
 
-        os.system("roslaunch sar_launch_exp Load_Params.launch")
         self.cf.setParam("stabilizer/controller", 5) # Set firmware controller to GTC
 
         ## SET SAR TYPE
@@ -139,6 +139,63 @@ class SAR_Exp_Interface(SAR_Base_Interface):
         # Load parameters into the ROS Parameter Server
         for param_name, param_value in loaded_parameters.items():
             rospy.set_param(param_name, param_value)
+
+
+        ## SAR PARAMETERS
+        self.SAR_Type = rospy.get_param('/SAR_SETTINGS/SAR_Type')
+        self.SAR_Config = rospy.get_param('/SAR_SETTINGS/SAR_Config')
+        self.Policy_Type = rospy.get_param('/SAR_SETTINGS/Policy_Type')
+
+        ## INERTIAL PARAMETERS
+        self.Ref_Mass = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Ref_Mass")
+        self.Ref_Ixx = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Ref_Ixx")
+        self.Ref_Iyy = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Ref_Iyy")
+        self.Ref_Izz = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Ref_Izz")
+
+        self.Base_Mass = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Base_Mass")
+        self.Base_Ixx = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Base_Ixx")
+        self.Base_Iyy = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Base_Iyy")
+        self.Base_Izz = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Base_Izz")
+
+        ## GEOMETRIC PARAMETERS
+        self.Forward_Reach = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Forward_Reach")
+        self.Leg_Length = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Leg_Length")
+        self.Leg_Angle = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Leg_Angle")
+        self.Prop_Front = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Prop_Front")
+        self.Prop_Rear = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Prop_Rear")
+
+        ## EFFECTIVE-GEOEMTRIC PARAMETERS
+        self.L_eff = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/L_eff")
+        self.Gamma_eff = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/Config/{self.SAR_Config}/Gamma_eff")
+        self.Lx_eff = self.L_eff*np.sin(np.radians(self.Gamma_eff))
+        self.Lz_eff = self.L_eff*np.cos(np.radians(self.Gamma_eff))
+        self.Collision_Radius = max(self.L_eff,self.Forward_Reach)
+
+        ## SYSTEM AND FLIGHT PARAMETERS
+        self.TrajAcc_Max = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/TrajAcc_Max")
+        self.TrajJerk_Max = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/TrajJerk_Max")
+        self.Tau_up = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Tau_up")
+        self.Tau_down = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Tau_down")
+        self.Thrust_max = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/Thrust_max")
+        self.C_tf = rospy.get_param(f"/SAR_Type/{self.SAR_Type}/System_Params/C_tf")
+        self.Ang_Acc_max = (9.81*self.Thrust_max*1e-3*self.Prop_Front[0])*2/self.Ref_Iyy
+        self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
+        
+        self.Beta_Min_deg = -(self.Gamma_eff + np.degrees(np.arctan2(self.Forward_Reach-self.Lx_eff,self.Lz_eff)))
+        self.Phi_P_B_impact_Min_deg = -self.Beta_Min_deg - self.Gamma_eff + 90
+
+        ## CAM PARAMETERS
+        self.Cam_Config = rospy.get_param('/CAM_SETTINGS/Cam_Config')
+        self.Cam_Active = rospy.get_param('/CAM_SETTINGS/Cam_Active')
+        
+
+        ## PLANE PARAMETERS
+        self.Plane_Type = rospy.get_param('/PLANE_SETTINGS/Plane_Type')
+        self.Plane_Config = rospy.get_param('/PLANE_SETTINGS/Plane_Config')
+        self.Plane_Pos_x_init = rospy.get_param('/PLANE_SETTINGS/Pos_X_init')
+        self.Plane_Pos_y_init = rospy.get_param('/PLANE_SETTINGS/Pos_Y_init')
+        self.Plane_Pos_z_init = rospy.get_param('/PLANE_SETTINGS/Pos_Z_init')
+        self.Plane_Angle_deg_init = rospy.get_param('/PLANE_SETTINGS/Plane_Angle_init')
 
     def handle_Load_Params(self):
 

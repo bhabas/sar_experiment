@@ -97,6 +97,9 @@ struct vec dOmega_B_O = {0.0f,0.0f,0.0f};       // Angular Accel [rad/s^2]
 struct mat33 R;                                 // Orientation as rotation matrix
 struct vec b3 = {0.0f,0.0f,1.0f};               // Current body z-axis in global coord.
 
+struct quat Quat_B_O_Vicon = {0.0f, 0.0f, 0.0f, 1.0f};  // Orientation from Vicon
+
+
 // =================================
 //     BODY WRT PLANE STATES
 // =================================

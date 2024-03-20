@@ -354,15 +354,15 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         // LAGGING STATES TO RECORD IMPACT VALUES
         // NOTE: A circular buffer would be a true better option if time allows
-        if (cycleCounter % 5 == 0)
-        {
-            Vel_mag_B_P_prev_N = Vel_mag_B_P;
-            Vel_angle_B_P_prev_N = Vel_angle_B_P;
-            Quat_B_O_prev_N = Quat_B_O;
-            Omega_B_O_prev_N = Omega_B_O;
-            dOmega_B_O_prev_N = dOmega_B_O;
-        }
-        cycleCounter++;
+        // if (cycleCounter % 5 == 0)
+        // {
+        Vel_mag_B_P_prev_N = Vel_mag_B_P;
+        Vel_angle_B_P_prev_N = Vel_angle_B_P;
+        Quat_B_O_prev_N = Quat_B_O_Vicon;
+        Omega_B_O_prev_N = Omega_B_O;
+        dOmega_B_O_prev_N = dOmega_B_O;
+        // }
+        // cycleCounter++;
         
 
         // ONBOARD IMPACT DETECTION

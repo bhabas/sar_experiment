@@ -127,6 +127,8 @@ extern struct vec dOmega_B_O;       // Angular Accel [rad/s^2]
 extern struct mat33 R;              // Orientation as rotation matrix
 extern struct vec b3;               // Current body z-axis in global coord.
 
+extern struct quat Quat_B_O_Vicon;  // Orientation from Vicon
+
 
 // =================================
 //     BODY WRT PLANE STATES
