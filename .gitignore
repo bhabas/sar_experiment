@@ -165,7 +165,6 @@ cython_debug/
 
 
 # Custom gitignore
-sar_logging_exp/local_logs/*
 
 
 .vscode/

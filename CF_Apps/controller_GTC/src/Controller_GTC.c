@@ -231,6 +231,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Quat_P_B_trg = Quat_P_B;
                         Omega_B_P_trg = Omega_B_P;
 
+                        Vel_mag_B_P_trg = Vel_mag_B_P;
+                        Vel_angle_B_P_trg = Vel_angle_B_P;
+
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
                         Theta_x_trg = Theta_x;
@@ -282,6 +285,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Vel_B_P_trg = Vel_B_P;
                         Quat_P_B_trg = Quat_P_B;
                         Omega_B_P_trg = Omega_B_P;
+
+                        Vel_mag_B_P_trg = Vel_mag_B_P;
+                        Vel_angle_B_P_trg = Vel_angle_B_P;
 
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
@@ -336,9 +342,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         Omega_B_O = mkvec(radians(sensors->gyro.x), radians(sensors->gyro.y), radians(sensors->gyro.z));   // [rad/s]
 
         // CALC AND FILTER ANGULAR ACCELERATION
-        dOmega_B_O.x = firstOrderFilter((Omega_B_O.x - Omega_B_O_prev.x)/time_delta,dOmega_B_O.x,1.0f); // [rad/s^2]
-        dOmega_B_O.y = firstOrderFilter((Omega_B_O.y - Omega_B_O_prev.y)/time_delta,dOmega_B_O.y,1.0f); // [rad/s^2]
-        dOmega_B_O.z = firstOrderFilter((Omega_B_O.z - Omega_B_O_prev.z)/time_delta,dOmega_B_O.z,1.0f); // [rad/s^2]
+        dOmega_B_O.x = firstOrderFilter((Omega_B_O.x - Omega_B_O_prev.x)/time_delta,dOmega_B_O.x,0.9f); // [rad/s^2]
+        dOmega_B_O.y = firstOrderFilter((Omega_B_O.y - Omega_B_O_prev.y)/time_delta,dOmega_B_O.y,0.9f); // [rad/s^2]
+        dOmega_B_O.z = firstOrderFilter((Omega_B_O.z - Omega_B_O_prev.z)/time_delta,dOmega_B_O.z,0.9f); // [rad/s^2]
 
         Quat_B_O = mkquat(state->attitudeQuaternion.x,
                         state->attitudeQuaternion.y,
@@ -366,7 +372,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         
 
         // ONBOARD IMPACT DETECTION
-        if (dOmega_B_O.y > 300.0f && Impact_Flag_OB == false)
+        if (dOmega_B_O.y > 400.0f && Impact_Flag_OB == false)
         {
             Impact_Flag_OB = true;
             Vel_mag_B_P_impact_OB = Vel_mag_B_P_prev_N;

@@ -11,7 +11,7 @@ import sys
 
 from sar_env_exp import SAR_Exp_Interface
 
-def cmd_send_exp(env,logName):
+def cmd_send_exp(env):
 
     while True:
         # Converts input number into action name
@@ -70,12 +70,12 @@ if __name__ == '__main__':
 
 
     ## INITIALIALIZE LOGGING DATA
-    logName = f"Test_Log.csv"
-    # env.createCSV(logName)
+    env.Log_Name = f"Test_Log.csv"
+    env.createCSV()
 
 
     ## INIT COMMANDER THREAD
-    cmd_thread = threading.Thread(target=cmd_send_exp,args=(env,logName))
+    cmd_thread = threading.Thread(target=cmd_send_exp,args=(env,))
     cmd_thread.start()   
 
 
