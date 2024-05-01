@@ -8,6 +8,7 @@ import numpy as np
 import rospy
 import rospkg
 import sys
+import datetime
 
 from sar_env_exp import SAR_Exp_Interface
 
@@ -67,11 +68,27 @@ if __name__ == '__main__':
     ## INITIALIZE CRAZYFLIE
     env.cf.setParam("kalman/resetEstimation", 1)
     time.sleep(0.2)
+    now = datetime.datetime.now()
+    current_time = now.strftime("%m_%d-%H:%M")
 
 
     ## INITIALIALIZE LOGGING DATA
-    env.Log_Name = f"Test_Log.csv"
-    env.createCSV()
+    Type = "SOV5"
+    Config = "A1"
+
+    V_mag = env.userInput("Enter Velocity Magnitude: ",float)
+    V_angle = env.userInput("Enter Velocity Angle: ",int)
+    Trial_num = env.userInput("Enter Trial Number: ",int)
+    K_eff = env.userInput("Enter K_eff: ",float)
+
+    env.Log_Name = f"{Type}_{Config}_V{V_mag}_A{V_angle}_K{K_eff}_T{Trial_num}_{current_time}.csv"
+    
+    str_input = input("Approve Log Name: " + env.Log_Name + "\nPress Enter to Continue")
+    if str_input == "q":
+        print("Invalid Input: Exiting Program")
+        sys.exit()
+    else:
+        env.createCSV()
 
 
     ## INIT COMMANDER THREAD
