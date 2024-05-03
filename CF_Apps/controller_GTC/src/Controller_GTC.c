@@ -270,7 +270,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                     a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
 
                     // EXECUTE POLICY IF TRIGGERED
-                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
+                    if(a_Trg >= 0.5f && onceFlag == false && Tau_CR <= 0.4f && Tau_CR >= 0.0f)
                     {
                         onceFlag = true;
 
@@ -372,7 +372,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         
 
         // ONBOARD IMPACT DETECTION
-        if (dOmega_B_O.y > 400.0f && Impact_Flag_OB == false)
+        if (dOmega_B_O.y > 600.0f && Impact_Flag_OB == false)
         {
             Impact_Flag_OB = true;
             Vel_mag_B_P_impact_OB = Vel_mag_B_P_prev_N;

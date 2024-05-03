@@ -18,9 +18,9 @@ PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
   Plane_Type: "Landing_Surface"
   Plane_Config: "Checkerboard_L02"
   Plane_Angle_init: 0  # [deg]
-  Pos_X_init: 5.70    # [m]
+  Pos_X_init: 4.9    # [m]
   Pos_Y_init: 0.0    # [m]
-  Pos_Z_init: 2.58    # [m]
+  Pos_Z_init: 2.62    # [m]
 
 
 SAR_DC_SETTINGS:

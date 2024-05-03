@@ -392,7 +392,7 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             a_Rot_bounds[0] = CTRL_Cmd->cmd_val3;
             a_Rot_bounds[1] = CTRL_Cmd->cmd_flag;
 
-            Policy_Armed_Flag = !Policy_Armed_Flag;
+            Policy_Armed_Flag = true;
             break;
 
         case 9: // UPDATE PLANE POSITION
