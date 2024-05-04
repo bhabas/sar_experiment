@@ -2,8 +2,8 @@ DATA_TYPE: "EXP"
 
 
 SAR_SETTINGS:
-  SAR_Type: "Source_One_V5"
-  SAR_Config: "A15_L250"
+  SAR_Type: "Impulse_Micro"
+  SAR_Config: "A60_L150"
 
   # Policy_Type: "PARAM_OPTIM"
   # Policy_Type: "DEEP_RL_SB3" 
@@ -18,9 +18,9 @@ PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
   Plane_Type: "Landing_Surface"
   Plane_Config: "Checkerboard_L02"
   Plane_Angle_init: 0  # [deg]
-  Pos_X_init: 4.9    # [m]
+  Pos_X_init: 4.3   # [m]
   Pos_Y_init: 0.0    # [m]
-  Pos_Z_init: 2.62    # [m]
+  Pos_Z_init: 2.63   # [m]
 
 
 SAR_DC_SETTINGS:
