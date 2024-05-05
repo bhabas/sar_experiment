@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
 
     ## INITIALIALIZE LOGGING DATA
-    Type = "IM"
+    Type = "SOV5"
     Config = "D1"
     Angle = int(45)
 
