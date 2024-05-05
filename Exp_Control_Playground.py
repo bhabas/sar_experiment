@@ -75,13 +75,14 @@ if __name__ == '__main__':
     ## INITIALIALIZE LOGGING DATA
     Type = "IM"
     Config = "D1"
+    Angle = int(45)
 
     V_mag = env.userInput("Enter Velocity Magnitude: ",float)
     V_angle = env.userInput("Enter Velocity Angle: ",int)
     Trial_num = env.userInput("Enter Trial Number: ",int)
     K_eff = env.userInput("Enter K_eff: ",float)
 
-    env.Log_Name = f"{Type}_{Config}_V{V_mag}_A{V_angle}_K{K_eff}_T{Trial_num}_{current_time}.csv"
+    env.Log_Name = f"{Type}_{Config}_V{V_mag}_A{V_angle}_PA{Angle}_K{K_eff}_T{Trial_num}_{current_time}.csv"
     
     str_input = input("Approve Log Name: " + env.Log_Name + "\nPress Enter to Continue")
     if str_input == "q":

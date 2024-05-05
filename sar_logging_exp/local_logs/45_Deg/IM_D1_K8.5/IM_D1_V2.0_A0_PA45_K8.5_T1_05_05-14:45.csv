@@ -1,0 +1,7 @@
+K_ep,K_run,t,Trg_Action,Rot_Action,Mu,Sigma,Policy,D_perp,Tau,Tau_CR,Theta_x,V_BO_Mag,V_BO_Angle,a_BO_Mag,V_BP_Mag,V_BP_Angle,Phi_PB,Trg_Flag,Impact_Flag_Ext,Impact_Flag_OB,r_BO.x,r_BO.y,r_BO.z,V_BO.x,V_BO.y,V_BO.z,a_BO.x,a_BO.y,a_BO.z,Eul_BO.x,Eul_BO.y,Eul_BO.z,W_BO.x,W_BO.y,W_BO.z,AngAcc_BO.y,F_thrust,Mx,My,Mz,x_d.x,x_d.y,x_d.z,v_d.x,v_d.y,v_d.z,a_d.x,a_d.y,a_d.z,Error
+# DATA_TYPE: EXP, SAR_SETTINGS: {Policy_Type: DEEP_RL_ONBOARD, SAR_Type: Impulse_Micro, SAR_Config: A60_L150}, LEG_SETTINGS: {L_eff: 0.147, Gamma_eff: 53, K_Pitch: 0.4, K_Yaw: 0.4}, 
+
+0,0,--,8,--,[0.000 0.000],[0.000 0.000],[0.000 0.000], 45.00,  6.36,  0.00,  2.19,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,--,No_Debug_Data,
+0,0, 179840.096, 0.516,-90.0,--,--,--, 0.437, 0.329, 0.218, 2.818, 1.81,   2.12,--, 1.81,  47.12,--,True,--,--, 0.00, 0.00, 0.00, 1.81, 0.05, 0.07,--,--,--, 0.80, 0.65,-1.58, 0.00,-0.06, 0.00,--,--,--,--,--,--,--,--,--,--,--,--,--,--,Trigger Data
+0,0,-1714754952.681,--,0,False,False,False,0,0,0,0,    nan,   0.00,  76.14,--, 0.00,-31.14, 668.00,False,True, 0.00, 0.00, 0.00, 0.94,  nan, 0.78,--,--,--, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,--, 0.00, 0.00, 0.00, 0.00,--,--,--,--,--,--,--,--,--,Impact Data
+
