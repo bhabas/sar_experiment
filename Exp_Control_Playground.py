@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     ## INITIALIALIZE LOGGING DATA
     Type = "SOV5"
-    Config = "D1"
+    Config = "A1"
     Angle = int(45)
 
     V_mag = env.userInput("Enter Velocity Magnitude: ",float)
