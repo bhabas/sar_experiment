@@ -372,7 +372,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         
 
         // ONBOARD IMPACT DETECTION
-        if (dOmega_B_O.y > 400.0f && Impact_Flag_OB == false)
+        if (dOmega_B_O.y > 300.0f && Impact_Flag_OB == false)
         {
             Impact_Flag_OB = true;
             Vel_mag_B_P_impact_OB = Vel_mag_B_P_prev_N;
