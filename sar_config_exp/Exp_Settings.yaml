@@ -17,8 +17,8 @@ CAM_SETTINGS:
 PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
   Plane_Type: "Landing_Surface"
   Plane_Config: "Checkerboard_L02"
-  Plane_Angle_init: 135  # [deg]
-  Pos_X_init: 6.12  # [m]
+  Plane_Angle_init: 180  # [deg]
+  Pos_X_init: 5.82  # [m]
   Pos_Y_init: 0.0    # [m]
   Pos_Z_init: 0.12  # [m]
 
